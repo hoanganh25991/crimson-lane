@@ -758,15 +758,16 @@ function buildDragonKnight() {
   armLM.position.set(-0.12,-0.17,0); armLM.rotation.z = -0.3;
   armLPivot.add(armLM); g.add(armLPivot); parts.armL = armLPivot;
 
-  // Sword group
+  // Sword group — held upright in right hand
   const swordGroup = new THREE.Group();
-  swordGroup.position.set(0.38,0.72,0.08);
-  // Blade (ExtrudeGeometry tapered)
+  swordGroup.position.set(0.42, 0.82, 0.12);
+  swordGroup.rotation.z = -0.12; // slight outward tilt for natural grip
+  // Blade (ExtrudeGeometry tapered, points up Y-axis)
   const bladeShape = new THREE.Shape();
   bladeShape.moveTo(-0.04,0); bladeShape.lineTo(-0.04,0.5); bladeShape.bezierCurveTo(-0.04,0.72,-0.02,0.84,0,0.90);
   bladeShape.bezierCurveTo(0.02,0.84,0.04,0.72,0.04,0.5); bladeShape.lineTo(0.04,0); bladeShape.closePath();
   const blade = new THREE.Mesh(new THREE.ExtrudeGeometry(bladeShape,{depth:0.014,bevelEnabled:true,bevelSize:0.006,bevelThickness:0.006,bevelSegments:2}), metalMat(0xddddcc,0.15,0.95));
-  blade.rotation.x = Math.PI/2; swordGroup.add(blade);
+  blade.position.z = -0.007; swordGroup.add(blade);
   // Crossguard
   const guard = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.04,0.04), metalMat(0xbb6600,0.3,0.8));
   guard.position.y = 0.02; swordGroup.add(guard);
