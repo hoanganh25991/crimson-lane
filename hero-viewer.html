@@ -262,6 +262,75 @@ const heroLight = new THREE.PointLight(0x00ffcc, 1.0, 4);
 heroLight.position.set(0,1.5,0.5);
 scene.add(heroLight);
 
+// ─── 3D FACE HELPERS ──────────────────────────────────────────────────────────
+// Pure geometry only — no canvas/textures. All face features are proper meshes.
+
+// ── 3D FACE EXTRAS: brow ridge tube, human ear, elven ear ─────────────────────
+
+function addBrowRidge(g, side, x, y, color) {
+  // A subtle half-cylinder ridge above each eye brow
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(side*(x-.065), y, .155),
+    new THREE.Vector3(side*(x-.02),  y+.012, .185),
+    new THREE.Vector3(side*(x+.02),  y+.013, .186),
+    new THREE.Vector3(side*(x+.055), y+.004, .166),
+  ]);
+  const mesh = new THREE.Mesh(
+    new THREE.TubeGeometry(curve,8,.016,5,false),
+    stdMat(color,.65)
+  );
+  g.add(mesh);
+}
+
+function addHumanEar(g, side, yOffset, color) {
+  // Ear as LatheGeometry half-dome + TubeGeometry inner helix
+  const earPts=[[0,0],[.022,.02],[.036,.06],[.034,.10],[.024,.14],[.008,.16],[0,.14]]
+    .map(([x,y])=>new THREE.Vector2(x,y));
+  const earMain = new THREE.Mesh(
+    new THREE.LatheGeometry(earPts,6,0,Math.PI),
+    stdMat(color,.72)
+  );
+  earMain.rotation.y = side>0 ? 0 : Math.PI;
+  const helixCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,.02,.001), new THREE.Vector3(.013,.06,.008),
+    new THREE.Vector3(.010,.10,.006), new THREE.Vector3(0,.12,.001)
+  ]);
+  const helix = new THREE.Mesh(
+    new THREE.TubeGeometry(helixCurve,5,.005,4,false),
+    stdMat(color*.88,.72)
+  );
+  const eg = new THREE.Group();
+  eg.add(earMain); eg.add(helix);
+  eg.position.set(side*.205, yOffset, .02);
+  eg.rotation.y = side>0 ? -Math.PI*.38 : Math.PI*.38+Math.PI;
+  eg.scale.setScalar(.82);
+  g.add(eg);
+}
+
+function addElvenEar(g, side, yOffset, color) {
+  const earShape = new THREE.Shape();
+  earShape.moveTo(0,0);
+  earShape.bezierCurveTo(.042,.04,.058,.10,.020,.22); // pointed tip
+  earShape.lineTo(-.020,.22);
+  earShape.bezierCurveTo(-.058,.10,-.042,.04,0,0);
+  earShape.closePath();
+  const earMesh = new THREE.Mesh(
+    new THREE.ExtrudeGeometry(earShape,{depth:.024,bevelEnabled:true,bevelSize:.005,bevelThickness:.005,bevelSegments:1}),
+    stdMat(color,.65)
+  );
+  // Inner ear canal hint
+  const canal = new THREE.Mesh(
+    new THREE.CylinderGeometry(.008,.008,.02,5),
+    stdMat(color*.75,.8)
+  );
+  canal.position.set(0,.06,.022);
+  const eg = new THREE.Group();
+  eg.add(earMesh); eg.add(canal);
+  eg.position.set(side*.196, yOffset, .04);
+  eg.rotation.y = side>0 ? -Math.PI*.32 : Math.PI*(1+.32);
+  g.add(eg);
+}
+
 // ─── HERO BUILDERS ────────────────────────────────────────────────────────────
 
 function buildLich() {
@@ -291,31 +360,42 @@ function buildLich() {
     g.add(v);
   }
 
-  // Skull
-  const skullGeo = new THREE.SphereGeometry(0.22,16,12);
-  const skull = new THREE.Mesh(skullGeo, stdMat(0xe8ddc8,0.8));
-  skull.scale.set(1,0.92,0.95);
-  skull.position.set(0,1.54,0);
-  skull.castShadow = true;
-  g.add(skull); parts.skull = skull;
+  // Skull (high-poly, slightly squished)
+  const skullGeo = new THREE.SphereGeometry(0.22,20,16);
+  const skull = new THREE.Mesh(skullGeo, stdMat(0xe8ddc8,0.78));
+  skull.scale.set(1,0.92,0.95); skull.position.set(0,1.54,0);
+  skull.castShadow = true; g.add(skull); parts.skull = skull;
+
+  // Canvas face texture on skull front
+  attachFace(skull, makeFaceTex(drawLichFace), 0.215, 0.42);
 
   // Jaw (ExtrudeGeometry)
   const jawShape = new THREE.Shape();
   jawShape.moveTo(-0.14,0); jawShape.lineTo(-0.16,-0.04); jawShape.lineTo(-0.12,-0.10);
-  jawShape.lineTo(0,  -0.11); jawShape.lineTo(0.12,-0.10); jawShape.lineTo(0.16,-0.04);
+  jawShape.lineTo(0,-0.11); jawShape.lineTo(0.12,-0.10); jawShape.lineTo(0.16,-0.04);
   jawShape.lineTo(0.14,0); jawShape.closePath();
-  const jaw = new THREE.Mesh(new THREE.ExtrudeGeometry(jawShape,{depth:0.12,bevelEnabled:true,bevelSize:0.01,bevelThickness:0.01,bevelSegments:2}), stdMat(0xe0d4bc,0.8));
-  jaw.rotation.x = Math.PI/2; jaw.position.set(-0.06, 1.36, 0.05);
-  g.add(jaw);
+  const jaw = new THREE.Mesh(new THREE.ExtrudeGeometry(jawShape,{depth:0.12,bevelEnabled:true,bevelSize:0.012,bevelThickness:0.012,bevelSegments:2}), stdMat(0xe0d4bc,0.8));
+  jaw.rotation.x = Math.PI/2; jaw.position.set(-0.06,1.36,0.05); g.add(jaw);
 
-  // Eye sockets + glow
-  for(let s of[-1,1]){
-    const socket = new THREE.Mesh(new THREE.SphereGeometry(0.055,8,6), stdMat(0x0a0a0a,1.0));
-    socket.scale.set(1,0.5,0.6); socket.position.set(s*0.09,1.58,0.18);
-    g.add(socket);
-    const iris = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,6), glowMat(0x00ffcc,3));
-    iris.position.set(s*0.09,1.58,0.21);
-    g.add(iris);
+  // Zygomatic arches (cheekbone tubes)
+  for(const s of[-1,1]){
+    const zc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.16,1.55,.12), new THREE.Vector3(s*.20,1.50,.14),
+      new THREE.Vector3(s*.22,1.44,.10), new THREE.Vector3(s*.20,1.38,.06)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(zc,6,.012,5,false), stdMat(0xd0c0a8,.8)));
+  }
+
+  // 3D eye sockets (deep) + glowing point lights
+  for(const s of[-1,1]){
+    const socket = new THREE.Mesh(new THREE.SphereGeometry(0.058,10,8), stdMat(0x080808,1.0));
+    socket.scale.set(1,.55,.65); socket.position.set(s*.09,1.58,.14); g.add(socket);
+    // Glowing iris sphere (adds depth alongside texture)
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(0.038,8,6), glowMat(0x00ffcc,3.5));
+    iris.position.set(s*.09,1.58,.195); g.add(iris);
+    // Tiny point light per eye
+    const el = new THREE.PointLight(0x00ffcc,.4,1.2);
+    el.position.set(s*.09,1.58,.22); g.add(el);
   }
 
   // Shoulder spikes (LatheGeometry, 7 points, 6 sides)
@@ -415,22 +495,45 @@ function buildSniper() {
     boot.rotation.y = s>0?Math.PI/2:-Math.PI/2; boot.position.set(s*0.10,-0.05,0); g.add(boot);
   }
 
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.24,14,10), stdMat(0xd4a870,0.7));
+  // Head (high-poly, gnome proportions)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.24,20,16), stdMat(0xd4a870,0.68));
   head.scale.set(1,0.88,1); head.position.y = 1.15; head.castShadow = true; g.add(head);
 
-  // Nose (LatheGeometry, 8 points)
-  const nosePts = [[0,0],[0.025,0.01],[0.038,0.04],[0.042,0.08],[0.040,0.12],[0.032,0.15],[0.018,0.16],[0,0.16]].map(([x,y])=>new THREE.Vector2(x,y));
-  const nose = new THREE.Mesh(new THREE.LatheGeometry(nosePts,8), stdMat(0xc89860,0.7));
-  nose.rotation.x = -Math.PI/2.2; nose.position.set(0,1.12,0.23); g.add(nose);
+  // Canvas face on head front
+  attachFace(head, makeFaceTex(drawSniperFace), 0.228, 0.44);
 
-  // Eyes
-  for(let s of[-1,1]){
-    const white = new THREE.Mesh(new THREE.SphereGeometry(0.055,10,8), stdMat(0xffffff,0.5));
-    white.scale.set(1,0.7,0.5); white.position.set(s*0.09,1.18,0.21); g.add(white);
-    const iris = new THREE.Mesh(new THREE.SphereGeometry(0.04,8,6), stdMat(0x334466,0.5));
-    iris.position.set(s*0.09,1.18,0.235); g.add(iris);
+  // 3D Brow ridges (thick gnome brows)
+  addBrowRidge(g, -1, .09, 1.225, 0xa07830);
+  addBrowRidge(g,  1, .09, 1.225, 0xa07830);
+
+  // Human ears
+  addHumanEar(g, -1, 1.14, 0xd4a870);
+  addHumanEar(g,  1, 1.14, 0xd4a870);
+
+  // 3D Layered eyes (sit just in front of the face texture for depth)
+  for(const s of[-1,1]){
+    // Eye socket recess
+    const sock = new THREE.Mesh(new THREE.SphereGeometry(.062,10,8), stdMat(0xc08040,.9));
+    sock.scale.set(1,.68,.45); sock.position.set(s*.093,1.18,.182); g.add(sock);
+    // Sclera
+    const wh = new THREE.Mesh(new THREE.SphereGeometry(.052,10,8), new THREE.MeshStandardMaterial({color:0xfefef5,roughness:.35}));
+    wh.scale.set(1,.72,.52); wh.position.set(s*.092,1.18,.208); g.add(wh);
+    // Iris
+    const ir = new THREE.Mesh(new THREE.SphereGeometry(.035,8,6), stdMat(0x2244aa,.45));
+    ir.scale.z = .38; ir.position.set(s*.092,1.18,.234); g.add(ir);
+    // Pupil
+    const pu = new THREE.Mesh(new THREE.SphereGeometry(.018,6,5), stdMat(0x060606,.3));
+    pu.scale.z = .3; pu.position.set(s*.092,1.18,.244); g.add(pu);
+    // Specular highlight
+    const hi = new THREE.Mesh(new THREE.SphereGeometry(.009,5,4), glowMat(0xffffff,.8));
+    hi.position.set(s*.082,1.191,.248); g.add(hi);
   }
+
+  // Big gnome nose (LatheGeometry, 9 points)
+  const nosePts = [[0,0],[0.028,.01],[0.048,.04],[0.055,.09],[0.052,.14],[0.045,.18],[0.030,.20],[0.012,.21],[0,.21]]
+    .map(([x,y])=>new THREE.Vector2(x,y));
+  const nose = new THREE.Mesh(new THREE.LatheGeometry(nosePts,10), stdMat(0xc89060,.72));
+  nose.rotation.x = -Math.PI/2.1; nose.position.set(0,1.118,.225); g.add(nose);
 
   // Hat brim (LatheGeometry, 7 points, 14 sides)
   const brimPts = [[0,0],[0.20,0.00],[0.28,0.01],[0.34,0.02],[0.36,0.005],[0.34,-0.02],[0.30,-0.04]].map(([x,y])=>new THREE.Vector2(x,y));
@@ -566,9 +669,31 @@ function buildDragonKnight() {
   ].map(([x,y])=>new THREE.Vector2(x,y));
   const helm = new THREE.Mesh(new THREE.LatheGeometry(helmPts,12), metalMat(0x991100,0.3,0.85));
   helm.position.y = 1.40; helm.castShadow = true; g.add(helm);
-  // Visor slit
-  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.20,0.04,0.06), stdMat(0x050505,1.0));
+  // Visor slit (narrow eye gap)
+  const visor = new THREE.Mesh(new THREE.BoxGeometry(0.20,0.038,0.06), stdMat(0x030303,1.0));
   visor.position.set(0,1.56,0.24); g.add(visor);
+  // Amber eyes visible through visor
+  for(const s of[-1,1]){
+    const eyeGL = new THREE.Mesh(new THREE.SphereGeometry(.022,6,5), glowMat(0xffaa22,2.5));
+    eyeGL.position.set(s*.055,1.562,.27); g.add(eyeGL);
+    const el = new THREE.PointLight(0xff8800,.35,.8);
+    el.position.set(s*.055,1.562,.28); g.add(el);
+  }
+  // Lower face visible below helm (chin/jaw/mouth area)
+  const lowerFace = new THREE.Mesh(new THREE.SphereGeometry(0.18,16,10), stdMat(0xc08048,.7));
+  lowerFace.scale.set(1,.55,1); lowerFace.position.set(0,1.40,.12); g.add(lowerFace);
+  attachFace(lowerFace, makeFaceTex(drawDKFace), 0.185, 0.36);
+  // Chin strap geometry
+  for(const s of[-1,1]){
+    const strapCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.24,1.56,.06), new THREE.Vector3(s*.20,1.46,.14),
+      new THREE.Vector3(s*.12,1.38,.18), new THREE.Vector3(0,1.34,.20)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(strapCurve,6,.012,5,false), metalMat(0x991100,.35,.8)));
+  }
+  // Brow ridge above visor
+  addBrowRidge(g,-1,.06,1.61,0x991100);
+  addBrowRidge(g, 1,.06,1.61,0x991100);
   // Dragon crest
   const crest = new THREE.Mesh(new THREE.ConeGeometry(0.06,0.18,5), stdMat(0xcc2200,0.5,0.3));
   crest.position.set(0,1.78,0); crest.rotation.x = -0.2; g.add(crest);
@@ -663,14 +788,54 @@ function buildShadowFiend() {
   const chestDetail = new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.16,0.3,8), stdMat(0x220808,0.9));
   chestDetail.position.set(0,0.90,0.04); g.add(chestDetail);
 
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.20,14,10), stdMat(0x1a0808,0.9));
-  head.position.y = 1.28; head.castShadow = true; g.add(head);
+  // Head (high-poly, angular demon)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.20,20,16), stdMat(0x140606,.96));
+  head.scale.set(1,1.04,.94); head.position.y = 1.28; head.castShadow = true; g.add(head);
 
-  // Glowing eyes
-  for(let s of[-1,1]){
-    const eyeGlow = new THREE.Mesh(new THREE.SphereGeometry(0.045,8,6), glowMat(0xff2200,4));
-    eyeGlow.position.set(s*0.08,1.32,0.17); g.add(eyeGlow);
+  // Canvas face texture (markings, slit pupils, fangs)
+  attachFace(head, makeFaceTex(drawSFFace), 0.205, 0.40);
+
+  // Angular cheekbone ridges
+  for(const s of[-1,1]){
+    const cc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.14,1.34,.12), new THREE.Vector3(s*.18,1.28,.14),
+      new THREE.Vector3(s*.19,1.22,.10), new THREE.Vector3(s*.15,1.17,.07)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(cc,5,.014,5,false), stdMat(0x220a0a,.9)));
+  }
+
+  // Deep-set glowing eyes (3D layered)
+  for(const s of[-1,1]){
+    // Dark socket recess
+    const sock = new THREE.Mesh(new THREE.SphereGeometry(.058,10,8), stdMat(0x0a0202,1));
+    sock.scale.set(1,.62,.55); sock.position.set(s*.085,1.315,.135); g.add(sock);
+    // Red iris glow
+    const iris = new THREE.Mesh(new THREE.SphereGeometry(.038,8,6), glowMat(0xff2200,4.5));
+    iris.position.set(s*.085,1.315,.182); g.add(iris);
+    // Slit pupil (scaled dark disk)
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(.024,6,5), stdMat(0x030000,.2));
+    pupil.scale.set(.26,1,.3); pupil.position.set(s*.085,1.315,.198); g.add(pupil);
+    // Intense point light
+    const el = new THREE.PointLight(0xff2200,.55,1.4);
+    el.position.set(s*.085,1.315,.21); g.add(el);
+  }
+
+  // Angular brow ridges (demonic, sharp-angled)
+  for(const s of[-1,1]){
+    const bc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.04,1.40,.16), new THREE.Vector3(s*.09,1.42,.16),
+      new THREE.Vector3(s*.15,1.38,.11), new THREE.Vector3(s*.17,1.32,.07)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(bc,6,.020,5,false), stdMat(0x180505,.95)));
+  }
+
+  // Visible fang geometry (protruding below lip line)
+  for(const s of[-1,1]){
+    const fangCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.045,1.19,.18), new THREE.Vector3(s*.048,1.14,.185),
+      new THREE.Vector3(s*.042,1.09,.175)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(fangCurve,5,.013,5,false), stdMat(0xd0c0b0,.7)));
   }
 
   // Curved horns (TubeGeometry along curve)
@@ -822,20 +987,46 @@ function buildWindrunner() {
     boot.rotation.y = s>0?Math.PI/2:-Math.PI/2; boot.position.set(s*0.10,-0.04,0); g.add(boot);
   }
 
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.19,14,10), stdMat(0xddc49a,0.7));
-  head.position.y = 1.02; head.castShadow = true; g.add(head);
+  // Head (high-poly, slim elven)
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.19,20,16), stdMat(0xddc49a,.68));
+  head.scale.set(.96,1.04,.96); head.position.y = 1.02; head.castShadow = true; g.add(head);
+
+  // Canvas face texture (large almond eyes, elven features, cupid bow)
+  attachFace(head, makeFaceTex(drawWRFace), 0.198, 0.38);
+
   // Hood (LatheGeometry partial dome)
-  const hoodPts = [[0,0.22],[0.06,0.22],[0.12,0.20],[0.17,0.16],[0.18,0.10],[0.16,0.04],[0.10,0.01],[0,0]].map(([x,y])=>new THREE.Vector2(x,y));
-  const hood = new THREE.Mesh(new THREE.LatheGeometry(hoodPts,8), stdMat(0x1e3a12,0.85));
+  const hoodPts = [[0,.22],[.06,.22],[.12,.20],[.17,.16],[.18,.10],[.16,.04],[.10,.01],[0,0]]
+    .map(([x,y])=>new THREE.Vector2(x,y));
+  const hood = new THREE.Mesh(new THREE.LatheGeometry(hoodPts,8), stdMat(0x1e3a12,.85));
   hood.position.y = 0.98; g.add(hood);
   // Hood point
-  const hoodTip = new THREE.Mesh(new THREE.ConeGeometry(0.07,0.22,6), stdMat(0x1e3a12,0.85));
-  hoodTip.position.set(0,1.28,0); hoodTip.rotation.z = 0.1; g.add(hoodTip);
-  // Eyes (teal glowing)
-  for(let s of[-1,1]){
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.032,8,6), glowMat(0x44ffcc,2.5));
-    eye.position.set(s*0.07,1.05,0.17); g.add(eye);
+  const hoodTip = new THREE.Mesh(new THREE.ConeGeometry(.07,.22,6), stdMat(0x1e3a12,.85));
+  hoodTip.position.set(0,1.28,0); hoodTip.rotation.z = .1; g.add(hoodTip);
+
+  // Elven ears (pointed)
+  addElvenEar(g, -1, 1.00, 0xddc49a);
+  addElvenEar(g,  1, 1.00, 0xddc49a);
+
+  // 3D Layered eyes (large, teal)
+  for(const s of[-1,1]){
+    // Eye socket area (slightly recessed)
+    const sock = new THREE.Mesh(new THREE.SphereGeometry(.048,10,8), stdMat(0xc8a878,.75));
+    sock.scale.set(1.1,.65,.45); sock.position.set(s*.072,1.044,.155); g.add(sock);
+    // Sclera (white)
+    const wh = new THREE.Mesh(new THREE.SphereGeometry(.040,10,8), new THREE.MeshStandardMaterial({color:0xfefef8,roughness:.3}));
+    wh.scale.set(1.1,.70,.48); wh.position.set(s*.071,1.044,.172); g.add(wh);
+    // Iris (large teal, elven)
+    const ir = new THREE.Mesh(new THREE.SphereGeometry(.028,8,6), glowMat(0x00cc88,.8));
+    ir.scale.set(1,1.1,.4); ir.position.set(s*.071,1.044,.188); g.add(ir);
+    // Pupil
+    const pu = new THREE.Mesh(new THREE.SphereGeometry(.014,6,5), stdMat(0x040a06,.3));
+    pu.scale.z = .32; pu.position.set(s*.071,1.044,.196); g.add(pu);
+    // Specular
+    const hi = new THREE.Mesh(new THREE.SphereGeometry(.007,5,4), glowMat(0xffffff,.7));
+    hi.position.set(s*.063,1.053,.200); g.add(hi);
+    // Subtle eye glow light
+    const el = new THREE.PointLight(0x44ffcc,.25,.9);
+    el.position.set(s*.071,1.044,.21); g.add(el);
   }
   // Ponytail
   const ponyCurve = new THREE.CatmullRomCurve3([
