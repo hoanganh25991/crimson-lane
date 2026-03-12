@@ -761,8 +761,8 @@ function buildDragonKnight() {
   // Sword group — child of armRPivot so it swings with the arm
   // armRPivot is at world (0.26, 1.12, 0); hand is ~(0.17, -0.32, 0.12) in pivot space
   const swordGroup = new THREE.Group();
-  swordGroup.position.set(0.20, -0.22, 0.26);
-  swordGroup.rotation.z = 0.30; // match arm tilt
+  swordGroup.position.set(0.19, -0.23, 0.22);
+  swordGroup.rotation.z = -0.15; // lean outward (right) — blade clears body
   // Blade (ExtrudeGeometry tapered, points up Y-axis)
   const bladeShape = new THREE.Shape();
   bladeShape.moveTo(-0.04,0); bladeShape.lineTo(-0.04,0.5); bladeShape.bezierCurveTo(-0.04,0.72,-0.02,0.84,0,0.90);
@@ -779,10 +779,12 @@ function buildDragonKnight() {
   pommel.position.y = -0.20; swordGroup.add(pommel);
   armRPivot.add(swordGroup); parts.swordGroup = swordGroup;
 
-  // Shield (kite shape, ExtrudeGeometry)
+  // Shield (kite shape, ExtrudeGeometry) — child of armLPivot
+  // Left hand endpoint in pivot-local: (-0.170, -0.332, 0)
+  // Shield top (y=0 local) placed at hand, hangs forward-left
   const shieldGroup = new THREE.Group();
-  shieldGroup.position.set(-0.44,0.80,-0.05);
-  shieldGroup.rotation.y = 0.4;
+  shieldGroup.position.set(-0.14, -0.24, 0.18);
+  shieldGroup.rotation.y = 0.3;
   const shieldShape = new THREE.Shape();
   shieldShape.moveTo(0,0);
   shieldShape.bezierCurveTo(0.28,0,0.30,-0.18,0.30,-0.28);
@@ -793,7 +795,7 @@ function buildDragonKnight() {
   shieldGroup.add(shield);
   const shieldCrest = new THREE.Mesh(new THREE.SphereGeometry(0.06,8,6), metalMat(0xffaa00,0.2,0.9));
   shieldCrest.position.set(0,-0.24,0.08); shieldGroup.add(shieldCrest);
-  g.add(shieldGroup); parts.shieldGroup = shieldGroup;
+  armLPivot.add(shieldGroup); parts.shieldGroup = shieldGroup;
 
   // Cape (PlaneGeometry with wave)
   const capeGeo = new THREE.PlaneGeometry(0.5,0.8,4,8);

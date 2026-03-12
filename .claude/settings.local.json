@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(open /Users/anhle/work-station/dota-1-like-claude/hero-viewer.html)"
+      "Bash(open /Users/anhle/work-station/dota-1-like-claude/hero-viewer.html)",
+      "Bash(node -e \"\nconst cx=0.12, cy=-0.17, rz=0.3, half=0.17;\n// bottom of cylinder in pivot-local, accounting for rotation.z\nconst bx = cx + half*Math.sin\\(rz\\);\nconst by = cy - half*Math.cos\\(rz\\);\nconsole.log\\('Hand endpoint \\(pivot-local\\):', bx.toFixed\\(3\\), by.toFixed\\(3\\), '0.000'\\);\n// sword grip is at y=-0.10 in sword-local, also rotated by rz=0.3\nconst gx_off = 0.10*Math.sin\\(rz\\);\nconst gy_off = -0.10*Math.cos\\(rz\\);\nconsole.log\\('Grip offset from swordGroup origin:', gx_off.toFixed\\(3\\), gy_off.toFixed\\(3\\)\\);\n// swordGroup.position = hand - grip_offset\nconst sx = bx - gx_off;\nconst sy = by - gy_off;\nconsole.log\\('swordGroup.position should be:', sx.toFixed\\(3\\), sy.toFixed\\(3\\)\\);\n\")"
     ]
   }
 }
