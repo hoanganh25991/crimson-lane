@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(open /Users/anhle/work-station/dota-1-like-claude/hero-viewer.html)"
+    ]
+  }
+}
