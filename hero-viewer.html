@@ -366,8 +366,21 @@ function buildLich() {
   skull.scale.set(1,0.92,0.95); skull.position.set(0,1.54,0);
   skull.castShadow = true; g.add(skull); parts.skull = skull;
 
-  // Canvas face texture on skull front
-  attachFace(skull, makeFaceTex(drawLichFace), 0.215, 0.42);
+  // Nasal cavity — two dark oval hollows
+  for(const s of[-1,1]){
+    const nc = new THREE.Mesh(new THREE.SphereGeometry(.022,7,5), stdMat(0x060606,1));
+    nc.scale.set(1.1,.8,.55); nc.position.set(s*.036,1.455,.195); g.add(nc);
+  }
+  // Nasal bridge bone (thin tube)
+  const nasalCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,1.52,.17), new THREE.Vector3(0,1.49,.19), new THREE.Vector3(0,1.46,.20)
+  ]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(nasalCurve,4,.010,5,false), stdMat(0xd8c8b0,.75)));
+  // Teeth row — 5 small cylinders
+  for(let i=0;i<5;i++){
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(.010,.012,.038,5), stdMat(0xddd5c0,.6));
+    t.position.set((i-2)*.026, 1.385, .195); t.rotation.x = Math.PI/2; g.add(t);
+  }
 
   // Jaw (ExtrudeGeometry)
   const jawShape = new THREE.Shape();
@@ -499,16 +512,29 @@ function buildSniper() {
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.24,20,16), stdMat(0xd4a870,0.68));
   head.scale.set(1,0.88,1); head.position.y = 1.15; head.castShadow = true; g.add(head);
 
-  // Canvas face on head front
-  attachFace(head, makeFaceTex(drawSniperFace), 0.228, 0.44);
+  // 3D Brow ridges (thick gnome brows, inline)
+  for(const s of[-1,1]){
+    const bc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.02,1.234,.196), new THREE.Vector3(s*.06,1.238,.200),
+      new THREE.Vector3(s*.09,1.232,.196), new THREE.Vector3(s*.12,1.218,.186)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(bc,6,.018,6,false), stdMat(0xa07830,.82)));
+  }
 
-  // 3D Brow ridges (thick gnome brows)
-  addBrowRidge(g, -1, .09, 1.225, 0xa07830);
-  addBrowRidge(g,  1, .09, 1.225, 0xa07830);
-
-  // Human ears
-  addHumanEar(g, -1, 1.14, 0xd4a870);
-  addHumanEar(g,  1, 1.14, 0xd4a870);
+  // Human ears (inline — LatheGeometry half-dome + inner tube)
+  for(const s of[-1,1]){
+    const earPts = [[0,0],[.032,.01],[.048,.04],[.050,.08],[.044,.13],[.030,.16],[0,.17]]
+      .map(([x,y])=>new THREE.Vector2(x,y));
+    const ear = new THREE.Mesh(new THREE.LatheGeometry(earPts,7), stdMat(0xd4a870,.75));
+    ear.rotation.y = s>0 ? Math.PI/2 : -Math.PI/2;
+    ear.position.set(s*.242,1.14,0); g.add(ear);
+    // Inner helix tube
+    const hc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.241,1.17,.02), new THREE.Vector3(s*.243,1.14,.04),
+      new THREE.Vector3(s*.241,1.11,.02)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(hc,4,.008,5,false), stdMat(0xc09060,.8)));
+  }
 
   // 3D Layered eyes (sit just in front of the face texture for depth)
   for(const s of[-1,1]){
@@ -682,7 +708,9 @@ function buildDragonKnight() {
   // Lower face visible below helm (chin/jaw/mouth area)
   const lowerFace = new THREE.Mesh(new THREE.SphereGeometry(0.18,16,10), stdMat(0xc08048,.7));
   lowerFace.scale.set(1,.55,1); lowerFace.position.set(0,1.40,.12); g.add(lowerFace);
-  attachFace(lowerFace, makeFaceTex(drawDKFace), 0.185, 0.36);
+  // Chin cleft — small dark sphere indent
+  const chinCleft = new THREE.Mesh(new THREE.SphereGeometry(.018,6,5), stdMat(0xa06830,1));
+  chinCleft.scale.set(1,.7,.5); chinCleft.position.set(0,1.374,.228); g.add(chinCleft);
   // Chin strap geometry
   for(const s of[-1,1]){
     const strapCurve = new THREE.CatmullRomCurve3([
@@ -691,9 +719,14 @@ function buildDragonKnight() {
     ]);
     g.add(new THREE.Mesh(new THREE.TubeGeometry(strapCurve,6,.012,5,false), metalMat(0x991100,.35,.8)));
   }
-  // Brow ridge above visor
-  addBrowRidge(g,-1,.06,1.61,0x991100);
-  addBrowRidge(g, 1,.06,1.61,0x991100);
+  // Brow ridge above visor (inline)
+  for(const s of[-1,1]){
+    const bc = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(s*.01,1.618,.22), new THREE.Vector3(s*.05,1.622,.224),
+      new THREE.Vector3(s*.09,1.615,.218), new THREE.Vector3(s*.13,1.600,.206)
+    ]);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(bc,5,.016,5,false), metalMat(0x991100,.35,.85)));
+  }
   // Dragon crest
   const crest = new THREE.Mesh(new THREE.ConeGeometry(0.06,0.18,5), stdMat(0xcc2200,0.5,0.3));
   crest.position.set(0,1.78,0); crest.rotation.x = -0.2; g.add(crest);
@@ -792,8 +825,11 @@ function buildShadowFiend() {
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.20,20,16), stdMat(0x140606,.96));
   head.scale.set(1,1.04,.94); head.position.y = 1.28; head.castShadow = true; g.add(head);
 
-  // Canvas face texture (markings, slit pupils, fangs)
-  attachFace(head, makeFaceTex(drawSFFace), 0.205, 0.40);
+  // Forehead marking — raised ridge scar (TubeGeometry)
+  const scarCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-.04,1.38,.175), new THREE.Vector3(0,1.41,.185), new THREE.Vector3(.04,1.38,.175)
+  ]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(scarCurve,5,.009,5,false), stdMat(0x3a0808,.95)));
 
   // Angular cheekbone ridges
   for(const s of[-1,1]){
@@ -991,8 +1027,16 @@ function buildWindrunner() {
   const head = new THREE.Mesh(new THREE.SphereGeometry(0.19,20,16), stdMat(0xddc49a,.68));
   head.scale.set(.96,1.04,.96); head.position.y = 1.02; head.castShadow = true; g.add(head);
 
-  // Canvas face texture (large almond eyes, elven features, cupid bow)
-  attachFace(head, makeFaceTex(drawWRFace), 0.198, 0.38);
+  // Elven nose bridge — slim tube
+  const wrnCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0,1.07,.168), new THREE.Vector3(0,1.04,.172), new THREE.Vector3(0,1.01,.170)
+  ]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(wrnCurve,4,.009,5,false), stdMat(0xd4b888,.7)));
+  // Cupid bow lip — two small half-sphere bumps
+  for(const s of[-1,1]){
+    const lip = new THREE.Mesh(new THREE.SphereGeometry(.014,7,5), stdMat(0xc89870,.75));
+    lip.scale.set(1,.7,.7); lip.position.set(s*.018,.978,.168); g.add(lip);
+  }
 
   // Hood (LatheGeometry partial dome)
   const hoodPts = [[0,.22],[.06,.22],[.12,.20],[.17,.16],[.18,.10],[.16,.04],[.10,.01],[0,0]]
@@ -1003,9 +1047,18 @@ function buildWindrunner() {
   const hoodTip = new THREE.Mesh(new THREE.ConeGeometry(.07,.22,6), stdMat(0x1e3a12,.85));
   hoodTip.position.set(0,1.28,0); hoodTip.rotation.z = .1; g.add(hoodTip);
 
-  // Elven ears (pointed)
-  addElvenEar(g, -1, 1.00, 0xddc49a);
-  addElvenEar(g,  1, 1.00, 0xddc49a);
+  // Elven ears (inline ExtrudeGeometry pointed shape)
+  for(const s of[-1,1]){
+    const earShape = new THREE.Shape();
+    earShape.moveTo(0,0); earShape.lineTo(0,.10); earShape.bezierCurveTo(.01,.16,.02,.20,0,.26);
+    earShape.bezierCurveTo(-.02,.20,-.01,.16,0,.10); earShape.lineTo(0,0); earShape.closePath();
+    const ear = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(earShape,{depth:.028,bevelEnabled:true,bevelSize:.006,bevelThickness:.006,bevelSegments:2}),
+      stdMat(0xddc49a,.7)
+    );
+    ear.rotation.y = s>0 ? Math.PI/2 : -Math.PI/2;
+    ear.position.set(s*.186,1.00,.0); g.add(ear);
+  }
 
   // 3D Layered eyes (large, teal)
   for(const s of[-1,1]){
