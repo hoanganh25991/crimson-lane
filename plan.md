@@ -1,782 +1,1018 @@
-Below is a **structured instruction plan you can give to Claude Code** so it can build the project **end‑to‑end with minimal questions**.  
-You can paste this as a **single system instruction / project spec**.
+# Mobile Dota-Inspired Web Game Spec for Claude Code
 
-I structured it like a **Game Design Doc + Technical Spec + Execution Plan** so an autonomous coding agent can follow it without stopping.
+This file is now written in **Option B** format:
 
----
+1. **Master Prompt** — short instruction for Claude Code
+2. **Technical Appendix** — detailed indexed execution contract
 
-# Claude Code Instruction: Build a Mobile Dota‑Inspired Web Game
-
-## 1. Project Goal
-
-Build a **mobile‑first browser game inspired by Dota 1 (Warcraft III custom map)**.
-
-The game must:
-
-- Run **fully in browser**
-- Work **smoothly on mobile devices**
-- Use **HTML, CSS, JavaScript**
-- Use **Three.js for 3D rendering**
-- Focus on **simple controls similar to Garena mobile MOBA**
-- Be playable **solo vs AI first**
-- Be structured to allow **future multiplayer**
-
-The gameplay should replicate **core Dota mechanics** but simplified for mobile.
-
-Important:
-
-- This is **not a clone with copyrighted assets**
-- Use **original models and assets**
-- Mechanics inspired by Dota only.
+Use the **Master Prompt** as the main instruction.
+Use the **Technical Appendix** as the detailed source of truth.
 
 ---
 
-# 2. Target Platform
+# Part A — Master Prompt
 
-Primary target:
+## Claude Code Master Prompt
 
-- Mobile browsers
-- Android Chrome
-- iOS Safari
+Build a **mobile-first browser MOBA inspired by Dota 1** using **HTML, CSS, JavaScript, and Three.js**.
 
-Secondary:
+The game must be playable **end-to-end in the browser** with **solo play against AI bots first**, while being architected so **future multiplayer** can be added later using **WebRTC / PeerJS-style networking**.
 
-- Desktop browsers
+This is **not** a copyrighted clone. Use **original assets, original stylized models, and original UI**, while preserving the feel of classic three-lane Warcraft/Dota-style gameplay.
 
-Target performance:
+## Product goals
 
-- **60 FPS desktop**
-- **30+ FPS mid‑range mobile**
+- Create a **playable MOBA prototype** close in spirit to Dota 1
+- Prioritize **mobile controls and mobile readability**
+- Still support **desktop mouse + keyboard play**
+- Keep the game loop deep enough to feel like a real MOBA:
+  - laning
+  - last hit
+  - deny
+  - XP gain
+  - gold gain
+  - leveling
+  - items
+  - tower pressure
+  - barracks progression
+  - ancient destruction
+
+## Fixed MVP scope
+
+Implement these in MVP:
+
+- 1 playable map with:
+  - 3 lanes
+  - river
+  - jungle camps
+  - towers
+  - barracks
+  - ancients
+- 5 playable heroes based on `hero-viewer.html`:
+  - Lich
+  - Sniper
+  - Dragon Knight
+  - Shadow Fiend
+  - Windrunner
+- 12 items total
+- Item recipes including 2-part and 3-part combinations
+- Some item active skills
+- Solo mode with configurable:
+  - team size
+  - bot count
+- Hero select screen
+- Minimap MVP
+- Mobile HUD with:
+  - left joystick
+  - attack button
+  - Q/W/E/R buttons
+  - visible item active buttons
+- Desktop controls in parallel
+- AI bots for heroes and creeps
+
+## Non-negotiable UX rules
+
+- Mobile-first UI similar in clarity to Garena-style mobile MOBA controls
+- Camera auto-follows hero
+- Player can drag/pan to inspect nearby area
+- Double tap skill = auto target
+- Drag skill = aim and release to cast
+- Minimap is visible in MVP
+- TP uses **Teleport Scroll item**, not universal recall
+
+## Visual direction
+
+- Clean modern mobile fantasy style
+- Original models only
+- Do **not** use copyrighted Dota assets
+- Do **not** use pure cube placeholder art as the core approach
+- Start with **custom in-code stylized geometry** similar in spirit to `hero-viewer.html`
+- Models must be readable, performant, and visually consistent
+
+## Technical direction
+
+- Use modular architecture
+- Separate simulation logic from rendering logic
+- Keep systems future-ready for multiplayer
+- Use data-driven definitions for heroes, abilities, and items where possible
+- Keep each development phase runnable and testable
+
+## Performance targets
+
+- 60 FPS desktop target
+- 30+ FPS mid-range mobile target
+- Mobile-friendly rendering budgets
+
+## Autonomous execution rules
+
+- Do not stop for unnecessary questions
+- If a detail is ambiguous, choose the simplest Dota-like solution that preserves mobile usability and performance
+- Prefer complete playable loops over isolated tech demos
+- Maintain documentation while building
+- Each phase must end with a working playable increment
+
+## Deliverables
+
+Produce:
+
+1. Full source code
+2. Working local playable build
+3. Documentation for:
+   - setup
+   - architecture
+   - hero definitions
+   - abilities
+   - items
+   - future multiplayer integration path
 
 ---
 
-# 3. Core Gameplay Design
+# Part B — Technical Appendix
 
-## Match Structure
+## 1. Executive Summary
 
-Game type:
-
-- **5 vs 5 MOBA**
-- Player controls **one hero**
-- Other heroes are **AI bots**
-
-Match objective:
-
-Destroy enemy **Ancient building**.
-
-Match duration target:
-
-- 10–20 minutes
+Build a browser-based, mobile-first, Three.js-powered MOBA inspired by Dota 1.
+The MVP must support real gameplay flow, not only a visual demo.
+It should be playable solo with AI bots, include lane and jungle systems, and provide enough depth to feel like a proper MOBA prototype.
 
 ---
 
-# 4. Map Design
+## 2. Product Vision
 
-Inspired by **Dota 1 map layout**.
+The project aims to recreate the **strategic feeling** of Dota 1 with a **mobile-friendly interaction model**.
 
-### Map Components
+The game should feel like:
+- classic three-lane Warcraft custom map structure
+- modern mobile readability
+- streamlined controls for touch screens
+- original 3D visuals with personality
 
+The project should be developed so that:
+- solo play works first
+- bot logic is strong enough for repeated testing
+- future multiplayer can be integrated without rewriting core systems
+
+---
+
+## 3. Non-Negotiable Decisions
+
+These are fixed and must not be changed by Claude Code:
+
+1. Platform:
+   - browser only
+   - mobile-first
+   - desktop supported
+
+2. Tech stack:
+   - HTML
+   - CSS
+   - JavaScript
+   - Three.js
+
+3. Core mode:
+   - solo vs AI first
+   - future multiplayer planned later
+
+4. Match structure:
+   - designed for 5v5
+   - solo mode may allow smaller team sizes
+   - bots fill missing slots
+
+5. Hero roster for MVP:
+   - Lich
+   - Sniper
+   - Dragon Knight
+   - Shadow Fiend
+   - Windrunner
+
+6. Control philosophy:
+   - mobile-first
+   - drag to aim
+   - double tap to auto target
+   - direct visible buttons
+
+7. Required core systems:
+   - last hit
+   - deny
+   - XP
+   - gold
+   - level up
+   - death and respawn
+   - tower progression
+   - barracks progression
+   - jungle camps
+   - item progression
+
+8. Visual direction:
+   - custom in-code stylized geometry first
+   - original art only
+   - use `hero-viewer.html` as the primary style reference for hero personality and readability
+
+---
+
+## 4. MVP Scope
+
+### 4.1 Included in MVP
+
+- Main menu
+- Solo match setup menu
+- Hero selection screen
+- Match start flow
+- Match end flow
+- Restart flow
+- One full map
 - 3 lanes
-  - Top
-  - Mid
-  - Bottom
-
-- Jungle areas
+- Jungle camps
 - River
-
-Buildings:
-
-Team base contains:
-
-- Ancient
-- 3 lane towers
+- Trees as map geometry / blockers / visual identity
+- Towers
 - Barracks
+- Ancient
+- 5 heroes
+- Hero abilities
+- 12 items
+- Item recipes
+- Item active buttons on mobile HUD
+- Creep spawning
+- Neutral creeps
+- Hero bots
+- Minimap MVP
+- Desktop and mobile controls
 
-Lane tower structure:
+### 4.2 Excluded from MVP
 
+- Real multiplayer gameplay
+- Matchmaking backend
+- Login/account system
+- Monetization systems
+- Cosmetics store
+- Ranked mode
+- Draft / ban phase
+- Replay system
+- Full tree destruction / advanced tree interaction
+
+---
+
+## 5. Player Experience Goals
+
+The user should feel:
+- strong hero identity
+- responsive skill casting
+- readable map pressure
+- meaningful progression through gold, XP, and items
+- satisfying lane and jungle loop
+- enjoyable touch controls on mobile
+
+The player should be able to understand:
+- where to move
+- what to attack
+- what each skill does
+- where towers and objectives are
+- how to buy items
+- where the current battle is happening via minimap
+
+---
+
+## 6. Core Match Rules
+
+### 6.1 Match objective
+
+Destroy the enemy Ancient.
+
+### 6.2 Team setup
+
+- Game designed for 5v5
+- Solo setup may allow:
+  - 1v1
+  - 2v2
+  - 3v3
+  - 5v5
+- Empty hero slots are filled with bots
+
+### 6.3 Match duration target
+
+- MVP target match time: 10 to 20 minutes
+
+---
+
+## 7. Map and World Rules
+
+### 7.1 Map layout
+
+The map is inspired by classic three-lane Dota structure:
+
+- Top lane
+- Mid lane
+- Bottom lane
+- River crossing mid area
+- Jungle on both sides
+- Team bases at opposite corners
+
+### 7.2 Map size
+
+Suggested world size:
+- about 600 x 600 gameplay units
+
+### 7.3 Environment elements
+
+- terrain mesh
+- lane paths
+- cliffs / elevation suggestion where useful
+- trees
+- river material
+- jungle camp clearings
+- base zones
+
+### 7.4 Tree rule for MVP
+
+- Trees are static blockers and visual elements in MVP
+- Advanced tree interaction is deferred
+
+---
+
+## 8. Camera and Minimap Rules
+
+### 8.1 Camera
+
+- isometric / angled top-down
+- hero auto-follow by default
+- limited zoom only
+- no free rotation in MVP
+- player can drag/pan on mobile and desktop to inspect nearby area
+- camera returns to hero focus after recenter input or short idle timeout
+
+### 8.2 Minimap MVP
+
+Required in MVP.
+
+Must display:
+- allied heroes
+- enemy heroes when visible
+- creeps
+- towers
+- barracks
+- ancient
+- jungle camp positions
+- player position
+
+MVP minimap interaction:
+- visible and readable
+- at minimum support display + recenter interaction
+
+---
+
+## 9. Hero Roster
+
+The 5 heroes are based on `hero-viewer.html` and should be implemented as original game heroes with those same identities.
+
+### 9.1 Lich
+- Role: Intelligence support / nuker
+- Identity: frost caster, mana control, AoE slow, chain magic
+
+### 9.2 Sniper
+- Role: Agility ranged carry
+- Identity: long range damage, zoning, single-target finishing
+
+### 9.3 Dragon Knight
+- Role: Strength durable frontliner
+- Identity: stun, breath attack, sustained survivability, dragon form
+
+### 9.4 Shadow Fiend
+- Role: Agility snowball caster / damage carry
+- Identity: soul scaling, burst raze pattern, presence aura, explosive ultimate
+
+### 9.5 Windrunner
+- Role: Agility utility ranged hero
+- Identity: skillshot utility, movement burst, attack focus ultimate
+
+### 9.6 Hero production rule
+
+For each hero implement:
+- custom stylized in-code geometry model
+- idle animation
+- walk animation
+- attack animation
+- cast animation
+- death animation
+- readable VFX
+- HUD iconography
+
+---
+
+## 10. Hero Stats and Progression Rules
+
+### 10.1 Core attributes
+
+- Strength
+- Agility
+- Intelligence
+
+### 10.2 Derived stats
+
+- HP
+- HP regen
+- Mana
+- Mana regen
+- Attack damage
+- Attack speed
+- Armor
+- Magic resist
+- Move speed
+- Attack range
+
+### 10.3 Progression
+
+- Heroes gain XP from nearby kills
+- Heroes level up during the match
+- Skill points unlock / improve abilities
+- Gold is used for item progression
+- Heroes are not static
+
+### 10.4 Suggested formula policy
+
+Claude Code may tune numbers, but formulas must be consistent and documented.
+Use simple, readable MOBA-style formulas instead of arbitrary magic numbers scattered across files.
+
+---
+
+## 11. Ability System Rules
+
+Each hero has:
+- Q
+- W
+- E
+- R
+
+Ability system must support:
+- target skills
+- area skills
+- skillshots
+- passive skills
+- cooldown
+- mana cost
+- cast time if needed
+- animation trigger
+- projectile support
+- status effects
+- scaling values by level
+
+Status effects supported in MVP:
+- stun
+- slow
+- silence
+- knockback
+
+---
+
+## 12. Combat Rules
+
+### 12.1 Damage types
+
+- Physical
+- Magical
+- Pure
+
+### 12.2 Combat loop
+
+- acquire target
+- move into range if needed
+- attack or cast
+- apply mitigation
+- apply damage
+- apply status effects
+- check death
+- handle gold / XP reward
+- handle respawn flow
+
+### 12.3 Attack rules
+
+- ranged and melee attacks supported
+- projectile travel for ranged basic attacks where appropriate
+- attack wind-up and recovery timing supported
+
+---
+
+## 13. Lane, Creep, and Neutral Rules
+
+### 13.1 Lane creeps
+
+Spawn every 30 seconds.
+
+Each lane wave:
+- 3 melee creeps
+- 1 ranged creep
+
+### 13.2 Lane creep AI
+
+- follow lane spline/path
+- acquire enemy creeps first
+- then enemy heroes if attacked / in valid combat state
+- then towers
+- then barracks
+- then ancient
+
+### 13.3 Neutral camps
+
+Required in MVP.
+
+Neutral rules:
+- camp spawn locations in jungle
+- leash back if pulled too far
+- respawn timer after full camp death
+- grants gold and XP
+
+### 13.4 Last hit and deny
+
+Required in MVP.
+
+- last hit grants gold to the last hitter
+- nearby heroes still gain XP per rule set
+- allied units can be denied under the appropriate HP threshold
+- deny reduces enemy benefit
+
+Implementation note:
+If exact Dota values are not specified, use a simplified but clearly documented deny/XP/gold rule that preserves the lane skill dynamic.
+
+---
+
+## 14. Tower, Barracks, and Ancient Rules
+
+### 14.1 Towers
+
+Each lane has:
 - Tier 1
 - Tier 2
 - Tier 3
 
----
+Tower behavior:
+- auto attack enemies in range
+- prioritize creeps by default
+- switch aggro appropriately when enemy hero attacks allied hero under tower rules
 
-### Map Size
+### 14.2 Barracks
 
-Small optimized map:
+Each lane contains barracks structures.
 
-```
-~600 x 600 units
-```
+Rules:
+- destroying barracks upgrades allied lane creeps on that lane
+- barracks progression should matter strategically
 
-Optimized for mobile.
+### 14.3 Ancient
 
----
-
-### Terrain
-
-Use:
-
-- heightmap
-- simple textures
-
-Libraries:
-
-```
-three.js
-```
-
-Features:
-
-- terrain mesh
-- simple grass shader
-- pathfinding grid overlay
+- final objective
+- match ends when destroyed
 
 ---
 
-# 5. Camera System
+## 15. Economy, Death, and Respawn Rules
 
-Camera style:
+### 15.1 Gold
 
-**Isometric / angled top down**
+Sources:
+- creep last hits
+- neutral camp kills
+- hero kills
+- tower / objective rewards
+- optional passive trickle if needed for pacing
 
-Similar to:
+### 15.2 XP
 
-- Dota
-- League
-- Mobile MOBAs
+Sources:
+- nearby creep deaths
+- hero kills
+- neutral kills
+- shared/team rules may be simplified for MVP but must be documented
 
-Camera features:
+### 15.3 Death
 
-- follows hero
-- limited zoom
-- rotate disabled for simplicity
+Must include:
+- death animation/state
+- respawn timer
+- respawn location
+- kill reward logic
 
----
+### 15.4 Respawn
 
-# 6. Hero System
+- respawn at base
+- respawn timer scales with level or game phase
 
-Initial hero count:
+### 15.5 Teleport
 
-```
-6 heroes
-```
-
-Roles:
-
-- Tank
-- Fighter
-- Assassin
-- Mage
-- Support
-- Marksman
-
-Each hero has:
-
-- 4 skills
-- base attributes
-- attack animation
-- movement speed
-
-Attributes:
-
-```
-Strength
-Agility
-Intelligence
-```
-
-Derived stats:
-
-```
-HP
-Mana
-Attack
-Armor
-Magic Resist
-Attack Speed
-Move Speed
-```
+- no universal recall button in final logic
+- use Teleport Scroll item
+- teleport is Dota-like and should target allied structures in MVP
 
 ---
 
-# 7. Ability System
+## 16. Item System
 
-Each hero has:
+### 16.1 Inventory
 
-```
-Skill Q
-Skill W
-Skill E
-Ultimate R
-```
+- 6 inventory slots
 
-Skill types:
+### 16.2 MVP item count
 
-- target
-- area
-- skill shot
-- passive
+- exactly 12 starter items in MVP
 
-Example skill:
+### 16.3 Item requirements
 
-```
-Fireball
-type: projectile
-damage: 100
-cooldown: 6s
-mana cost: 40
-```
+- support passive stat items
+- support active items
+- support 2-part combinations
+- support 3-part combinations
+- support item recipes / upgrade paths
 
-Skill system must support:
+### 16.4 Suggested item categories
 
-- cooldown
-- mana
-- cast animation
-- damage
-- status effects
-
----
-
-# 8. Combat System
-
-Damage types:
-
-```
-Physical
-Magical
-Pure
-```
-
-Status effects:
-
-```
-Stun
-Slow
-Silence
-Knockback
-```
-
-Combat loop:
-
-```
-attack
-cast skill
-apply damage
-update health
-check death
-respawn
-```
-
----
-
-# 9. Minion / Creep System
-
-Spawn system:
-
-Every:
-
-```
-30 seconds
-```
-
-Each lane spawns:
-
-```
-3 melee
-1 ranged
-```
-
-AI behavior:
-
-```
-follow lane path
-attack nearest enemy
-attack towers
-```
-
----
-
-# 10. Tower System
-
-Towers:
-
-- auto attack
-- prioritize hero if attacking ally hero
-
-Stats:
-
-```
-HP
-Armor
-Damage
-Attack speed
-Range
-```
-
----
-
-# 11. Item System
-
-Simple item shop.
-
-Categories:
-
+- movement
 - damage
 - armor
-- magic
+- mana
+- sustain
 - utility
 
-Hero inventory:
+### 16.5 Mobile item UX
 
-```
-6 slots
-```
-
-Example item:
-
-```
-Boots of Speed
-+45 move speed
-```
+- item active buttons are directly available
+- no hidden complex nested UI for essential active items
 
 ---
 
-# 12. Mobile Control System
+## 17. Controls and Input Rules
 
-Inspired by **Garena mobile MOBA controls**.
+### 17.1 Mobile controls
 
-### Left Side
+Left side:
+- virtual joystick for movement
 
-Virtual joystick:
-
-```
-movement control
-```
-
-### Right Side
-
-Buttons:
-
-```
-Attack
-Skill 1
-Skill 2
-Skill 3
-Ultimate
-Recall
-Item
-```
-
-Skills can be:
-
-- tap cast
-- drag direction
-- auto target
-
----
-
-# 13. AI System
-
-Bots control:
-
-- heroes
-- creeps
-
-Hero AI behaviors:
-
-```
-lane push
-retreat when low hp
-cast abilities
-farm creeps
-attack towers
-```
-
-Use:
-
-```
-Finite State Machine
-```
-
-States:
-
-```
-Idle
-Move
-Attack
-Retreat
-Cast
-Farm
-Push
-```
-
----
-
-# 14. Graphics Design
-
-3D Style:
-
-- Low poly
-- Mobile optimized
-
-Polygon targets:
-
-Hero:
-
-```
-1500 - 2500 tris
-```
-
-Creep:
-
-```
-500 tris
-```
-
-Tower:
-
-```
-1000 tris
-```
-
----
-
-# 15. Rendering Optimization
-
-Use:
-
-```
-Instancing
-LOD
-Texture atlas
-```
-
-Techniques:
-
-- frustum culling
-- GPU instancing
-- compressed textures
-
----
-
-# 16. Audio System
-
-Use:
-
-```
-WebAudio API
-```
-
-Sounds:
-
-- skill cast
+Right side:
 - attack
-- tower hit
-- death
+- Q
+- W
+- E
+- R
+- item actives
+- shop access when allowed
+- TP item use
 
-Music loop optional.
+### 17.2 Skill casting behavior
+
+- tap skill: select / quick cast behavior if appropriate
+- drag skill: directional or area aiming
+- release: cast
+- double tap skill: auto-target nearest or best valid target
+
+### 17.3 Desktop controls
+
+Support desktop in parallel:
+- mouse movement / targeting
+- keyboard hotkeys
+- standard MOBA-like usability
 
 ---
 
-# 17. Networking (Future)
+## 18. AI Rules
 
-Design architecture so multiplayer can be added later.
+### 18.1 AI architecture
 
-Abstract systems:
+Use finite state machine or equivalent structured behavior model.
 
-```
-GameState
-PlayerController
-Input
-```
+### 18.2 Hero bot states
+
+- Idle
+- Move
+- Attack
+- Retreat
+- Cast
+- Farm
+- Push
+- Defend
+- Buy
+
+### 18.3 Hero bot priorities
+
+- assign lane or role at match start
+- farm lane
+- attempt last hits
+- attempt denies
+- retreat on low HP
+- cast abilities using simple heuristics
+- avoid obvious tower dives unless advantage is high
+- buy items automatically using a build path
+- return to lane or jungle after respawn
+
+### 18.4 Creep AI
+
+- deterministic and lightweight
+- lane-following with combat interruption
 
 ---
 
-# 18. Project Architecture
+## 19. Art Direction and Asset Rules
 
-Folder structure:
+### 19.1 Style goals
 
-```
-/project
+- clean mobile fantasy
+- stylized 3D
+- readable silhouettes
+- clear team readability
+- visually satisfying skill effects
 
+### 19.2 Reference rule
+
+Use `hero-viewer.html` as reference for:
+- silhouette quality
+- personality
+- weapon readability
+- stylized geometry approach
+- ability flavor
+
+### 19.3 Asset constraints
+
+- original work only
+- no copyrighted Dota models, icons, textures, sounds, or UI
+
+### 19.4 Geometry targets
+
+Keep mobile-friendly model budgets.
+Exact triangle counts may vary, but heroes should be expressive without becoming heavy.
+
+---
+
+## 20. Technical Architecture
+
+### 20.1 Architectural approach
+
+Use a modular game architecture with strong separation between:
+- rendering
+- simulation
+- input
+- UI
+- AI
+- content data
+
+### 20.2 Core modules
+
+Recommended module groups:
+- engine
+- game state
+- map systems
+- hero systems
+- ability systems
+- combat systems
+- AI systems
+- UI systems
+- asset / model builders
+
+### 20.3 Data orientation
+
+Use data-driven configuration for:
+- hero definitions
+- skill definitions
+- item definitions
+- creep stats
+- tower stats
+- bot behavior parameters
+
+### 20.4 Multiplayer-ready boundaries
+
+Prepare clear abstraction boundaries for future networking:
+- input commands
+- entity state snapshots
+- game simulation tick
+- player controller abstraction
+
+Do not implement real multiplayer in MVP.
+
+---
+
+## 21. File and Folder Expectations
+
+Suggested structure:
+
+```text
 /src
   /engine
   /game
   /ai
   /heroes
   /abilities
+  /items
   /ui
   /map
   /systems
+  /data
+  /tests
 
 /assets
-  /models
-  /textures
   /audio
+  /textures
 
-/public
-
-/tools
-
-/build
+/docs
 ```
+
+If the repository already has a structure, Claude Code should adapt while preserving modularity.
 
 ---
 
-# 19. Game Engine Architecture
+## 22. Development Phases and Acceptance Criteria
 
-Core systems:
+### Phase 1 — Project foundation
 
-```
-Entity Component System
-```
-
-Components:
-
-```
-Transform
-Health
-Mana
-Movement
-Combat
-Ability
-AI
-Animation
-```
-
-Systems:
-
-```
-RenderSystem
-MovementSystem
-CombatSystem
-AbilitySystem
-AISystem
-UISystem
-```
-
----
-
-# 20. Libraries
-
-Required:
-
-```
-three.js
-vite
-zustand (state)
-```
-
-Optional:
-
-```
-ammo.js (physics)
-pathfinding.js
-```
-
----
-
-# 21. Build System
-
-Use:
-
-```
-Vite
-```
-
-Commands:
-
-```
-npm install
-npm run dev
-npm run build
-```
-
----
-
-# 22. Performance Targets
-
-Mobile GPU memory:
-
-```
-< 300 MB
-```
-
-Draw calls:
-
-```
-< 150
-```
-
-Polygon budget:
-
-```
-< 200k total
-```
-
----
-
-# 23. Development Phases
-
-Claude Code must implement in this order.
-
----
-
-### Phase 1
-
-Project setup
-
-- vite
-- three.js
-- folder structure
-- base scene
-- camera
+Deliver:
+- project setup
+- Three.js scene
 - terrain
+- camera
+- base game loop
 
----
+Acceptance:
+- app runs locally
+- camera works on mobile and desktop
+- terrain renders reliably
 
-### Phase 2
+### Phase 2 — Hero controller and presentation
 
-Hero controller
-
+Deliver:
+- one controlled hero
 - movement
-- animation
-- camera follow
+- animations
+- follow camera
 
----
+Acceptance:
+- player can move hero on mobile and desktop
+- hero animation states transition correctly
 
-### Phase 3
+### Phase 3 — Core combat
 
-Combat
-
-- attack
+Deliver:
+- basic attack
 - health
 - damage
+- death
 
----
+Acceptance:
+- units can fight and die correctly
 
-### Phase 4
+### Phase 4 — Ability system
 
-Ability system
-
-- cooldown
+Deliver:
+- Q/W/E/R support
+- cooldowns
 - targeting
-- projectile
+- projectiles
+- status effects
 
----
+Acceptance:
+- at least one hero complete end-to-end with all abilities
 
-### Phase 5
+### Phase 5 — Lane and jungle systems
 
-Creep system
+Deliver:
+- lane creep spawning
+- lane pathing
+- neutral camps
+- XP/gold gain
+- last hit and deny
 
-- spawn
-- lane AI
+Acceptance:
+- laning loop is playable and understandable
 
----
+### Phase 6 — Objective structures
 
-### Phase 6
+Deliver:
+- towers
+- barracks
+- ancient
 
-Tower system
+Acceptance:
+- match can be won by destroying objectives
 
----
+### Phase 7 — Mobile-first HUD and minimap
 
-### Phase 7
-
-Mobile UI
-
+Deliver:
 - joystick
 - skill buttons
+- item buttons
+- minimap
+- hero status HUD
+
+Acceptance:
+- entire core match can be played on mobile controls
+
+### Phase 8 — Bot hero AI
+
+Deliver:
+- bots can lane
+- bots can farm
+- bots can fight
+- bots can buy items
+
+Acceptance:
+- solo match is meaningfully playable against bots
+
+### Phase 9 — Full MVP content
+
+Deliver:
+- all 5 heroes
+- all 12 items
+- hero select
+- solo setup options
+
+Acceptance:
+- user can start a configurable solo game and finish a full match loop
+
+### Phase 10 — Optimization and polish
+
+Deliver:
+- performance improvements
+- cleanup
+- docs
+- tests
+
+Acceptance:
+- stable local build
+- acceptable mobile frame rate
 
 ---
 
-### Phase 8
-
-Bot hero AI
-
----
-
-### Phase 9
-
-Item system
-
----
-
-### Phase 10
-
-Optimization
-
----
-
-# 24. Testing Requirements
+## 23. Testing Requirements
 
 Claude Code must include:
+- unit tests
+- simulation tests where practical
+- manual verification checklist
 
-- automated unit tests
-- gameplay simulation tests
-
-Test cases:
-
-```
-damage calculation
-cooldown logic
-AI state transitions
-```
-
----
-
-# 25. Deliverables
-
-Claude Code must produce:
-
-1. Full source code
-2. Working playable build
-3. Documentation
-
-Docs must include:
-
-```
-setup
-architecture
-adding new heroes
-adding abilities
-```
+Minimum test coverage should include:
+- damage calculation
+- cooldown logic
+- XP and level logic
+- last hit logic
+- deny logic
+- bot state transitions
+- tower aggro logic
+- item combination logic
 
 ---
 
-# 26. Important Constraints
+## 24. Documentation Requirements
 
-Must:
-
-- run fully in browser
-- support touch controls
-- avoid copyrighted assets
-- prioritize mobile performance
-
----
-
-# 27. Final Expected Result
-
-A playable **mobile browser MOBA prototype** that includes:
-
-- 1 map
-- 6 heroes
-- AI bots
-- towers
-- creeps
-- abilities
-- items
-- mobile controls
+Produce docs for:
+- setup
+- run/build commands
+- architecture overview
+- hero data format
+- ability data format
+- item data format
+- adding new heroes
+- adding new abilities
+- future multiplayer path
 
 ---
 
-✅ This instruction should allow Claude Code to **build end‑to‑end without repeatedly asking questions.**
+## 25. Claude Code Autonomous Execution Policy
+
+When unclear, Claude Code must follow these rules:
+
+1. Prefer a working full loop over partial isolated polish.
+2. Choose the simplest Dota-like design that keeps strategic depth.
+3. Preserve mobile usability first.
+4. Keep rendering and simulation separate.
+5. Keep all content data structured and reusable.
+6. Do not pause unless a missing requirement blocks architecture.
+7. Maintain original art direction and avoid copyrighted content.
+8. End each phase with a runnable build.
 
 ---
 
-If you want, I can also give you **3 extremely important upgrades** that will make this project **10x easier for AI agents to build**, such as:
+## 26. Definition of Done
 
-- the **exact ECS architecture**
-- a **Dota‑style ability scripting system**
-- a **map lane pathing system**
+This spec is considered fulfilled when the project provides:
 
-These drastically reduce AI confusion during development.
+- a playable browser MOBA prototype
+- solo play with bots
+- configurable match setup for solo mode
+- hero select MVP
+- minimap MVP
+- 5 heroes
+- 12 items
+- lane + jungle gameplay
+- towers + barracks + ancient
+- last hit + deny + XP + gold + leveling
+- mobile-first controls
+- desktop controls
+- documentation and tests
+
+---
+
+## 27. Final Note
+
+This document is intentionally written so Claude Code can build the project **end to end with minimal or no clarification questions**.
+
+If needed later, the next follow-up docs to add would be:
+- exact hero stat sheet tables
+- exact 12-item table with recipes and active effects
+- exact bot difficulty presets
+- exact XP / gold formulas
+
+Those can be added as separate balance documents without changing the architecture above.
