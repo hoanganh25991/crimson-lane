@@ -783,8 +783,8 @@ function buildDragonKnight() {
   // Left hand endpoint in pivot-local: (-0.170, -0.332, 0)
   // Shield top (y=0 local) placed at hand, hangs forward-left
   const shieldGroup = new THREE.Group();
-  shieldGroup.position.set(-0.14, -0.24, 0.18);
-  shieldGroup.rotation.y = 0.3;
+  shieldGroup.position.set(-0.14, -0.33, 0.22);
+  shieldGroup.rotation.y = -0.3; // face outward (left side)
   const shieldShape = new THREE.Shape();
   shieldShape.moveTo(0,0);
   shieldShape.bezierCurveTo(0.28,0,0.30,-0.18,0.30,-0.28);
