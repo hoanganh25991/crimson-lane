@@ -109,6 +109,7 @@ export function initControls() {
       case 'e': case 'E': castSkill('E'); break;
       case 'r': case 'R': castSkill('R'); break;
       case ' ': if(h){h.moveTarget=null;h.attackTarget=null;} e.preventDefault(); break;
+      case 'b': case 'B': if(window.toggleShop) window.toggleShop(); break;
       case 'a': case 'A': {
         if(!h||!h.alive) break;
         const enems = getEnemiesOf(h.team).filter(en=>en.alive);

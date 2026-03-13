@@ -189,7 +189,13 @@ export function createHero(type, isPlayer) {
     windrunActive:false, windrunTimer:0,
     focusFireActive:false, focusFireTimer:0, focusFireTarget:null,
     // Shadow Fiend soul stacks
-    soulStacks:0
+    soulStacks:0,
+    // Item system
+    armor: def.armor,
+    inventory: [],
+    itemCDs: {},
+    itemBonus: {maxHp:0,maxMp:0,dmgMin:0,dmgMax:0,armor:0,move:0},
+    aiBuyTimer: 0, aiGold: 625
   };
   scene.add(group);
   return hero;

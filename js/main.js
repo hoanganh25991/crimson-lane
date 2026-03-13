@@ -13,6 +13,7 @@ import { initControls, toggleAttackMode, joystick, keys } from './controls.js';
 import { updateHUD, updateMinimap, updateSkillUI, showAnnouncer, drawPortrait } from './hud.js';
 import { playSound, playMainTheme, stopMainTheme } from './audio.js';
 import { spawnParticles, updateParticles, updateEffects } from './particles.js';
+import { buyItem, useItem, updateItemCooldowns, updateAIItems, ITEM_DEFS } from './items.js';
 
 // ─── Expose HUD functions for combat.js bridge ──────────────────────────────────
 window._hudFns = { showAnnouncer, updateSkillUI };
@@ -97,6 +98,11 @@ export function startGame() {
   // Init controls
   initControls();
 
+  // Expose item functions globally
+  window.buyItemById = (id) => { if(G.playerHero) { buyItem(G.playerHero, id); renderShopItems(); updateInventoryHUD(); } };
+  window.useItemSlot = (idx) => { if(G.playerHero) useItem(G.playerHero, idx); };
+  window.toggleShop = toggleShop;
+
   // Spawn initial creep wave
   spawnWave();
 
@@ -151,7 +157,7 @@ function updateHeroes(dt) {
         if(keys['ArrowLeft']) { kx-=1; kz+=1; }
         if(kx!==0||kz!==0) {
           const len=Math.sqrt(kx*kx+kz*kz);
-          const spd = h.def.move * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
+          const spd = (h.def.move+(h.itemBonus?.move||0)) * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
           h.x=Math.max(1,Math.min(99,h.x+(kx/len)*spd*dt));
           h.z=Math.max(1,Math.min(99,h.z+(kz/len)*spd*dt));
           h.group.position.set(h.x,0,h.z);
@@ -161,7 +167,7 @@ function updateHeroes(dt) {
 
         // Joystick movement (using world-relative direction)
         if(joystick.active) {
-          const spd = h.def.move * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
+          const spd = (h.def.move+(h.itemBonus?.move||0)) * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
           h.x = Math.max(0.5, Math.min(99.5, h.x + joystick.wx*spd*dt));
           h.z = Math.max(0.5, Math.min(99.5, h.z + joystick.wz*spd*dt));
           h.group.position.x = h.x;
@@ -177,7 +183,7 @@ function updateHeroes(dt) {
           const dx=h.moveTarget.x-h.x, dz=h.moveTarget.z-h.z;
           const d=Math.sqrt(dx*dx+dz*dz);
           if(d > 0.3) {
-            const spd = h.def.move*(h.slowTimer>0?0.7:1);
+            const spd = (h.def.move+(h.itemBonus?.move||0))*(h.slowTimer>0?0.7:1);
             const mv = Math.min(d, spd*dt);
             h.x += (dx/d)*mv; h.z += (dz/d)*mv;
             h.group.position.x=h.x; h.group.position.z=h.z;
@@ -206,15 +212,18 @@ function updateHeroes(dt) {
             if(h.atkTimer<=0) {
               h.atkTimer = effectiveAtkCd;
               h.group.rotation.y = Math.atan2(dx,dz);
-              let dmg = h.def.dmgMin + Math.random()*(h.def.dmgMax-h.def.dmgMin);
+              const ib = h.itemBonus;
+              let dmg = (h.def.dmgMin+ib.dmgMin) + Math.random()*((h.def.dmgMax+ib.dmgMax)-(h.def.dmgMin+ib.dmgMin));
+              const hasLifesteal = h.inventory.includes('lifesteal_blade');
               let onHitFn = null;
               if(h.type==='sniper' && G.skillLevels['W']>0 && Math.random()<0.4) {
                 dmg += [30,55,80,115][G.skillLevels['W']-1]||30;
-                onHitFn = (t)=>{ if(t&&t.alive){ t.stunTimer=0.5; floatDamage(t.x,t.z,'HEADSHOT!','#ffcc44'); } };
+                onHitFn = (t,_d)=>{ if(t&&t.alive){ t.stunTimer=0.5; floatDamage(t.x,t.z,'HEADSHOT!','#ffcc44'); } };
               }
-              // Necromastery bonus (Shadow Fiend W)
-              if(h.type==='shadow_fiend' && G.skillLevels['W']>0) {
-                dmg += h.soulStacks * 2;
+              if(h.type==='shadow_fiend' && G.skillLevels['W']>0) dmg += h.soulStacks*2;
+              if(hasLifesteal) {
+                const prev=onHitFn;
+                onHitFn=(t,actualDmg)=>{ if(prev)prev(t,actualDmg); if(actualDmg>0){h.hp=Math.min(h.maxHp,h.hp+Math.floor(actualDmg*0.2));} };
               }
               spawnProjectile(h, h.attackTarget, h.team==='scourge'?0xcc88ff:0x88ccff, dmg, 'physical', onHitFn);
               playSound(h.def.range <= 3 ? 'hit' : 'ranged_hit');
@@ -297,6 +306,82 @@ function respawnHero(hero) {
   spawnParticles(hero.x, hero.z, hero.team==='scourge'?0xff2200:0x2244ff, 8);
 }
 
+// ─── ITEM HUD ──────────────────────────────────────────────────────────────────
+function updateInventoryHUD() {
+  const h = G.playerHero; if(!h) return;
+  for(let i=0;i<6;i++) {
+    const slot=document.getElementById('inv'+i);
+    const nameEl=document.getElementById('inv-name'+i);
+    const cdEl=document.getElementById('inv-cd'+i);
+    if(!slot) continue;
+    const itemId=h.inventory[i];
+    if(itemId) {
+      const def=ITEM_DEFS[itemId];
+      slot.style.background=def.color+'33';
+      slot.style.borderColor=def.color;
+      slot.title=def.name;
+      if(nameEl) nameEl.textContent=def.short;
+      const cd=h.itemCDs[itemId]||0;
+      if(cdEl) { if(cd>0){cdEl.style.display='flex';cdEl.textContent=cd.toFixed(1);}else{cdEl.style.display='none';} }
+    } else {
+      slot.style.background=''; slot.style.borderColor='';
+      if(nameEl) nameEl.textContent='';
+      if(cdEl) cdEl.style.display='none';
+    }
+  }
+}
+
+function toggleShop() {
+  const shop=document.getElementById('shop');
+  if(!shop) return;
+  const visible=shop.style.display!=='none'&&shop.style.display!=='';
+  shop.style.display=visible?'none':'flex';
+  if(!visible) renderShopItems();
+}
+
+function renderShopItems() {
+  const h=G.playerHero; if(!h) return;
+  const goldEl=document.getElementById('shop-gold');
+  if(goldEl) goldEl.textContent=Math.floor(G.gold);
+  const container=document.getElementById('shop-items'); if(!container) return;
+  container.innerHTML='';
+  const ALL_ITEMS=['boots_of_speed','iron_branch','blades_of_attack','ring_of_protection','magic_charm','vitality_gem',
+    'power_boots','arcane_boots','blink_dagger','lifesteal_blade','aura_shield','void_staff'];
+  for(const id of ALL_ITEMS) {
+    const def=ITEM_DEFS[id];
+    const cost=getItemBuyCost_shop(h,id);
+    const canAfford=G.gold>=cost && h.inventory.length<6;
+    const owned=h.inventory.includes(id);
+    const div=document.createElement('div');
+    div.className='shop-item'+(canAfford&&!owned?' can-buy':'')+(owned?' owned':'');
+    div.innerHTML=`<div class="si-name" style="color:${def.color}">${def.name}</div>`+
+      `<div class="si-cost">${owned?'OWNED':cost+'g'}</div>`+
+      `<div class="si-bonus">${formatBonuses(def.bonuses)}</div>`+
+      (def.components.length?`<div class="si-recipe">= ${def.components.map(c=>ITEM_DEFS[c]?.short||c).join(' + ')}</div>`:'');
+    if(!owned) div.onclick=()=>{ window.buyItemById(id); };
+    container.appendChild(div);
+  }
+}
+
+function getItemBuyCost_shop(hero, itemId) {
+  const def=ITEM_DEFS[itemId]; if(!def) return 0;
+  if(!def.components.length) return def.cost;
+  let tempInv=[...hero.inventory], cost=def.cost;
+  for(const comp of def.components){const idx=tempInv.indexOf(comp);if(idx>=0)tempInv.splice(idx,1);else cost+=ITEM_DEFS[comp]?ITEM_DEFS[comp].cost:0;}
+  return cost;
+}
+
+function formatBonuses(b) {
+  if(!b) return '';
+  const parts=[];
+  if(b.maxHp)  parts.push('+'+b.maxHp+' HP');
+  if(b.maxMp)  parts.push('+'+b.maxMp+' MP');
+  if(b.dmgMin) parts.push('+'+b.dmgMin+' DMG');
+  if(b.armor)  parts.push('+'+b.armor+' Armor');
+  if(b.move)   parts.push('+'+b.move+' Spd');
+  return parts.join(' · ');
+}
+
 // ─── MAIN LOOP ─────────────────────────────────────────────────────────────────
 function loop(ts) {
   const dt = Math.min((ts - (clock.last||ts))/1000, 0.05);
@@ -320,6 +405,9 @@ function loop(ts) {
     updateEffects(dt);
     updateCamera(dt, G.playerHero);
     updateGold(dt);
+    updateItemCooldowns(G.playerHero, dt);
+    if(G.aiHero) updateAIItems(G.aiHero, dt);
+    updateInventoryHUD();
     updateHUD();
     updateMinimap();
 

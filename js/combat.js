@@ -186,7 +186,7 @@ export function moveToward(entity, tx, tz, dt) {
   const dx=tx-entity.x, dz=tz-entity.z;
   const d=Math.sqrt(dx*dx+dz*dz);
   if(d < 0.15) return;
-  const spd = (entity.def||{move:4}).move || 4;
+  const spd = ((entity.def||{move:4}).move || 4) + (entity.itemBonus?.move||0);
   const slowFactor = entity.slowTimer>0 ? 0.7 : 1;
   const mv = Math.min(d, spd*slowFactor*dt);
   entity.x += (dx/d)*mv;
@@ -226,8 +226,9 @@ export function updateProjectiles(dt) {
     if(d < 0.5) {
       p.alive=false;
       scene.remove(p.mesh);
-      if(p.onHit) p.onHit(t);
-      else if(t.alive) applyDamage(t, p.dmg, p.dmgType);
+      let actualDmg = 0;
+      if(t.alive && p.dmg > 0) actualDmg = applyDamage(t, p.dmg, p.dmgType);
+      if(p.onHit) p.onHit(t, actualDmg);
     } else {
       p.mesh.position.x += (dx/d)*p.speed*dt;
       p.mesh.position.y += (dy/d)*p.speed*dt;
