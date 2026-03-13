@@ -52,6 +52,24 @@ export const TOWER_DEFS = [
   {team:'sentinel',lane:'ancient',tier:4,x:92,z:92,hp:4750}
 ];
 
+export const NEUTRAL_CAMPS = [
+  {id:'nc1', x:28, z:55, tier:1, leash:12},
+  {id:'nc2', x:32, z:70, tier:1, leash:12},
+  {id:'nc3', x:18, z:42, tier:2, leash:14},
+  {id:'nc4', x:72, z:45, tier:1, leash:12},
+  {id:'nc5', x:68, z:30, tier:1, leash:12},
+  {id:'nc6', x:82, z:58, tier:2, leash:14},
+];
+
+export const BARRACKS_DEFS = [
+  {team:'scourge', lane:'top', x:13, z:88, hp:1000},
+  {team:'scourge', lane:'mid', x:12, z:14, hp:1000},
+  {team:'scourge', lane:'bot', x:13, z:12, hp:1000},
+  {team:'sentinel', lane:'top', x:87, z:88, hp:1000},
+  {team:'sentinel', lane:'mid', x:88, z:86, hp:1000},
+  {team:'sentinel', lane:'bot', x:87, z:12, hp:1000},
+];
+
 export const SKILL_COSTS = {
   lich:{Q:[100,115,125,140],W:[25,25,25,25],E:[200,290,380,380],R:[0,0,0,0]},
   sniper:{Q:[120,120,120,120],W:[0,0,0,0],E:[0,0,0,0],R:[200,200,200,200]},

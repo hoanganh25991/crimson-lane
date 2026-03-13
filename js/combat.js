@@ -29,7 +29,7 @@ export function calcPhysDmg(dmg, armor) {
 
 export function calcMagicDmg(dmg) { return dmg * 0.75; }
 
-export function applyDamage(target, amount, type) {
+export function applyDamage(target, amount, type, attacker) {
   if(!target || !target.alive) return 0;
   let actual = 0;
   if(type==='physical') actual = calcPhysDmg(amount, target.armor||0);
@@ -37,8 +37,11 @@ export function applyDamage(target, amount, type) {
   else actual = amount; // pure
   actual = Math.floor(actual);
   target.hp -= actual;
+  if(attacker) target.lastHitter = attacker;
   const col = type==='magic'?'#00ffcc':(type==='pure'?'#ffffff':'#ffaa44');
   floatDamage(target.x, target.z, actual, col);
+  // Cancel TP channeling if damaged
+  if(target.tpTarget) { target.tpTarget = null; target.channeling = 0; floatDamage(target.x, target.z, 'TP CANCELLED', '#ff8844'); }
   if(target.hp <= 0) killEntity(target);
   return actual;
 }
@@ -52,9 +55,11 @@ export function killEntity(entity) {
 
   if(entity.isPlayer !== undefined) { // hero
     onHeroDeath(entity);
+  } else if(entity.isBarracks) { // barracks
+    onBarracksDeath(entity);
   } else if(entity.def) { // tower
     onTowerDeath(entity);
-  } else { // creep
+  } else { // creep / neutral
     onCreepDeath(entity);
   }
 }
