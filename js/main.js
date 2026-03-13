@@ -69,11 +69,18 @@ export function startGame() {
   buildMap();
   buildTowers();
 
-  const playerTeam = HERO_DEFS[G.pickedHero].team;
-  const opponents = ALL_HEROES.filter(h => HERO_DEFS[h].team !== playerTeam);
-  const aiType = opponents[Math.floor(Math.random() * opponents.length)];
+  const others = ALL_HEROES.filter(h => h !== G.pickedHero);
+  const aiType = others[Math.floor(Math.random() * others.length)];
   G.playerHero = createHero(G.pickedHero, true);
+  // Player always starts at scourge base (bottom-left)
+  G.playerHero.team = 'scourge';
+  G.playerHero.x = 10; G.playerHero.z = 10;
+  G.playerHero.group.position.set(10, 0, 10);
   G.aiHero = createHero(aiType, false);
+  // AI always starts at sentinel base (top-right)
+  G.aiHero.team = 'sentinel';
+  G.aiHero.x = 90; G.aiHero.z = 90;
+  G.aiHero.group.position.set(90, 0, 90);
   G.aiHero.wpIndex = 0;
 
   const heroNameEl = document.getElementById('hero-name');
