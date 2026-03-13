@@ -118,13 +118,52 @@ function onTowerDeath(tower) {
   }
 }
 
+function onBarracksDeath(barracks) {
+  barracks.group.visible = false;
+  const { showAnnouncer } = window._hudFns || {};
+  const lane = barracks.lane.toUpperCase();
+  const side = barracks.team === 'scourge' ? 'SCOURGE' : 'SENTINEL';
+  if(showAnnouncer) showAnnouncer(side+' '+lane+' BARRACKS FALLEN!', '#ffaa00', 3000);
+  // Opposing team gets mega creeps on that lane
+  const enemy = barracks.team === 'scourge' ? 'sentinel' : 'scourge';
+  G.megaLanes[enemy][barracks.lane] = true;
+  if(barracks.team !== G.playerHero.team) {
+    G.gold += 250;
+    floatDamage(G.playerHero.x, G.playerHero.z, '+250g BARRACKS', '#ffcc44');
+    addXP(200);
+  }
+  playSound('tower_death');
+}
+
 function onCreepDeath(creep) {
   creep.group.visible = false;
   const ph = G.playerHero;
-  if(ph && ph.alive) {
-    const dx = ph.x - creep.x, dz = ph.z - creep.z;
-    if(Math.sqrt(dx*dx+dz*dz) < 20) {
-      addXP(50);
+  if(!ph || !ph.alive) return;
+  const dx = ph.x - creep.x, dz = ph.z - creep.z;
+  const dist = Math.sqrt(dx*dx+dz*dz);
+
+  // Last hit gold — only the killer gets gold
+  if(creep.lastHitter === ph) {
+    let gold;
+    if(creep.type === 'neutral') gold = (creep.tier===2 ? 90 : 55) + Math.floor(Math.random()*15);
+    else if(creep.type === 'ranged') gold = 55 + Math.floor(Math.random()*15);
+    else gold = 40 + Math.floor(Math.random()*15);
+    G.gold += gold;
+    floatDamage(creep.x, creep.z, '+'+gold+'g', '#ffcc44');
+    playSound('gold');
+  }
+
+  // XP to nearby player regardless of who killed
+  if(dist < 20) {
+    addXP(creep.type === 'neutral' ? (creep.tier===2 ? 80 : 50) : 50);
+  }
+
+  // Neutral camp respawn
+  if(creep.type === 'neutral' && creep.campRef) {
+    creep.campRef.deadCount = (creep.campRef.deadCount||0) + 1;
+    if(creep.campRef.deadCount >= creep.campRef.units.length) {
+      creep.campRef.respawnTimer = 60;
+      creep.campRef.alive = false;
     }
   }
 }
@@ -208,7 +247,7 @@ export function spawnProjectile(from, target, color, dmg, dmgType, onHit) {
   const mesh = new THREE.Mesh(geo, mat);
   mesh.position.set(from.x, 1.2, from.z);
   scene.add(mesh);
-  G.projectiles.push({mesh, target, dmg, dmgType, speed:20, onHit, alive:true});
+  G.projectiles.push({mesh, from, target, dmg, dmgType, speed:20, onHit, alive:true});
 }
 
 export function spawnSpellProjectile(x,z, target, color, speed, onHit) {
@@ -232,7 +271,7 @@ export function updateProjectiles(dt) {
       p.alive=false;
       scene.remove(p.mesh);
       let actualDmg = 0;
-      if(t.alive && p.dmg > 0) actualDmg = applyDamage(t, p.dmg, p.dmgType);
+      if(t.alive && p.dmg > 0) actualDmg = applyDamage(t, p.dmg, p.dmgType, p.from);
       if(p.onHit) p.onHit(t, actualDmg);
     } else {
       p.mesh.position.x += (dx/d)*p.speed*dt;

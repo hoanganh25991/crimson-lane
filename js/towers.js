@@ -1,5 +1,5 @@
 // ─── TOWERS ────────────────────────────────────────────────────────────────────
-import { TOWER_DEFS } from './constants.js';
+import { TOWER_DEFS, BARRACKS_DEFS } from './constants.js';
 import { G } from './state.js';
 import { scene } from './scene.js';
 import { getEnemiesOf, spawnProjectile } from './combat.js';
@@ -56,6 +56,39 @@ export function createTower(def) {
   };
   if(isAncient) { t.range = 12; }
   return t;
+}
+
+export function buildBarracks() {
+  for(const def of BARRACKS_DEFS) {
+    const color = def.team === 'scourge' ? 0x661111 : 0x113366;
+    const group = new THREE.Group();
+    const bodyGeo = new THREE.BoxGeometry(1.2, 2, 1.2);
+    const bodyMat = new THREE.MeshStandardMaterial({color, roughness:0.7, metalness:0.2});
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 1; body.castShadow = true;
+    group.add(body);
+    const roofGeo = new THREE.ConeGeometry(0.9, 0.8, 4);
+    const roofMat = new THREE.MeshStandardMaterial({color: def.team==='scourge'?0x991111:0x114499});
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.y = 2.4; group.add(roof);
+    // HP bar
+    const hpBg = new THREE.Mesh(new THREE.PlaneGeometry(1.5,0.2), new THREE.MeshBasicMaterial({color:0x330000,side:THREE.DoubleSide}));
+    hpBg.position.set(0,3.2,0); hpBg.rotation.x=-Math.PI/2+0.01; group.add(hpBg);
+    const hpFill = new THREE.Mesh(new THREE.PlaneGeometry(1.5,0.2), new THREE.MeshBasicMaterial({color:0x22cc22,side:THREE.DoubleSide}));
+    hpFill.position.set(0,3.21,0); hpFill.rotation.x=-Math.PI/2+0.01; group.add(hpFill);
+    group.position.set(def.x, 0, def.z);
+    scene.add(group);
+    const b = {group, hpFill, isBarracks:true, team:def.team, lane:def.lane, hp:def.hp, maxHp:def.hp, alive:true, x:def.x, z:def.z, armor:2};
+    G.barracks.push(b);
+  }
+}
+
+export function updateBarracks(dt) {
+  for(const b of G.barracks) {
+    if(!b.alive) continue;
+    b.hpFill.scale.x = Math.max(0.001, b.hp/b.maxHp);
+    b.hpFill.position.x = -(1-b.hp/b.maxHp)*0.75;
+  }
 }
 
 export function updateTowers(dt) {
