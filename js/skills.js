@@ -41,7 +41,7 @@ export function castSkill(key, targetPos, targetEntity) {
   if(sbEl) sbEl.classList.remove('active-target');
 }
 
-function castLichSkill(hero, key, pos, ent) {
+function castLichSkill(hero, key, pos, _ent) {
   const lvl = G.skillLevels[key];
   if(key==='Q') { // Frost Nova
     playSound('frost');
@@ -119,7 +119,7 @@ function castLichSkill(hero, key, pos, ent) {
 }
 
 function castSniperSkill(hero, key, pos, ent) {
-  const lvl = G.skillLevels[key];
+  void G.skillLevels[key]; // lvl used implicitly via G.skillLevels['R'] in R branch
   if(key==='Q') { // Shrapnel
     playSound('shrapnel');
     const radius = 7;

@@ -59,7 +59,7 @@ export function onResize() {
   renderer.setSize(w, h);
 }
 
-export function updateCamera(dt, playerHero) {
+export function updateCamera(_dt, playerHero) {
   if(playerHero && playerHero.alive) {
     camTarget.x += (playerHero.x - camTarget.x)*0.08;
     camTarget.z += (playerHero.z - camTarget.z)*0.08;

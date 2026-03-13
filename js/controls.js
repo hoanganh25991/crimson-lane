@@ -106,9 +106,6 @@ export function initControls() {
     const h = G.playerHero;
     switch(e.key) {
       case 'q': case 'Q': castSkill('Q'); break;
-      case 'w': case 'W':
-        // W is both WASD move and skill - only cast skill if not pure movement key tracking
-        castSkill('W'); break;
       case 'e': case 'E': castSkill('E'); break;
       case 'r': case 'R': castSkill('R'); break;
       case ' ': if(h){h.moveTarget=null;h.attackTarget=null;} e.preventDefault(); break;

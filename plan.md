@@ -433,6 +433,38 @@ For each hero implement:
 Claude Code may tune numbers, but formulas must be consistent and documented.
 Use simple, readable MOBA-style formulas instead of arbitrary magic numbers scattered across files.
 
+### 10.5 Detailed hero implementation requirement
+
+Each MVP hero must be fully specified in code with:
+- base attributes
+- per-level attribute growth
+- attack range
+- attack backswing / wind-up timing
+- attack projectile or melee hit logic
+- move speed
+- turn behavior or facing logic if used
+- four abilities with level scaling tables
+- animation state map
+- bot usage priorities
+
+At least one shared hero data format should exist, for example:
+
+```js
+{
+  id: 'lich',
+  role: 'support-nuker',
+  primaryAttribute: 'intelligence',
+  baseStats: {},
+  growthStats: {},
+  attackProfile: {},
+  abilities: ['frostNova', 'darkRitual', 'chainFrost', 'frostArmor'],
+  botProfile: {},
+  modelProfile: {}
+}
+```
+
+This is required so Claude Code does not hardcode hero logic separately in many places.
+
 ---
 
 ## 11. Ability System Rules
@@ -462,6 +494,66 @@ Status effects supported in MVP:
 - silence
 - knockback
 
+### 11.1 Ability data model detail
+
+Each ability should be defined through a common structure that can support both hero spells and item actives.
+
+Suggested shape:
+
+```js
+{
+  id: 'frostNova',
+  slot: 'Q',
+  castType: 'area-target',
+  targetRule: 'enemy-unit-or-ground',
+  damageType: 'magical',
+  manaCostByLevel: [120,130,145,160],
+  cooldownByLevel: [7,6,5,4],
+  castRangeByLevel: [600,600,600,600],
+  radiusByLevel: [250,275,300,325],
+  effectValuesByLevel: {
+    damage: [75,150,225,300],
+    slowPct: [20,30,40,50],
+    slowDuration: [4,4,4,4]
+  },
+  animationKey: 'castQ',
+  vfxKey: 'frostNova',
+  aiHints: {
+    useWhenEnemiesInRadiusAtLeast: 1,
+    minManaPct: 0.2
+  }
+}
+```
+
+### 11.2 Ability execution stages
+
+Each cast should run through a clear pipeline:
+1. input accepted
+2. target validation
+3. cast start
+4. cast animation / wind-up
+5. mana spend
+6. cooldown start
+7. projectile or instant effect creation
+8. hit resolution
+9. damage / status application
+10. combat log / VFX / audio update
+
+### 11.3 Ability categories required in MVP
+
+The overall 5-hero roster must include examples of:
+- single target nuke
+- projectile skillshot
+- line ability
+- area burst
+- buff
+- passive aura
+- transformation
+- channel or charge-like cast
+- active movement or evasive effect
+
+This avoids a shallow ability roster.
+
 ---
 
 ## 12. Combat Rules
@@ -489,6 +581,45 @@ Status effects supported in MVP:
 - ranged and melee attacks supported
 - projectile travel for ranged basic attacks where appropriate
 - attack wind-up and recovery timing supported
+
+### 12.4 Required formula detail
+
+Claude Code must define and document exact formulas for MVP. If not specified elsewhere, use simple MOBA-like formulas.
+
+Required formulas:
+- HP calculation
+- Mana calculation
+- armor mitigation
+- attack speed scaling
+- move speed caps
+- respawn duration
+- hero kill reward scaling
+
+Suggested default formulas if no balancing doc exists:
+
+```text
+HP = baseHP + strength * hpPerStrength + levelGrowthHP
+Mana = baseMana + intelligence * manaPerIntelligence + levelGrowthMana
+PhysicalDamageTakenMultiplier = 100 / (100 + armor * 6)   // or another single consistent formula
+AttackInterval = baseAttackTime / attackSpeedMultiplier
+MoveSpeedClamp = min 100 / max 550
+RespawnTime = 5 + level * 2
+```
+
+These do not need to match original Dota exactly, but they must be consistent, centralized, and documented.
+
+### 12.5 Combat events
+
+The combat system should emit structured events so UI, VFX, logs, and future networking do not depend on hidden side effects.
+
+Examples:
+- damageApplied
+- healApplied
+- statusApplied
+- unitDied
+- goldGranted
+- xpGranted
+- projectileSpawned
 
 ---
 
@@ -532,6 +663,47 @@ Required in MVP.
 
 Implementation note:
 If exact Dota values are not specified, use a simplified but clearly documented deny/XP/gold rule that preserves the lane skill dynamic.
+
+### 13.5 Detailed deny and XP rule for MVP
+
+Use an explicit rule set so Claude Code does not invent inconsistent lane behavior.
+
+Recommended MVP rule:
+- last hit on enemy creep: gold to last hitter, XP to nearby allied heroes
+- deny on allied creep below threshold: no enemy gold, reduced enemy XP
+- deny threshold: e.g. 50% HP or lower
+- neutral last hit: gold to killer, XP to nearby allied heroes
+
+If needed, Claude Code may simplify split calculations, but it must preserve these principles:
+- last hitting matters
+- denying matters
+- being near lane still matters for XP
+
+### 13.6 Lane pathing detail
+
+Each lane must use explicit path nodes or splines.
+
+Required lane data:
+- spawn point
+- ordered path nodes
+- tower checkpoints
+- barracks checkpoint
+- ancient checkpoint
+
+This prevents fragile lane movement logic.
+
+### 13.7 Jungle camp detail
+
+Each neutral camp should define:
+- camp id
+- camp center
+- spawn box or spawn radius
+- unit composition
+- leash radius
+- respawn timer
+- difficulty tier
+
+At least 4–6 neutral camps should exist in MVP so jungle route behavior is meaningful.
 
 ---
 
@@ -602,6 +774,27 @@ Must include:
 - use Teleport Scroll item
 - teleport is Dota-like and should target allied structures in MVP
 
+### 15.6 Required economy detail
+
+Claude Code must explicitly define:
+- starting gold
+- passive gold rate if any
+- creep gold ranges
+- hero kill gold logic
+- objective reward logic
+- buyback rule: omit for MVP unless later added
+- death gold loss rule: simplify or omit, but document the decision
+
+### 15.7 Teleport Scroll behavior detail
+
+TP Scroll MVP behavior:
+- purchasable consumable or stack-based utility item
+- targets allied towers and allied base structures
+- requires cast time / channel
+- interrupted by stun or death
+- places hero near target structure at a valid spawn offset
+- has cooldown or item lockout to prevent spam
+
 ---
 
 ## 16. Item System
@@ -636,6 +829,62 @@ Must include:
 - item active buttons are directly available
 - no hidden complex nested UI for essential active items
 
+### 16.6 Required 12-item MVP table
+
+Claude Code must implement a fixed starter set of 12 items. A recommended MVP structure is:
+
+Components:
+1. Boots of Speed
+2. Iron Branch
+3. Blades of Attack
+4. Ring of Protection
+5. Magic Charm
+6. Vitality Gem
+
+Upgrades:
+7. Power Boots
+8. Arcane Boots
+9. Blink Dagger style item
+10. Lifesteal blade item
+11. Armor shield aura item
+12. Mana burst / AoE active item
+
+This can be renamed to original item names, but the design coverage should remain:
+- movement upgrade
+- mana item
+- survivability item
+- damage item
+- mobility active
+- offensive active
+
+### 16.7 Item data detail
+
+Each item should include:
+- id
+- name
+- cost
+- component ids
+- stat bonuses
+- active ability id if any
+- passive behavior id if any
+- icon key
+- shop category
+
+Suggested shape:
+
+```js
+{
+  id: 'powerBoots',
+  name: 'Power Boots',
+  cost: 1400,
+  components: ['bootsOfSpeed', 'vitalityGem'],
+  bonuses: { moveSpeed: 45, attackSpeed: 20 },
+  activeAbilityId: null,
+  passiveId: 'bootsPassive',
+  shopCategory: 'movement'
+}
+```
+
 ---
 
 ## 17. Controls and Input Rules
@@ -668,6 +917,28 @@ Support desktop in parallel:
 - mouse movement / targeting
 - keyboard hotkeys
 - standard MOBA-like usability
+
+### 17.4 Mobile HUD layout detail
+
+MVP HUD should visually allocate:
+- bottom-left: joystick
+- bottom-right: attack + Q/W/E/R + item active buttons
+- top-left or top-center: hero vitals and level
+- top-right: minimap
+- side or bottom panel: inventory and shop access
+
+HUD must be readable on small phone screens in portrait-compatible layout planning, but active gameplay is expected in landscape mode.
+
+### 17.5 Input abstraction detail
+
+All controls should map into a shared command layer such as:
+- moveCommand
+- attackCommand
+- castAbilityCommand
+- useItemCommand
+- cameraPanCommand
+
+This is required so mobile, desktop, and future multiplayer input can share the same downstream simulation path.
 
 ---
 
@@ -705,6 +976,28 @@ Use finite state machine or equivalent structured behavior model.
 
 - deterministic and lightweight
 - lane-following with combat interruption
+
+### 18.5 Bot difficulty detail
+
+For MVP, implement at least one stable difficulty profile.
+Optional later presets:
+- Easy
+- Normal
+- Hard
+
+If multiple presets are added, only tune decision timing and aggression, not entirely separate logic trees.
+
+### 18.6 Bot purchase and skill-up detail
+
+Each hero bot requires:
+- skill leveling order
+- item build order
+- lane preference
+- retreat thresholds
+- mana usage thresholds
+- engage conditions
+
+This data should exist in hero bot profiles, not hidden in procedural one-off code.
 
 ---
 
@@ -783,6 +1076,26 @@ Prepare clear abstraction boundaries for future networking:
 - player controller abstraction
 
 Do not implement real multiplayer in MVP.
+
+### 20.5 Internal system contracts
+
+Claude Code should define clean contracts between systems. At minimum:
+- Render layer reads world state but does not own gameplay rules
+- Simulation tick updates all gameplay state
+- Input system creates commands, not direct world mutation where possible
+- AI produces commands similarly to player input
+- UI reads state and dispatches commands
+
+### 20.6 Save debugging and balancing hooks
+
+The build should include lightweight developer tools or toggles for:
+- spawning units
+- forcing gold
+- forcing level up
+- toggling cooldowns
+- inspecting entity stats
+
+These are valuable for autonomous development and regression testing.
 
 ---
 
@@ -922,6 +1235,14 @@ Deliver:
 Acceptance:
 - user can start a configurable solo game and finish a full match loop
 
+Detailed completion expectation:
+- all 5 heroes selectable
+- all 12 items purchasable
+- lane and jungle flow stable
+- bots complete a full match without hard-locking
+- TP Scroll usable
+- deny and last hit functioning
+
 ### Phase 10 — Optimization and polish
 
 Deliver:
@@ -933,6 +1254,13 @@ Deliver:
 Acceptance:
 - stable local build
 - acceptable mobile frame rate
+
+Detailed optimization checklist:
+- avoid unnecessary per-frame allocations
+- use instancing where appropriate
+- reduce draw calls for creeps and repeated structures
+- ensure HUD remains responsive under combat load
+- ensure mobile touch latency remains acceptable
 
 ---
 
@@ -967,6 +1295,12 @@ Produce docs for:
 - adding new heroes
 - adding new abilities
 - future multiplayer path
+
+Also produce:
+- balancing assumptions for MVP
+- list of known simplifications compared to full Dota
+- testing checklist for mobile controls
+- content index of heroes, items, structures, and neutral camps
 
 ---
 

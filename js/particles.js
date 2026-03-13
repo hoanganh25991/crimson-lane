@@ -53,9 +53,8 @@ export function updateEffects(dt) {
       e.tickTimer -= dt;
       if(e.tickTimer<=0) {
         e.tickTimer = 0.5;
-        // Deal DPS to enemies in zone — done via combat (imported in main.js loop)
-        // We store a flag so main loop can process it
-        e.needsTick = true;
+        // Fire shrapnel tick callback if registered
+        if(window._shrapnelTick) window._shrapnelTick(e);
       }
       e.mesh.material.opacity = (e.life/e.maxLife)*0.3;
     }

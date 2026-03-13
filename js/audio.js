@@ -4,7 +4,7 @@ let mainThemeInterval = null;
 
 function getAudio() {
   if(!audioCtx) {
-    try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){}
+    try { audioCtx = new (window.AudioContext || /** @type {any} */ (window).webkitAudioContext)(); } catch(e){}
   }
   return audioCtx;
 }
