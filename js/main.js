@@ -4,8 +4,8 @@ import { G } from './state.js';
 import { initThree, scene, camera, renderer, camTarget, updateCamera } from './scene.js';
 import { buildMap } from './map.js';
 import { createHero } from './heroes.js';
-import { spawnWave, updateCreeps } from './creeps.js';
-import { buildTowers, updateTowers } from './towers.js';
+import { spawnWave, updateCreeps, initNeutralCamps, updateNeutralCamps } from './creeps.js';
+import { buildTowers, buildBarracks, updateTowers, updateBarracks } from './towers.js';
 import { updateProjectiles, moveToward, spawnProjectile, floatDamage, applyDamage } from './combat.js';
 import { updateSkillCDs, castSkill, processAssassinateEffect } from './skills.js';
 import { updateAI } from './ai.js';
@@ -68,6 +68,7 @@ export function startGame() {
   initThree();
   buildMap();
   buildTowers();
+  buildBarracks();
 
   const others = ALL_HEROES.filter(h => h !== G.pickedHero);
   const aiType = others[Math.floor(Math.random() * others.length)];
@@ -110,8 +111,9 @@ export function startGame() {
   window.useItemSlot = (idx) => { if(G.playerHero) useItem(G.playerHero, idx); };
   window.toggleShop = toggleShop;
 
-  // Spawn initial creep wave
+  // Spawn initial creep wave and neutral camps
   spawnWave();
+  initNeutralCamps();
 
   // Sound
   playMainTheme();
@@ -154,7 +156,16 @@ function updateHeroes(dt) {
     } else {
       if(h.slowTimer>0) h.slowTimer-=dt;
       if(h.stunTimer>0){h.stunTimer-=dt;}
-      else if(h.channeling>0){h.channeling-=dt;}
+      else if(h.channeling>0){
+        const prev=h.channeling; h.channeling-=dt;
+        if(h.channeling<=0 && prev>0 && h.tpTarget) {
+          h.x=h.tpTarget.x; h.z=h.tpTarget.z;
+          h.group.position.set(h.x,0,h.z); h.tpTarget=null;
+          spawnParticles(h.x,h.z,0x44ffcc,10);
+          playSound('spawn');
+          floatDamage(h.x,h.z,'TELEPORTED!','#44ffcc');
+        }
+      }
       else {
         // Arrow/WASD continuous movement (with camera fix: screen-up = world +x+z)
         let kx=0, kz=0;
@@ -353,7 +364,7 @@ function renderShopItems() {
   const container=document.getElementById('shop-items'); if(!container) return;
   container.innerHTML='';
   const ALL_ITEMS=['boots_of_speed','iron_branch','blades_of_attack','ring_of_protection','magic_charm','vitality_gem',
-    'power_boots','arcane_boots','blink_dagger','lifesteal_blade','aura_shield','void_staff'];
+    'power_boots','arcane_boots','blink_dagger','lifesteal_blade','aura_shield','void_staff','tp_scroll'];
   for(const id of ALL_ITEMS) {
     const def=ITEM_DEFS[id];
     const cost=getItemBuyCost_shop(h,id);
@@ -400,7 +411,9 @@ function loop(ts) {
     updateSkillCDs(dt);
     updateHeroes(dt);
     updateCreeps(dt);
+    updateNeutralCamps(dt);
     updateTowers(dt);
+    updateBarracks(dt);
     updateProjectiles(dt);
     updateParticles(dt);
     // Process assassinate before effects update

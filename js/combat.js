@@ -200,8 +200,9 @@ export function getEnemiesOf(team) {
   const enemies = [];
   const eh = team==='scourge' ? G.aiHero : G.playerHero;
   if(eh && eh.alive) enemies.push(eh);
-  for(const c of G.creeps) { if(c.alive && c.team !== team) enemies.push(c); }
+  for(const c of G.creeps) { if(c.alive && c.team !== team && c.team !== 'neutral') enemies.push(c); }
   for(const t of G.towers) { if(t.alive && t.team !== team) enemies.push(t); }
+  for(const b of G.barracks) { if(b.alive && b.team !== team) enemies.push(b); }
   return enemies;
 }
 

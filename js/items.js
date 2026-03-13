@@ -20,6 +20,7 @@ export const ITEM_DEFS = {
   lifesteal_blade:{ id:'lifesteal_blade',name:'Lifesteal Blade',short:'LIFESTEAL',cost:600, components:['blades_of_attack','ring_of_protection'], bonuses:{dmgMin:15,dmgMax:15,armor:2}, passiveId:'lifesteal', color:'#ff4444' },
   aura_shield:  { id:'aura_shield',  name:'Aura Shield',    short:'SHIELD',   cost:700,  components:['ring_of_protection','vitality_gem'],       bonuses:{armor:4,maxHp:200},  passiveId:'armor_aura',   color:'#88aaff' },
   void_staff:   { id:'void_staff',   name:'Void Staff',     short:'VOID',     cost:900,  components:['magic_charm','magic_charm'],               bonuses:{maxMp:300},          activeId:'void_burst', activeCD:30, color:'#ff44ff' },
+  tp_scroll:    { id:'tp_scroll',    name:'TP Scroll',      short:'TP',       cost:135,  components:[],                                         bonuses:{},                   activeId:'teleport',   activeCD:60, color:'#44ffcc' },
 };
 
 export function getItemFullCost(itemId) {
@@ -96,6 +97,14 @@ export function useItem(hero, slotIdx) {
       spawnParticles(hero.x,hero.z,0xaa44ff,8);
       playSound('spawn');
       floatDamage(hero.x,hero.z,'BLINK!','#aa44ff');
+      break;
+    }
+    case 'teleport': {
+      // 3-second channel then teleport to base
+      hero.channeling = 3;
+      hero.tpTarget = {x: hero.team==='scourge'?10:90, z: hero.team==='scourge'?10:90};
+      floatDamage(hero.x, hero.z, 'TELEPORTING...', '#44ffcc');
+      playSound('magic');
       break;
     }
     case 'void_burst': {
