@@ -18,6 +18,7 @@ const MP_SETUP_BACK = document.getElementById('mp-setup-back');
 let _roomCode = null;
 let _onStartAsHost = null;
 let _onStartAsClient = null;
+let _joinCancelled = false;
 
 function randomRoomCode() {
   const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
@@ -87,13 +88,21 @@ export function createGame() {
 
 /** Join game as client. */
 export function joinGame(roomCode) {
+  _joinCancelled = false;
   return peer.joinRoom(roomCode.trim()).then(() => {
+    if (_joinCancelled) throw new Error('Cancelled');
     showMPPanel('client');
     return peer.getPeerId();
   }).catch((err) => {
-    console.error('Join room failed', err);
+    if (!_joinCancelled) console.error('Join room failed', err);
     throw err;
   });
+}
+
+/** Abort an in-flight joinGame() call. Resets peer state immediately. */
+export function cancelJoin() {
+  _joinCancelled = true;
+  peer.disconnect();
 }
 
 export function updatePlayersCount() {

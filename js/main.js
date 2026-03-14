@@ -646,15 +646,29 @@ document.getElementById('mp-join-btn').onclick = () => {
   document.getElementById('mp-choose').style.display = 'none';
   document.getElementById('mp-join-panel').style.display = 'block';
 };
+let _connectCountdown = null;
+function _resetConnectBtn() {
+  const btn = document.getElementById('mp-connect-btn');
+  if (_connectCountdown) { clearInterval(_connectCountdown); _connectCountdown = null; }
+  btn.disabled = false;
+  btn.textContent = 'Connect';
+}
 document.getElementById('mp-connect-btn').onclick = () => {
   const code = document.getElementById('mp-room-code-in').value.trim().toLowerCase();
   if (!code) return;
   const btn = document.getElementById('mp-connect-btn');
+  const errEl = document.getElementById('mp-join-error');
+  if (errEl) errEl.textContent = '';
   btn.disabled = true;
-  btn.textContent = 'Connecting...';
+  let secsLeft = 12;
+  btn.textContent = `Connecting... (${secsLeft}s)`;
+  if (_connectCountdown) clearInterval(_connectCountdown);
+  _connectCountdown = setInterval(() => {
+    secsLeft--;
+    if (secsLeft > 0) btn.textContent = `Connecting... (${secsLeft}s)`;
+  }, 1000);
   mpLobby.joinGame(code).then(() => {
-    btn.disabled = false;
-    btn.textContent = 'Connect';
+    _resetConnectBtn();
     G.isMultiplayer = true;
     G.isHost = false;
     G.playerSide = G.playerSide || 'scourge';
@@ -670,13 +684,16 @@ document.getElementById('mp-connect-btn').onclick = () => {
     const startBtn = document.getElementById('startBtn');
     if (startBtn) { startBtn.disabled = true; startBtn.textContent = 'WAITING FOR HOST'; }
   }).catch((err) => {
-    btn.disabled = false;
-    btn.textContent = 'Connect';
-    const errEl = document.getElementById('mp-join-error');
+    _resetConnectBtn();
+    if (err && err.message === 'Cancelled') return;
     if (errEl) errEl.textContent = 'Connection failed: ' + (err && err.message ? err.message : 'Room not found or server unavailable');
   });
 };
 document.getElementById('mp-join-back').onclick = () => {
+  mpLobby.cancelJoin();
+  _resetConnectBtn();
+  const errEl = document.getElementById('mp-join-error');
+  if (errEl) errEl.textContent = '';
   document.getElementById('mp-join-panel').style.display = 'none';
   document.getElementById('mp-choose').style.display = 'flex';
 };
