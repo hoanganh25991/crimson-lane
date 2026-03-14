@@ -577,6 +577,7 @@ const mainMenu = document.getElementById('main-menu');
 const playFlow = document.getElementById('play-flow');
 const settingsScreen = document.getElementById('settings-screen');
 const lobby = document.getElementById('lobby');
+const mpSetupEl = document.getElementById('multiplayer-setup');
 const playSideOptions = document.getElementById('play-side-options');
 const playModeOptions = document.getElementById('play-mode-options');
 const playFlowTitle = document.getElementById('play-flow-title');
@@ -587,6 +588,7 @@ function showScreen(show) {
   playFlow.classList.toggle('show', show === 'play');
   settingsScreen.classList.toggle('show', show === 'settings');
   lobby.classList.toggle('show', show === 'lobby');
+  if (mpSetupEl) mpSetupEl.style.display = show === 'multiplayer' ? 'flex' : 'none';
 }
 
 document.getElementById('btn-play').onclick = () => {
@@ -615,7 +617,10 @@ document.getElementById('btn-settings').onclick = () => {
   settingsScreen.querySelector('.set-tab[data-tab="general"]').classList.add('active');
   settingsScreen.querySelector('.set-pane[data-pane="general"]').classList.add('active');
 };
-document.getElementById('btn-multiplayer').onclick = () => mpLobby.showMultiplayerSetup();
+document.getElementById('btn-multiplayer').onclick = () => {
+  showScreen('multiplayer');
+  mpLobby.showMultiplayerSetup();
+};
 
 document.getElementById('mp-create-btn').onclick = () => {
   mpLobby.createGame().catch(() => {});
