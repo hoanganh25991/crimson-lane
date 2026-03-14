@@ -35,18 +35,18 @@ export function createHero(type, isPlayer) {
   mpFillMesh.position.set(0,1.95,0);
   group.add(mpFillMesh);
 
-  const startPos = def.team === 'scourge' ? {x:10,z:10} : {x:90,z:90};
-  group.position.set(startPos.x, 0, startPos.z);
+  // Position and team are set by game start (main.js) from G.playerSide — not from hero def
+  group.position.set(0, 0, 0);
 
   const hero = {
     type, group, parts, selRing, hpFillMesh, mpFillMesh,
     body: null, head: null,
-    def, team:def.team,
+    def, team: 'scourge', // overwritten by main.js from G.playerSide
     hp:def.hp, maxHp:def.hp, mp:def.mp, maxMp:def.mp,
     alive:true, isPlayer,
     moveTarget:null, attackTarget:null,
     atkTimer:0, atkCd:1/def.atkSpd,
-    x:startPos.x, z:startPos.z,
+    x: 0, z: 0,
     vx:0, vz:0,
     level:1, xp:0, xpNext:50,
     slowTimer:0, stunTimer:0, channeling:0, chanTarget:null,

@@ -11,7 +11,7 @@ export function initThree() {
   const aspect = window.innerWidth / window.innerHeight;
   camera = new THREE.OrthographicCamera(-ZOOM*aspect, ZOOM*aspect, ZOOM, -ZOOM, -500, 500);
   camTarget = new THREE.Vector3(50, 0, 50);
-  // Camera positioned so player base (10,10) is bottom-left, enemy (90,90) top-right
+  // View matches minimap: base (0,0)–(10,10) at bottom-left, lanes toward top-right
   camera.position.set(camTarget.x - 30, 35, camTarget.z - 30);
   camera.lookAt(camTarget.x, 0, camTarget.z);
 
@@ -59,14 +59,20 @@ export function onResize() {
   renderer.setSize(w, h);
 }
 
+// Offset so view matches minimap: base at bottom-left, hero in lower-left of screen
+const CAM_LOOK_OFFSET = 18;
+
 export function updateCamera(_dt, playerHero) {
-  if(playerHero && playerHero.alive) {
-    camTarget.x += (playerHero.x - camTarget.x)*0.08;
-    camTarget.z += (playerHero.z - camTarget.z)*0.08;
+  if (playerHero && playerHero.alive) {
+    // Look at a point toward enemy base (top-right) so hero stays in bottom-left of view
+    const lookX = playerHero.x + CAM_LOOK_OFFSET;
+    const lookZ = playerHero.z + CAM_LOOK_OFFSET;
+    camTarget.x += (lookX - camTarget.x) * 0.08;
+    camTarget.z += (lookZ - camTarget.z) * 0.08;
   }
   camTarget.x = Math.max(0, Math.min(100, camTarget.x));
   camTarget.z = Math.max(0, Math.min(100, camTarget.z));
-  // Player base (10,10) bottom-left, enemy (90,90) top-right
+  // Same orientation as minimap: (0,0) bottom-left, (100,100) top-right
   camera.position.x = camTarget.x - 30;
   camera.position.z = camTarget.z - 30;
   camera.lookAt(camTarget.x, 0, camTarget.z);

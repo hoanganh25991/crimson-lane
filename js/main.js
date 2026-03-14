@@ -73,17 +73,26 @@ export function startGame() {
 
   const others = ALL_HEROES.filter(h => h !== G.pickedHero);
   const aiType = others[Math.floor(Math.random() * others.length)];
+  // Team and spawn come only from chosen side (G.playerSide), not from hero type
+  const playerSide = G.playerSide || 'scourge';
+  const playerBase = playerSide === 'sentinel' ? { x: 90, z: 90 } : { x: 10, z: 10 };
+  const aiBase = playerSide === 'sentinel' ? { x: 10, z: 10 } : { x: 90, z: 90 };
+
   G.playerHero = createHero(G.pickedHero, true);
-  G.playerHero.team = G.playerSide || 'scourge';
-  const playerBase = G.playerSide === 'sentinel' ? { x: 90, z: 90 } : { x: 10, z: 10 };
-  const aiBase = G.playerSide === 'sentinel' ? { x: 10, z: 10 } : { x: 90, z: 90 };
-  G.playerHero.x = playerBase.x; G.playerHero.z = playerBase.z;
+  G.playerHero.team = playerSide;
+  G.playerHero.x = playerBase.x;
+  G.playerHero.z = playerBase.z;
   G.playerHero.group.position.set(playerBase.x, 0, playerBase.z);
+
   G.aiHero = createHero(aiType, false);
-  G.aiHero.team = G.playerSide === 'sentinel' ? 'scourge' : 'sentinel';
-  G.aiHero.x = aiBase.x; G.aiHero.z = aiBase.z;
+  G.aiHero.team = playerSide === 'sentinel' ? 'scourge' : 'sentinel';
+  G.aiHero.x = aiBase.x;
+  G.aiHero.z = aiBase.z;
   G.aiHero.group.position.set(aiBase.x, 0, aiBase.z);
   G.aiHero.wpIndex = 0;
+
+  // Initial camera: view matches minimap (base bottom-left), hero in lower-left of screen
+  camTarget.set(G.playerHero.x + 18, 0, G.playerHero.z + 18);
 
   const heroNameEl = document.getElementById('hero-name');
   if(heroNameEl) heroNameEl.textContent = HERO_DEFS[G.pickedHero].name;
@@ -493,7 +502,22 @@ function showScreen(show) {
   lobby.classList.toggle('show', show === 'lobby');
 }
 
-document.getElementById('btn-play').onclick = () => { showScreen('play'); playFlowStep = 0; playFlowTitle.textContent = 'Choose your side'; playSideOptions.style.display = 'flex'; playModeOptions.style.display = 'none'; playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); playSideOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); };
+document.getElementById('btn-play').onclick = () => {
+  showScreen('play');
+  playFlowStep = 0;
+  playFlowTitle.textContent = 'Choose your side';
+  playSideOptions.style.display = 'flex';
+  playModeOptions.style.display = 'none';
+  playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  playSideOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  // Ensure a side is always selected so G.playerSide is never wrong
+  let sideSelected = playSideOptions.querySelector('.opt-btn.selected');
+  if (!sideSelected) {
+    const defaultSide = playSideOptions.querySelector('.opt-btn[data-side="' + (G.playerSide || 'scourge') + '"]');
+    (defaultSide || playSideOptions.querySelector('.opt-btn[data-side="scourge"]')).classList.add('selected');
+    G.playerSide = (defaultSide && defaultSide.dataset.side) || 'scourge';
+  }
+};
 document.getElementById('btn-settings').onclick = () => {
   showScreen('settings');
   settingsScreen.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
