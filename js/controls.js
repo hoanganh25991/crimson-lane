@@ -195,12 +195,13 @@ export function initControls() {
     // Always play attack animation regardless of cooldown or enemy presence
     h._atkAnimTimer = Math.min(h.atkCd * 0.8, 0.55);
     // Lock on to nearest enemy if any
+    const range = h.def.range;
     const enemies = getEnemiesOf(h.team).filter(en=>en.alive);
     let best=null, bestD=Infinity;
     for(const en of enemies){
       const dx=en.x-h.x, dz=en.z-h.z;
       const d=Math.sqrt(dx*dx+dz*dz);
-      if(d<bestD){bestD=d;best=en;}
+      if(d<=range && d<bestD){bestD=d;best=en;}
     }
     if(best){ h.attackTarget=best; h.moveTarget=null; }
   }

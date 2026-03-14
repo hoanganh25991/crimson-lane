@@ -323,7 +323,7 @@ function respawnHero(hero) {
   hero.attackTarget = null; hero.moveTarget = null;
   hero.channeling = 0;
   hero.group.rotation.x = 0;
-  hero._atkAnimTimer = 0; hero._castAnimTimer = 0; hero._prevAnim = null;
+  hero.atkTimer = 0; hero._atkAnimTimer = 0; hero._castAnimTimer = 0; hero._prevAnim = null;
   if(hero.isPlayer) {
     showAnnouncer('— RESPAWNED —', '#88aaff', 1500);
     playSound('respawn');
