@@ -67,7 +67,7 @@ export default {
       if (showAnnouncer) showAnnouncer('🔭 CHANNELING...', '#ffff00', 1700);
       else {
         const el = document.getElementById('announcer');
-        if (el) { el.textContent = 'CHANNELING...'; el.style.color = '#ffff00'; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 1300); }
+        if (el) { el.textContent = '⏳ CHANNELING...'; el.style.color = '#ffff00'; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 1300); }
       }
     }
   },

@@ -286,7 +286,7 @@ body.targeting-skill #targeting-hint{display:block}
 <div id="loading-screen">
   <div id="loading-title">CRIMSON LANE</div>
   <div id="loading-sub">MOBILE MOBA</div>
-  <div id="loading-msg">Loading engine…</div>
+  <div id="loading-msg">⏳ Loading engine…</div>
   <div id="loading-bar-wrap"><div id="loading-bar-fill"></div></div>
   <div id="loading-error"></div>
 </div>
@@ -649,7 +649,7 @@ body.targeting-skill #targeting-hint{display:block}
   window._appReady = function() {
     if(done) return;
     done = true;
-    window._setProgress(100, 'Ready!');
+    window._setProgress(100, '✅ Ready!');
     // Enable main menu buttons
     ['btn-play','btn-multiplayer','btn-settings'].forEach(function(id){
       var el = document.getElementById(id);
@@ -669,7 +669,7 @@ body.targeting-skill #targeting-hint{display:block}
       errEl.style.display = 'block';
       errEl.innerHTML = 'Failed to load ' + lib + '.<br>Check your connection and <a href="" style="color:#ffcc44">reload</a>.';
     }
-    if(msg){ msg.textContent = 'Load failed'; msg.style.animationPlayState = 'paused'; }
+    if(msg){ msg.textContent = '❌ Load failed'; msg.style.animationPlayState = 'paused'; }
   };
 
   // Warn if still loading after 90s (3G edge case)
@@ -683,13 +683,13 @@ body.targeting-skill #targeting-hint{display:block}
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
   onerror="window._loadError('Three.js (3D engine)')"></script>
-<script>window._setProgress(40, 'Loading audio…');</script>
+<script>window._setProgress(40, '🔊 Loading audio…');</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"
   onerror="window._loadError('Howler.js (audio)')"></script>
-<script>window._setProgress(65, 'Loading utilities…');</script>
+<script>window._setProgress(65, '📦 Loading utilities…');</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"
   onerror="window._loadError('QR code library')"></script>
-<script>window._setProgress(80, 'Initializing game…');</script>
+<script>window._setProgress(80, '⚔️ Initializing game…');</script>
 <script src="js/main.js" type="module"></script>
 <script>
 // HUD idle-fade: panels fade to low opacity when player is idle for 4s
