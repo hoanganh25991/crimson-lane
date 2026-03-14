@@ -12,7 +12,7 @@
 |------|--------|
 | **Scope** | Read [plan.md](plan.md) for MVP rules; [input.md](input.md) for original vision. |
 | **Design** | [game-theme.md](game-theme.md) (look & feel), [dota1-heroes-detail.md](dota1-heroes-detail.md) (hero content). |
-| **Build** | [main-menu.md](main-menu.md) (UI flow), [dota1-mobile-game-plan.md](dota1-mobile-game-plan.md) (phased roadmap). |
+| **Build** | [main-menu.md](main-menu.md) (UI flow). |
 | **Track** | Plan section below — Done / Requirements Plan / Backlog. |
 
 ---
@@ -23,7 +23,7 @@
 
 | Doc | Tags | Description |
 |-----|------|-------------|
-| [plan.md](plan.md) | `#mvp` `#requirements` `#technical` `#phases` | Master spec: MVP scope, technical appendix (map, heroes, items, AI, controls), phase checklist. **Primary source of truth.** |
+| [plan.md](plan.md) | `#mvp` `#requirements` `#technical` | Game rules & systems spec: scope, match rules, map, stats, abilities, combat, lanes, structures, economy, items, controls, AI, architecture. **Primary source of truth.** |
 | [input.md](input.md) | `#vision` `#multiplayer` `#mobile` | Original brief: Dota 1 feel, WebRTC/QR join, mobile controls. |
 
 ### Design — content & look
@@ -33,11 +33,10 @@
 | [dota1-heroes-detail.md](dota1-heroes-detail.md) | `#content` `#heroes` `#skills` `#art` | All 5 heroes: geometry, animations, stats, Q/W/E/R skills. |
 | [game-theme.md](game-theme.md) | `#art` `#ui` `#audio` `#ux` | Theme: colors, typography, 3D style, HUD, audio identity, announcer. |
 
-### Implementation — roadmap & flow
+### Implementation — UI flow
 
 | Doc | Tags | Description |
 |-----|------|-------------|
-| [dota1-mobile-game-plan.md](dota1-mobile-game-plan.md) | `#phases` `#multiplayer` `#lobby` `#qr` | Phased roadmap: lobby/QR, map, entities, heroes, combat, HUD, PeerJS sync, polish. |
 | [main-menu.md](main-menu.md) | `#ui` `#flow` `#implemented` | Main menu, Play flow (side + team size), Settings, Hero Viewer, Lobby. |
 
 ---
@@ -49,11 +48,10 @@
 | `#mvp` | In scope for minimum viable product |
 | `#requirements` | Must-have rules and scope |
 | `#technical` | Architecture, systems, contracts |
-| `#phases` | Development phases / milestones |
 | `#content` | Heroes, items, map data |
 | `#heroes` `#skills` | Hero and ability design |
 | `#art` `#ui` `#audio` `#ux` | Visual, UI, sound, interaction |
-| `#multiplayer` `#lobby` `#qr` | Post-MVP: PeerJS, room ID, QR join |
+| `#multiplayer` | Post-MVP: PeerJS, networking, room/lobby |
 | `#vision` | High-level product goal |
 | `#implemented` | Describes shipped / verified feature |
 
