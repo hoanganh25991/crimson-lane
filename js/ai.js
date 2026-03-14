@@ -34,6 +34,7 @@ export function updateAI(hero, dt) {
         hero.atkTimer -= dt;
         if(hero.atkTimer<=0) {
           hero.atkTimer = hero.atkCd;
+          hero._atkAnimTimer = Math.min(hero.atkCd * 0.8, 0.55);
           spawnProjectile(hero, ph, hero.team==='scourge'?0xff4444:0x4488ff,
             hero.def.dmgMin + Math.random()*(hero.def.dmgMax-hero.def.dmgMin), 'physical', null);
           playSound('hit');

@@ -39,6 +39,10 @@ export function castSkill(key, targetPos, targetEntity) {
   h.mp -= cost;
   G.skillCDs[key] = getSkillCD(h, key);
 
+  // Trigger cast animation
+  h._castAnim = (key === 'R') ? 'castR' : 'castQ';
+  h._castAnimTimer = (key === 'R') ? 1.0 : 0.7;
+
   if(h.type === 'lich') castLichSkill(h, key, targetPos, targetEntity);
   else if(h.type === 'sniper') castSniperSkill(h, key, targetPos, targetEntity);
   else if(h.type === 'dragon_knight') castDragonKnightSkill(h, key, targetPos, targetEntity);

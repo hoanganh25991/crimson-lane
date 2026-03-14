@@ -9,10 +9,11 @@ import { buildTowers, buildBarracks, updateTowers, updateBarracks } from './towe
 import { updateProjectiles, moveToward, spawnProjectile, floatDamage, applyDamage } from './combat.js';
 import { updateSkillCDs, castSkill, processAssassinateEffect } from './skills.js';
 import { updateAI } from './ai.js';
-import { initControls, toggleAttackMode, joystick, keys } from './controls.js';
+import { initControls, joystick, keys } from './controls.js';
 import { updateHUD, updateMinimap, updateSkillUI, showAnnouncer, drawPortrait } from './hud.js';
 import { playSound, playMainTheme, stopMainTheme } from './audio.js';
 import { spawnParticles, updateParticles, updateEffects } from './particles.js';
+import { updateHeroAnim } from './animations.js';
 import { buyItem, useItem, updateItemCooldowns, updateAIItems, ITEM_DEFS } from './items.js';
 
 // ─── Expose HUD functions for combat.js bridge ──────────────────────────────────
@@ -167,12 +168,12 @@ function updateHeroes(dt) {
         }
       }
       else {
-        // Arrow/WASD continuous movement (with camera fix: screen-up = world +x+z)
         let kx=0, kz=0;
         if(keys['ArrowUp'])    { kx+=1; kz+=1; }
         if(keys['ArrowDown'])  { kx-=1; kz-=1; }
         if(keys['ArrowRight']) { kx-=1; kz+=1; }
         if(keys['ArrowLeft'])  { kx+=1; kz-=1; }
+        h._isMoving = (kx!==0||kz!==0) || joystick.active || !!(h.moveTarget);
         if(kx!==0||kz!==0) {
           const len=Math.sqrt(kx*kx+kz*kz);
           const spd = (h.def.move+(h.itemBonus?.move||0)) * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
@@ -229,6 +230,7 @@ function updateHeroes(dt) {
             const effectiveAtkCd = (h.focusFireActive && h.focusFireTarget) ? Math.min(h.atkCd, 0.18) : h.atkCd;
             if(h.atkTimer<=0) {
               h.atkTimer = effectiveAtkCd;
+              h._atkAnimTimer = Math.min(effectiveAtkCd * 0.8, 0.55);
               h.group.rotation.y = Math.atan2(dx,dz);
               const ib = h.itemBonus;
               let dmg = (h.def.dmgMin+ib.dmgMin) + Math.random()*((h.def.dmgMax+ib.dmgMax)-(h.def.dmgMin+ib.dmgMin));
@@ -283,7 +285,8 @@ function updateHeroes(dt) {
     }
   }
 
-  // AI hero
+  // Animations
+  if(G.playerHero) updateHeroAnim(G.playerHero, dt);
   if(G.aiHero) {
     const ai = G.aiHero;
     if(!ai.alive) {
@@ -291,6 +294,7 @@ function updateHeroes(dt) {
       if(ai.respawnTimer<=0) respawnHero(ai);
     } else {
       updateAI(ai, dt);
+      ai._isMoving = ai.aiState !== 'fight';
       // Dragon Blood passive for AI Dragon Knight
       if(ai.type==='dragon_knight') ai.hp = Math.min(ai.maxHp, ai.hp + 2*dt);
       ai.hpFillMesh.scale.x = Math.max(0.001, ai.hp/ai.maxHp);
@@ -298,6 +302,7 @@ function updateHeroes(dt) {
       ai.mpFillMesh.scale.x = Math.max(0.001, ai.mp/ai.maxMp);
       ai.mpFillMesh.position.x = -(1-ai.mp/ai.maxMp)*0.6;
     }
+    updateHeroAnim(ai, dt);
   }
 
   // Tower HP bars
@@ -317,11 +322,30 @@ function respawnHero(hero) {
   hero.hp = hero.maxHp; hero.mp = hero.maxMp;
   hero.attackTarget = null; hero.moveTarget = null;
   hero.channeling = 0;
+  hero.group.rotation.x = 0;
+  hero._atkAnimTimer = 0; hero._castAnimTimer = 0; hero._prevAnim = null;
   if(hero.isPlayer) {
     showAnnouncer('— RESPAWNED —', '#88aaff', 1500);
     playSound('respawn');
   }
   spawnParticles(hero.x, hero.z, hero.team==='scourge'?0xff2200:0x2244ff, 8);
+}
+
+// ─── ATTACK BUTTON HUD ─────────────────────────────────────────────────────────
+function updateAttackBtnHUD() {
+  const h = G.playerHero; if(!h) return;
+  const cdEl = document.getElementById('atk-cd');
+  const btn   = document.getElementById('attack-btn');
+  if(!cdEl || !btn) return;
+  const cd = h.atkTimer;
+  if(cd > 0.08) {
+    cdEl.style.display = 'flex';
+    cdEl.textContent = cd.toFixed(1);
+    btn.style.opacity = '0.5';
+  } else {
+    cdEl.style.display = 'none';
+    btn.style.opacity = '1';
+  }
 }
 
 // ─── ITEM HUD ──────────────────────────────────────────────────────────────────
@@ -431,6 +455,7 @@ function loop(ts) {
     updateItemCooldowns(G.playerHero, dt);
     if(G.aiHero) updateAIItems(G.aiHero, dt);
     updateInventoryHUD();
+    updateAttackBtnHUD();
     updateHUD();
     updateMinimap();
 
@@ -450,7 +475,6 @@ function loop(ts) {
 window.selectHero = selectHero;
 window.startGame = startGame;
 window.castSkill = castSkill;
-window.toggleAttackMode = toggleAttackMode;
 
 // Draw lobby portraits on load
 drawPortrait('lich-portrait','lich');

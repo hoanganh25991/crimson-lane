@@ -189,24 +189,21 @@ export function initControls() {
     },{passive:false});
   });
 
-  // Attack button mobile
-  document.getElementById('attack-btn').addEventListener('touchstart', e=>{
-    e.preventDefault();
+  // Attack button — find nearest enemy, set target, fire immediately
+  function doAttackNearest() {
     const h = G.playerHero; if(!h||!h.alive) return;
+    if(h.atkTimer > 0.05) return; // still on cooldown
     const enemies = getEnemiesOf(h.team).filter(en=>en.alive);
     let best=null, bestD=Infinity;
     for(const en of enemies){
-      const dx=en.x-h.x,dz=en.z-h.z;
+      const dx=en.x-h.x, dz=en.z-h.z;
       const d=Math.sqrt(dx*dx+dz*dz);
       if(d<bestD){bestD=d;best=en;}
     }
-    if(best){h.attackTarget=best;h.moveTarget=null;}
-  },{passive:false});
+    if(best){ h.attackTarget=best; h.moveTarget=null; h.atkTimer=0; }
+  }
+  const atkBtn = document.getElementById('attack-btn');
+  atkBtn.addEventListener('touchstart', e=>{ e.preventDefault(); doAttackNearest(); },{passive:false});
+  atkBtn.addEventListener('click', ()=>doAttackNearest());
 }
 
-export function toggleAttackMode() {
-  G.attackMode = !G.attackMode;
-  const btn = document.getElementById('attack-btn');
-  btn.style.background = G.attackMode ? '#8a1111' : '#4a1111';
-  btn.style.borderColor = G.attackMode ? '#ff2222' : '#882222';
-}
