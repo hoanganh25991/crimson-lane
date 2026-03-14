@@ -192,7 +192,9 @@ export function initControls() {
   // Attack button — find nearest enemy, set target, fire immediately
   function doAttackNearest() {
     const h = G.playerHero; if(!h||!h.alive) return;
-    if(h.atkTimer > 0.05) return; // still on cooldown
+    // Always play attack animation regardless of cooldown or enemy presence
+    h._atkAnimTimer = Math.min(h.atkCd * 0.8, 0.55);
+    // Lock on to nearest enemy if any
     const enemies = getEnemiesOf(h.team).filter(en=>en.alive);
     let best=null, bestD=Infinity;
     for(const en of enemies){
@@ -200,7 +202,7 @@ export function initControls() {
       const d=Math.sqrt(dx*dx+dz*dz);
       if(d<bestD){bestD=d;best=en;}
     }
-    if(best){ h.attackTarget=best; h.moveTarget=null; h.atkTimer=0; }
+    if(best){ h.attackTarget=best; h.moveTarget=null; }
   }
   const atkBtn = document.getElementById('attack-btn');
   atkBtn.addEventListener('touchstart', e=>{ e.preventDefault(); doAttackNearest(); },{passive:false});
