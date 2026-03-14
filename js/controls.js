@@ -9,6 +9,7 @@ export const keys = {};
 
 export function initControls() {
   const joystickArea = document.getElementById('joystick-area');
+  const joystickOuter = document.getElementById('joystick-outer');
   const joystickInner = document.getElementById('joystick-inner');
 
   // Initialize joystick inner position
@@ -16,13 +17,34 @@ export function initControls() {
   joystickInner.style.top='38px';
   joystickInner.style.position='absolute';
 
+  function repositionOuter(clientX, clientY) {
+    const r = joystickArea.getBoundingClientRect();
+    const localX = clientX - r.left;
+    const localY = clientY - r.top;
+    const half = 60;
+    const ox = Math.max(half, Math.min(r.width - half, localX)) - half;
+    const oy = Math.max(half, Math.min(r.height - half, localY)) - half;
+    joystickOuter.style.left = ox + 'px';
+    joystickOuter.style.top = oy + 'px';
+    joystickOuter.style.bottom = 'auto';
+    joystickInner.style.left = '38px';
+    joystickInner.style.top = '38px';
+  }
+
+  function resetOuter() {
+    joystickOuter.style.bottom = '20px';
+    joystickOuter.style.left = '20px';
+    joystickOuter.style.top = 'auto';
+    joystickInner.style.left = '38px';
+    joystickInner.style.top = '38px';
+  }
+
   joystickArea.addEventListener('touchstart', e=>{
     e.preventDefault();
     const t = e.changedTouches[0];
-    const r = joystickArea.getBoundingClientRect();
+    repositionOuter(t.clientX, t.clientY);
     joystick.active = true;
     joystick.startX = t.clientX; joystick.startY = t.clientY;
-    joystick.ox = t.clientX-r.left-60; joystick.oy = t.clientY-r.top-60;
   },{passive:false});
 
   joystickArea.addEventListener('touchmove', e=>{
@@ -37,7 +59,6 @@ export function initControls() {
     joystickInner.style.left = (60+nx*clampLen-22)+'px';
     joystickInner.style.top = (60+ny*clampLen-22)+'px';
     joystick.dx = nx; joystick.dz = ny;
-    // With camera at (cx-30,35,cz-30): apply camera-relative world direction
     joystick.wx = -(joystick.dx + joystick.dz) * 0.707;
     joystick.wz = (joystick.dx - joystick.dz) * 0.707;
   },{passive:false});
@@ -45,11 +66,13 @@ export function initControls() {
   joystickArea.addEventListener('touchend', e=>{
     e.preventDefault();
     joystick.active=false; joystick.dx=0; joystick.dz=0; joystick.wx=0; joystick.wz=0;
-    joystickInner.style.left='38px'; joystickInner.style.top='38px';
+    resetOuter();
   },{passive:false});
 
-  // Mouse joystick support (desktop)
+  // Mouse joystick support (desktop) — floating: repositions to click point
   joystickArea.addEventListener('mousedown', e=>{
+    e.preventDefault();
+    repositionOuter(e.clientX, e.clientY);
     joystick.active=true;
     joystick.startX=e.clientX; joystick.startY=e.clientY;
   });
@@ -65,10 +88,10 @@ export function initControls() {
     joystick.wx=-(joystick.dx+joystick.dz)*0.707;
     joystick.wz=(joystick.dx-joystick.dz)*0.707;
   });
-  document.addEventListener('mouseup', e=>{
+  document.addEventListener('mouseup', ()=>{
     if(!joystick.active) return;
     joystick.active=false; joystick.dx=0; joystick.dz=0; joystick.wx=0; joystick.wz=0;
-    joystickInner.style.left='38px'; joystickInner.style.top='38px';
+    resetOuter();
   });
 
   // Desktop click
@@ -120,7 +143,8 @@ export function initControls() {
 
   // Keyboard
   document.addEventListener('keydown', e=>{
-    keys[e.key] = true;
+    // Block WASD from being stored as movement keys (they're skill/action keys only)
+    if(!['w','W','a','A','s','S','d','D'].includes(e.key)) keys[e.key] = true;
     if(G.phase!=='game') return;
     const h = G.playerHero;
     switch(e.key) {
@@ -142,7 +166,7 @@ export function initControls() {
   });
 
   document.addEventListener('keyup', e=>{
-    keys[e.key] = false;
+    if(!['w','W','a','A','s','S','d','D'].includes(e.key)) keys[e.key] = false;
   });
 
   // Scroll zoom

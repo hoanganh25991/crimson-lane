@@ -376,7 +376,10 @@ function renderShopItems() {
       `<div class="si-cost">${owned?'OWNED':cost+'g'}</div>`+
       `<div class="si-bonus">${formatBonuses(def.bonuses)}</div>`+
       (def.components.length?`<div class="si-recipe">= ${def.components.map(c=>ITEM_DEFS[c]?.short||c).join(' + ')}</div>`:'');
-    if(!owned) div.onclick=()=>{ window.buyItemById(id); };
+    if(!owned) {
+      div.onclick=()=>{ window.buyItemById(id); };
+      div.addEventListener('touchend', e=>{ e.preventDefault(); window.buyItemById(id); },{passive:false});
+    }
     container.appendChild(div);
   }
 }
