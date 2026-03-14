@@ -15,14 +15,30 @@ function getPeer() {
 /** Create a new peer and become host with given id (room code). Returns peer id. */
 export function createRoom(roomCode) {
   const Peer = getPeer();
-  if (!Peer) throw new Error('PeerJS not loaded. Add script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"');
+  if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
   return new Promise((resolve, reject) => {
     if (_peer) { _peer.destroy(); _peer = null; }
     _connections.clear();
     _roomCode = roomCode;
+
+    let settled = false;
+    const done = (fn, val) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(val);
+    };
+
+    const timer = setTimeout(() => {
+      if (_peer) { _peer.destroy(); _peer = null; }
+      _connections.clear();
+      _roomCode = null;
+      done(reject, new Error('Could not connect to PeerJS server. Check your internet connection.'));
+    }, 12000);
+
     _peer = new Peer(roomCode, { debug: 0 });
-    _peer.on('open', () => resolve(_peer.id));
-    _peer.on('error', (err) => reject(err));
+    _peer.on('open', () => done(resolve, _peer.id));
+    _peer.on('error', (err) => done(reject, err));
     _peer.on('connection', (conn) => {
       conn.on('open', () => {
         _connections.set(conn.peer, conn);
@@ -36,10 +52,25 @@ export function createRoom(roomCode) {
 /** Join an existing room (host's peer id). Returns our peer id. */
 export function joinRoom(hostPeerId) {
   const Peer = getPeer();
-  if (!Peer) throw new Error('PeerJS not loaded.');
+  if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
   return new Promise((resolve, reject) => {
     if (_peer) { _peer.destroy(); _peer = null; }
     _connections.clear();
+
+    let settled = false;
+    const done = (fn, val) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn(val);
+    };
+
+    const timer = setTimeout(() => {
+      if (_peer) { _peer.destroy(); _peer = null; }
+      _connections.clear();
+      done(reject, new Error('Connection timed out. Room not found or host is offline.'));
+    }, 12000);
+
     _peer = new Peer({ debug: 0 });
     _peer.on('open', () => {
       const conn = _peer.connect(hostPeerId, { reliable: true });
@@ -47,11 +78,11 @@ export function joinRoom(hostPeerId) {
         _connections.set(hostPeerId, conn);
         conn.on('data', (data) => _listeners.forEach(fn => fn(hostPeerId, data)));
         conn.on('close', () => _connections.delete(hostPeerId));
-        resolve(_peer.id);
+        done(resolve, _peer.id);
       });
-      conn.on('error', reject);
+      conn.on('error', (err) => done(reject, err));
     });
-    _peer.on('error', reject);
+    _peer.on('error', (err) => done(reject, err));
   });
 }
 

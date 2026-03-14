@@ -52,8 +52,14 @@ export function selectHero(type) {
     const el = document.getElementById('pick-'+h);
     if(el) el.classList.toggle('selected', h===type);
   }
-  document.getElementById('startBtn').disabled = false;
-  document.getElementById('startBtn').textContent = 'START GAME';
+  const startBtn = document.getElementById('startBtn');
+  if (G.isMultiplayer && !G.isHost) {
+    startBtn.disabled = true;
+    startBtn.textContent = 'HERO SELECTED — WAITING FOR HOST';
+  } else {
+    startBtn.disabled = false;
+    startBtn.textContent = 'START GAME';
+  }
 }
 
 // ─── GAME START ────────────────────────────────────────────────────────────────
@@ -623,16 +629,52 @@ document.getElementById('btn-multiplayer').onclick = () => {
 };
 
 document.getElementById('mp-create-btn').onclick = () => {
-  mpLobby.createGame().catch(() => {});
+  const btn = document.getElementById('mp-create-btn');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  mpLobby.createGame().then(() => {
+    btn.disabled = false;
+    btn.textContent = 'Create Game';
+  }).catch((err) => {
+    btn.disabled = false;
+    btn.textContent = 'Create Game';
+    const errEl = document.getElementById('mp-create-error');
+    if (errEl) errEl.textContent = 'Failed to create room: ' + (err && err.message ? err.message : 'Server unavailable. Try again.');
+  });
 };
 document.getElementById('mp-join-btn').onclick = () => {
   document.getElementById('mp-choose').style.display = 'none';
   document.getElementById('mp-join-panel').style.display = 'block';
 };
 document.getElementById('mp-connect-btn').onclick = () => {
-  const code = document.getElementById('mp-room-code-in').value.trim();
+  const code = document.getElementById('mp-room-code-in').value.trim().toLowerCase();
   if (!code) return;
-  mpLobby.joinGame(code).catch(() => {});
+  const btn = document.getElementById('mp-connect-btn');
+  btn.disabled = true;
+  btn.textContent = 'Connecting...';
+  mpLobby.joinGame(code).then(() => {
+    btn.disabled = false;
+    btn.textContent = 'Connect';
+    G.isMultiplayer = true;
+    G.isHost = false;
+    G.playerSide = G.playerSide || 'scourge';
+    G.teamSize = G.teamSize || 3;
+    const mpSetup = document.getElementById('multiplayer-setup');
+    if (mpSetup) mpSetup.style.display = 'none';
+    const lobbyEl = document.getElementById('lobby');
+    if (lobbyEl) { lobbyEl.style.display = 'flex'; lobbyEl.classList.add('show'); }
+    const sub = document.getElementById('lobby-sub');
+    if (sub) sub.textContent = 'MULTIPLAYER — Pick your hero (waiting for host to start)';
+    const sideEl = document.getElementById('lobby-side-name');
+    if (sideEl) sideEl.textContent = G.playerSide === 'sentinel' ? 'Sentinel' : 'Scourge';
+    const startBtn = document.getElementById('startBtn');
+    if (startBtn) { startBtn.disabled = true; startBtn.textContent = 'WAITING FOR HOST'; }
+  }).catch((err) => {
+    btn.disabled = false;
+    btn.textContent = 'Connect';
+    const errEl = document.getElementById('mp-join-error');
+    if (errEl) errEl.textContent = 'Connection failed: ' + (err && err.message ? err.message : 'Room not found or server unavailable');
+  });
 };
 document.getElementById('mp-join-back').onclick = () => {
   document.getElementById('mp-join-panel').style.display = 'none';
@@ -779,11 +821,13 @@ buildLobbyHeroCards();
 
 // Client: when host starts, receive hero/side and start game
 mpLobby.onStartSignal((data) => {
-  G.pickedHero = data.hero || G.pickedHero;
+  if (!G.pickedHero) G.pickedHero = data.hero;
   G.playerSide = data.playerSide || G.playerSide;
-  G.teamSize = data.teamSize || 3;
+  G.teamSize = data.teamSize || G.teamSize || 3;
   G.isMultiplayer = true;
   G.isHost = false;
   mpLobby.hideMultiplayerSetup();
+  const lobbyEl = document.getElementById('lobby');
+  if (lobbyEl) { lobbyEl.style.display = 'none'; lobbyEl.classList.remove('show'); }
   startGame();
 });
