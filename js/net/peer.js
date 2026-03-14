@@ -1,268 +1,217 @@
-// ─── PEERJS WRAPPER ────────────────────────────────────────────────────────────
-// Create/join room, send/receive. Requires PeerJS loaded (e.g. from CDN).
+// ─── P2P NETWORKING (Trystero / BitTorrent tracker signaling) ─────────────────
 //
-// Signaling strategy:
-//   Always uses PeerJS cloud (0.peerjs.com) + STUN + public TURN relay.
-//   Works across different networks, NATs, and same-machine browser tabs.
+// Replaces PeerJS. Trystero uses distributed BitTorrent tracker infrastructure
+// for peer discovery — no single cloud signaling server that can go down.
+//
+// External API is identical to the old PeerJS wrapper so callers need no changes:
+//   createRoom()          → host; resolves with room code (persistent UUID)
+//   joinRoom(roomCode)    → client; resolves with self peer-session id
+//   send(peerId, data)    → unicast to one peer
+//   broadcast(data)       → send to all connected peers
+//   onReceive(fn)         → fn(peerId, data); returns unsubscribe
+//   disconnect()          → leave room
+//   getPeerId()           → our session peer id
+//   getRoomCode()         → room code (set when host)
+//   getConnectionIds()    → array of connected peer ids
 
-let _peer = null;
-let _roomCode = null;
-const _connections = new Map(); // peerId -> DataConnection
-const _listeners = [];
+import { joinRoom as trysteroJoin } from 'https://esm.sh/trystero/torrent';
 
-/**
- * ICE servers: multiple STUN + free public TURN relay (openrelay.metered.ca).
- * STUN alone fails when both peers sit behind symmetric NAT — TURN acts as relay
- * so connections succeed regardless of NAT type.
- */
-const ICE_SERVERS_DEFAULT = [
-  { urls: 'stun:stun.l.google.com:19302' },
-  { urls: 'stun:stun1.l.google.com:19302' },
-  { urls: 'stun:stun2.l.google.com:19302' },
-  { urls: 'stun:stun3.l.google.com:19302' },
-  {
-    urls: [
-      'turn:openrelay.metered.ca:80',
-      'turn:openrelay.metered.ca:443',
-      'turns:openrelay.metered.ca:443',
-    ],
-    username: 'openrelayproject',
-    credential: 'openrelayproject',
-  },
-];
+// ── Config ─────────────────────────────────────────────────────────────────────
 
-/** Optional TURN via Metered (paid/free-tier). Set both to override the default ICE config. */
-const METERED_TURN_APP_NAME = '';
-const METERED_TURN_API_KEY = '';
-
-/** Resolve ICE servers: default STUN+TURN, or credentials-based Metered config when set. */
-async function getIceServersAsync() {
-  if (METERED_TURN_APP_NAME && METERED_TURN_API_KEY) {
-    try {
-      const url = `https://${METERED_TURN_APP_NAME}.metered.live/api/v1/turn/credentials?apiKey=${encodeURIComponent(METERED_TURN_API_KEY)}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const servers = await res.json();
-        if (Array.isArray(servers) && servers.length > 0) {
-          return [...ICE_SERVERS_DEFAULT.slice(0, 4), ...servers.slice(0, 4)];
-        }
-      }
-    } catch (e) {
-      console.warn('[P2P] Failed to fetch TURN credentials, using defaults:', e.message);
-    }
-  }
-  return ICE_SERVERS_DEFAULT;
-}
-
-/** Build PeerJS constructor options — always uses cloud PeerJS + STUN + TURN. */
-async function buildPeerOptions(peerId) {
-  const iceServers = await getIceServersAsync();
-  return { id: peerId, opts: { debug: 0, config: { iceServers } } };
-}
-
-function getPeer() {
-  if (typeof window !== 'undefined' && window.Peer) return window.Peer;
-  return null;
-}
+/** Unique namespace for this game — prevents cross-app peer discovery. */
+const APP_ID = 'dota-1-like-game-v1';
 
 const STORAGE_KEY_PEER_ID = 'dota_peer_id';
 
-/** This device's persistent Peer ID (UUID). Host and joiner use the same ID forever; host = room code. */
-export function getOrCreatePersistentPeerId() {
-  if (typeof window === 'undefined' || !window.localStorage) {
-    return typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-          const r = (Math.random() * 16) | 0;
-          const v = c === 'x' ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
-  }
-  let id = localStorage.getItem(STORAGE_KEY_PEER_ID);
-  if (!id) {
-    id = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-          const r = (Math.random() * 16) | 0;
-          const v = c === 'x' ? r : (r & 0x3) | 0x8;
-          return v.toString(16);
-        });
-    try {
-      localStorage.setItem(STORAGE_KEY_PEER_ID, id);
-    } catch (_) {}
-  }
-  return id;
-}
+/**
+ * ICE servers: STUN for standard NAT + TURN relay for symmetric NAT.
+ * Trystero accepts rtcConfig as part of joinRoom options.
+ */
+const RTC_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turns:openrelay.metered.ca:443',
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+  ],
+};
 
-function _freshPeerId() {
-  const id = typeof crypto !== 'undefined' && crypto.randomUUID
+// ── Module state ───────────────────────────────────────────────────────────────
+
+let _room     = null;   // Trystero room object
+let _roomCode = null;   // set when we are host (= our persistent UUID)
+let _selfId   = null;   // our session id (returned by getPeerId)
+let _peers    = new Set(); // Trystero peer ids of connected remote peers
+let _sendMsg  = null;   // Trystero send function for the 'msg' action
+const _listeners = [];  // onReceive subscribers: fn(peerId, data)
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function _makeUUID() {
+  return (typeof crypto !== 'undefined' && crypto.randomUUID)
     ? crypto.randomUUID()
     : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = (Math.random() * 16) | 0;
         return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
       });
+}
+
+/** Persistent device UUID — used as room code by the host. */
+export function getOrCreatePersistentPeerId() {
+  if (typeof window === 'undefined' || !window.localStorage) return _makeUUID();
+  let id = localStorage.getItem(STORAGE_KEY_PEER_ID);
+  if (!id) {
+    id = _makeUUID();
+    try { localStorage.setItem(STORAGE_KEY_PEER_ID, id); } catch (_) {}
+  }
+  return id;
+}
+
+function _freshPeerId() {
+  const id = _makeUUID();
   try { localStorage.setItem(STORAGE_KEY_PEER_ID, id); } catch (_) {}
   return id;
 }
 
-function _tryCreatePeer(Peer, roomCode, peerOpts, onConnection) {
-  return new Promise((resolve, reject) => {
-    if (_peer) { _peer.destroy(); _peer = null; }
-    _connections.clear();
-
-    let settled = false;
-    const done = (fn, val) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      fn(val);
-    };
-
-    const timer = setTimeout(() => {
-      if (_peer) { _peer.destroy(); _peer = null; }
-      _connections.clear();
-      done(reject, new Error('Could not reach the signaling server. Check your internet connection and try again.'));
-    }, 14000);
-
-    _peer = new Peer(roomCode, peerOpts);
-    _peer.on('open', () => done(resolve, _peer.id));
-    _peer.on('error', (err) => done(reject, err));
-    _peer.on('connection', onConnection);
-  });
-}
-
-/** Create a new peer and become host. Uses persistent peer ID (same device = same room code forever). Returns peer id. */
-export async function createRoom() {
-  const Peer = getPeer();
-  if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
-
-  const onConnection = (conn) => {
-    conn.on('open', () => {
-      _connections.set(conn.peer, conn);
-      conn.on('data', (data) => _listeners.forEach(fn => fn(conn.peer, data)));
-      conn.on('close', () => _connections.delete(conn.peer));
-      // PeerJS quirk: host must send first so joiner's conn.on('open') fires
-      try { conn.send({ type: 'hostReady' }); } catch (_) {}
-    });
-  };
-
-  let roomCode = getOrCreatePersistentPeerId();
-  _roomCode = roomCode;
-
-  const { opts } = await buildPeerOptions(roomCode);
-
-  try {
-    const id = await _tryCreatePeer(Peer, roomCode, opts, onConnection);
-    return id;
-  } catch (err) {
-    // "unavailable-id" means our persisted peer ID is still registered on the server.
-    // Rotate to a fresh UUID and retry once.
-    const msg = err && (err.message || err.type || '');
-    if (/unavailable.?id|id.?taken/i.test(msg)) {
-      console.warn('[P2P] Peer ID taken — rotating to fresh ID and retrying.');
-      roomCode = _freshPeerId();
-      _roomCode = roomCode;
-      const { opts: opts2 } = await buildPeerOptions(roomCode);
-      return _tryCreatePeer(Peer, roomCode, opts2, onConnection);
-    }
-    throw err;
+/** Tear down existing room cleanly before creating/joining a new one. */
+function _destroyRoom() {
+  if (_room) {
+    try { _room.leave(); } catch (_) {}
+    _room = null;
   }
+  _peers.clear();
+  _sendMsg = null;
+  _selfId  = null;
 }
 
-/** Join an existing room (host's peer id). Returns our peer id. */
-export async function joinRoom(hostPeerId) {
-  const Peer = getPeer();
-  if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
+/**
+ * Wire up the Trystero room's shared 'msg' action.
+ * All game messages (hostReady, start, snapshots, commands) flow through this
+ * single action so we keep a minimal surface area.
+ *
+ * Returns the sendMsg function.
+ */
+function _wireRoom(room, onMessage) {
+  const [sendMsg, onMsg] = room.makeAction('msg');
+  _sendMsg = sendMsg;
 
-  const { opts } = await buildPeerOptions(null);
+  room.onPeerJoin(id  => { _peers.add(id); });
+  room.onPeerLeave(id => { _peers.delete(id); });
+
+  onMsg(onMessage);
+  return sendMsg;
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────────
+
+/**
+ * Create room as host.
+ * Uses a persistent UUID as the room code so the same device always has the
+ * same room code. Resolves immediately (Trystero connects in background);
+ * sends `hostReady` to each client as they arrive.
+ */
+export async function createRoom() {
+  _destroyRoom();
+
+  const roomCode = getOrCreatePersistentPeerId();
+  _roomCode = roomCode;
+  _selfId   = roomCode;
+
+  _room = trysteroJoin({ appId: APP_ID, rtcConfig: RTC_CONFIG }, roomCode);
+
+  const sendMsg = _wireRoom(_room, (data, peerId) => {
+    _listeners.forEach(fn => fn(peerId, data));
+  });
+
+  // Greet each joiner so they can resolve their joinRoom promise quickly.
+  _room.onPeerJoin(id => {
+    try { sendMsg({ type: 'hostReady' }, id); } catch (_) {}
+  });
+
+  return roomCode;
+}
+
+/**
+ * Join an existing room as client.
+ * Resolves once the host sends a `hostReady` handshake (or times out after 20 s).
+ */
+export async function joinRoom(hostRoomCode) {
+  _destroyRoom();
+  _selfId = _makeUUID();
 
   return new Promise((resolve, reject) => {
-    if (_peer) { _peer.destroy(); _peer = null; }
-    _connections.clear();
-
-    let settled = false;
-    const done = (fn, val) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
-      fn(val);
-    };
+    let resolved = false;
 
     const timer = setTimeout(() => {
-      if (_peer) { _peer.destroy(); _peer = null; }
-      _connections.clear();
-      done(reject, new Error(
+      if (resolved) return;
+      _destroyRoom();
+      reject(new Error(
         'Connection timed out. Make sure the host is online and sharing the correct room code.'
       ));
     }, 20000);
 
-    _peer = new Peer(opts);
-    _peer.on('open', () => {
-      // Brief delay so cloud signaling server has joiner registered (PeerJS timing quirk)
-      setTimeout(() => {
-        if (settled || !_peer) return;
-        const conn = _peer.connect(hostPeerId, { reliable: true });
+    _room = trysteroJoin({ appId: APP_ID, rtcConfig: RTC_CONFIG }, hostRoomCode);
 
-        const markOpen = () => {
-          if (settled) return;
-          _connections.set(hostPeerId, conn);
-          conn.on('data', (data) => _listeners.forEach(fn => fn(hostPeerId, data)));
-          conn.on('close', () => _connections.delete(hostPeerId));
-          done(resolve, _peer.id);
-        };
-
-        // PeerJS quirk: conn.on('open') can be delayed — also resolve when we receive the
-        // host's first handshake message so we don't wait unnecessarily.
-        conn.on('data', (data) => {
-          const msg = data && typeof data === 'object' ? data : (typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch (_) { return null; } })() : null);
-          if (msg && msg.type === 'hostReady') markOpen();
-        });
-        conn.on('open', () => markOpen());
-        conn.on('error', (err) => {
-          const detail = err && err.message ? err.message : String(err);
-          done(reject, new Error('Could not connect to host: ' + detail));
-        });
-      }, 500);
-    });
-    _peer.on('error', (err) => {
-      const detail = err && err.message ? err.message : String(err);
-      done(reject, new Error('Signaling error: ' + detail + '. Check your internet connection.'));
+    _wireRoom(_room, (data, peerId) => {
+      // Resolve on first hostReady — connection is established.
+      if (!resolved && data && data.type === 'hostReady') {
+        resolved = true;
+        clearTimeout(timer);
+        resolve(_selfId);
+      }
+      // Always dispatch to subscribers (start signal, snapshots, etc.).
+      _listeners.forEach(fn => fn(peerId, data));
     });
   });
 }
 
-/** Send data to one peer (host sends to one client; client sends to host) */
+/** Send data to one specific peer (by Trystero peer id). */
 export function send(peerId, data) {
-  const conn = _connections.get(peerId);
-  if (conn && conn.open) conn.send(data);
+  if (_sendMsg) {
+    try { _sendMsg(data, peerId); } catch (_) {}
+  }
 }
 
-/** Broadcast to all connected peers */
+/** Broadcast data to all connected peers. */
 export function broadcast(data) {
-  _connections.forEach((conn, peerId) => {
-    if (conn.open) conn.send(data);
-  });
+  if (_sendMsg) {
+    try { _sendMsg(data); } catch (_) {}
+  }
 }
 
-/** Register listener: fn(peerId, data) */
+/**
+ * Register a data listener: fn(peerId, data).
+ * Returns an unsubscribe function.
+ */
 export function onReceive(fn) {
   _listeners.push(fn);
-  return () => { const i = _listeners.indexOf(fn); if (i >= 0) _listeners.splice(i, 1); };
+  return () => {
+    const i = _listeners.indexOf(fn);
+    if (i >= 0) _listeners.splice(i, 1);
+  };
 }
 
-/** Disconnect and destroy peer */
+/** Leave the room and clean up. */
 export function disconnect() {
-  _connections.forEach(c => c.close());
-  _connections.clear();
-  if (_peer) { _peer.destroy(); _peer = null; }
+  _destroyRoom();
   _roomCode = null;
+  _listeners.length = 0;
 }
 
-/** Current peer id (host room code or our id when client) */
-export function getPeerId() { return _peer ? _peer.id : null; }
+/** Our session peer id (host = room code UUID, client = ephemeral UUID). */
+export function getPeerId() { return _selfId; }
 
-/** Room code when we are host */
+/** Room code — non-null only when we are host. */
 export function getRoomCode() { return _roomCode; }
 
-/** All connected peer ids */
-export function getConnectionIds() { return Array.from(_connections.keys()); }
+/** Trystero peer ids of all currently connected remote peers. */
+export function getConnectionIds() { return Array.from(_peers); }

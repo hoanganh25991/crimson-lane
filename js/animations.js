@@ -20,10 +20,13 @@ export function updateHeroAnim(hero, dt) {
 
   // Reset time when state changes
   if (anim !== hero._prevAnim) {
+    // Reset die rotation when leaving die state
+    if (hero._prevAnim === 'die') {
+      hero.group.rotation.x = 0;
+      hero.group.rotation.z = 0;
+    }
     hero.animTime = 0;
     hero._prevAnim = anim;
-    // Reset die rotation when leaving die state
-    if (hero._prevAnim === 'die') hero.group.rotation.x = 0;
   }
 
   // Attack anim runs at attack speed, others at normal

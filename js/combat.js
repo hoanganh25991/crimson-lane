@@ -2,7 +2,7 @@
 import { G } from './state.js';
 import { scene } from './scene.js';
 import { camera } from './scene.js';
-import { spawnParticles } from './particles.js';
+import { spawnParticles, spawnRing } from './particles.js';
 import { playSound } from './audio.js';
 
 // ─── Damage display ─────────────────────────────────────────────────────────────
@@ -67,7 +67,19 @@ export function killEntity(entity) {
 function onHeroDeath(hero) {
   hero.respawnMax = 5 + hero.level*4;
   hero.respawnTimer = hero.respawnMax;
-  hero.group.visible = false;
+
+  // White flash on death before hiding
+  if (hero.group) {
+    hero.group.traverse(child => {
+      if (child.isMesh && child.material && child.material.emissive) {
+        child.material.emissive.set(0xffffff);
+      }
+    });
+    setTimeout(() => {
+      if (hero.group) hero.group.visible = false;
+    }, 200);
+  }
+
   hero.moveTarget = null;
   hero.attackTarget = null;
   hero.channeling = 0;
@@ -221,6 +233,8 @@ function onLevelUp(h) {
   if(toUp) G.skillLevels[toUp] = Math.min(4, G.skillLevels[toUp]+1);
   if(updateSkillUI) updateSkillUI();
   spawnParticles(h.x, h.z, 0xffcc44, 8);
+  spawnRing(h.x, h.z, '#ffdd44', 1.5);
+  spawnRing(h.x, h.z, '#ffffff', 0.8);
 }
 
 function onBotLevelUp(hero) {

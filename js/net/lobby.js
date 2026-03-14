@@ -1,5 +1,5 @@
-// ─── MULTIPLAYER LOBBY LOGIC ────────────────────────────────────────────────────
-// Create/join room, room code, QR, player list. PeerJS must be loaded.
+// ─── MULTIPLAYER LOBBY LOGIC ─────────────────────────────────────────────────
+// Create/join room, room code, QR, player list. Uses Trystero via peer.js.
 
 import * as peer from './peer.js';
 import { MSG } from './protocol.js';
@@ -82,12 +82,15 @@ export function createGame() {
 /** Join game as client. */
 export function joinGame(roomCode) {
   _joinCancelled = false;
-  return peer.joinRoom(roomCode.trim()).then(() => {
-    if (_joinCancelled) throw new Error('Cancelled');
+  return peer.joinRoom(roomCode.trim()).then((myId) => {
+    if (_joinCancelled) {
+      peer.disconnect();
+      throw new Error('Cancelled');
+    }
     showMPPanel('client');
-    return peer.getPeerId();
+    return myId;
   }).catch((err) => {
-    if (!_joinCancelled) console.error('Join room failed', err);
+    if (!_joinCancelled) console.error('Join room failed:', err.message || err);
     throw err;
   });
 }

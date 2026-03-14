@@ -1,10 +1,10 @@
 // ─── ITEM SYSTEM ────────────────────────────────────────────────────────────────
 import { G } from './state.js';
 import { HERO_REGISTRY } from './heroes/registry.js';
-import { applyDamage, getEnemiesOf } from './combat.js';
+import { applyDamage, getEnemiesOf, floatDamage } from './combat.js';
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
-import { floatDamage } from './combat.js';
+import { DIFFICULTY_PROFILES, currentDifficulty } from './ai.js';
 
 export const ITEM_DEFS = {
   // ── Basic Components ──────────────────────────────────────────────────────────
@@ -101,10 +101,8 @@ export function useItem(hero, slotIdx) {
       break;
     }
     case 'teleport': {
-      // 3-second channel then teleport to base
-      hero.channeling = 3;
-      hero.tpTarget = {x: hero.team==='scourge'?10:90, z: hero.team==='scourge'?10:90};
-      floatDamage(hero.x, hero.z, 'TELEPORTING...', '#44ffcc');
+      G.selectingTPTarget = true;
+      floatDamage(hero.x, hero.z, 'SELECT TARGET...', '#44ffcc');
       playSound('magic');
       break;
     }
@@ -139,6 +137,10 @@ export function updateAIItems(hero, dt) {
   hero.aiBuyTimer=(hero.aiBuyTimer||0)-dt;
   if(hero.aiBuyTimer>0) return;
   hero.aiBuyTimer=8;
+
+  // Gate item purchases on difficulty — easy bots rarely buy, hard bots almost always do
+  const profile = DIFFICULTY_PROFILES[currentDifficulty] || DIFFICULTY_PROFILES.normal;
+  if(Math.random() >= profile.itemBuyFreq) return;
   const mod = HERO_REGISTRY[hero.type];
   const build = (mod && mod.aiBuild) ? mod.aiBuild : [];
   for(const itemId of build) {

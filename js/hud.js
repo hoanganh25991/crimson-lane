@@ -78,6 +78,14 @@ export function updateHUD() {
     }
   }
 
+  // TP target-selection banner
+  const announcer = document.getElementById('announcer');
+  if(G.selectingTPTarget && announcer) {
+    announcer.textContent = '— SELECT TARGET STRUCTURE —';
+    announcer.style.color = '#44ffcc';
+    announcer.style.opacity = '1';
+  }
+
   // Respawn
   if(!h.alive) {
     const ro = document.getElementById('respawn-overlay');
@@ -148,6 +156,15 @@ export function updateMinimap() {
     ctx.fillRect(mx-1.5, my-1.5, 3, 3);
   }
 
+  // Barracks
+  const playerTeam = G.playerHero ? G.playerHero.team : 'scourge';
+  for(const b of G.barracks) {
+    if(!b.alive) continue;
+    ctx.fillStyle = b.team === playerTeam ? '#88ff44' : '#ff4444';
+    const mx = (b.z/100)*W, my = H-(b.x/100)*H;
+    ctx.fillRect(mx-1.5, my-1.5, 3, 3);
+  }
+
   // Creeps
   for(const c of G.creeps) {
     if(!c.alive) continue;
@@ -156,8 +173,31 @@ export function updateMinimap() {
     ctx.fillRect(mx-1,my-1,2,2);
   }
 
-  // All heroes on minimap
-  const playerTeam = G.playerHero ? G.playerHero.team : 'scourge';
+  // Fog of war vision radii (world units, squared for fast distance check)
+  const FOG_HERO_R2 = 15 * 15;
+  const FOG_TOWER_R2 = 12 * 12;
+  const FOG_CREEP_R2 = 10 * 10;
+
+  function isVisibleToAlly(ex, ez) {
+    for(const h of G.heroList) {
+      if(!h || !h.alive || h.team !== playerTeam) continue;
+      const dx = h.x - ex, dz = h.z - ez;
+      if(dx*dx + dz*dz <= FOG_HERO_R2) return true;
+    }
+    for(const t of G.towers) {
+      if(!t.alive || t.team !== playerTeam) continue;
+      const dx = t.x - ex, dz = t.z - ez;
+      if(dx*dx + dz*dz <= FOG_TOWER_R2) return true;
+    }
+    for(const c of G.creeps) {
+      if(!c.alive || c.team !== playerTeam) continue;
+      const dx = c.x - ex, dz = c.z - ez;
+      if(dx*dx + dz*dz <= FOG_CREEP_R2) return true;
+    }
+    return false;
+  }
+
+  // Heroes on minimap — enemy heroes hidden by fog of war
   for(const hero of G.heroList) {
     if(!hero || !hero.alive) continue;
     const mx=(hero.z/100)*W, my=H-(hero.x/100)*H;
@@ -171,6 +211,7 @@ export function updateMinimap() {
       ctx.fillStyle='#44ff44';
       ctx.beginPath(); ctx.arc(mx,my,2.5,0,Math.PI*2); ctx.fill();
     } else {
+      if(!isVisibleToAlly(hero.x, hero.z)) continue;
       ctx.fillStyle='#ff4444';
       ctx.beginPath(); ctx.arc(mx,my,2.5,0,Math.PI*2); ctx.fill();
     }

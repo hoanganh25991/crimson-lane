@@ -9,7 +9,7 @@ import { spawnWave, updateCreeps, initNeutralCamps, updateNeutralCamps } from '.
 import { buildTowers, buildBarracks, updateTowers, updateBarracks } from './towers.js';
 import { updateProjectiles, moveToward, spawnProjectile, floatDamage, applyDamage } from './combat.js';
 import { updateSkillCDs, castSkill, processAssassinateEffect } from './skills.js';
-import { updateAI } from './ai.js';
+import { updateAI, setDifficulty } from './ai.js';
 import { initControls, joystick, keys } from './controls.js';
 import { updateHUD, updateMinimap, updateSkillUI, showAnnouncer, drawPortrait } from './hud.js';
 import { playSound, playMainTheme, stopMainTheme } from './audio.js';
@@ -169,6 +169,14 @@ export function startGame() {
     });
   }
 
+  // Wire recenter button
+  const recenterBtn = document.getElementById('recenter-btn');
+  if(recenterBtn) {
+    recenterBtn.addEventListener('click', function() {
+      if(G.playerHero) camTarget.set(G.playerHero.x, 0, G.playerHero.z);
+    });
+  }
+
   // Init controls
   initControls();
 
@@ -255,7 +263,13 @@ function updateHeroes(dt) {
       if(h.respawnTimer <= 0) respawnHero(h);
     } else {
       if(h.slowTimer>0) h.slowTimer-=dt;
-      if(h.stunTimer>0){h.stunTimer-=dt;}
+      if(h.stunTimer>0){
+        h.stunTimer-=dt;
+        if(h.tpTarget || G.selectingTPTarget) {
+          h.tpTarget=null; h.channeling=0; G.selectingTPTarget=false;
+          floatDamage(h.x,h.z,'TP CANCELLED','#ff4444');
+        }
+      }
       else if(h.channeling>0){
         const prev=h.channeling; h.channeling-=dt;
         if(h.channeling<=0 && prev>0 && h.tpTarget) {
@@ -844,6 +858,16 @@ function buildLobbyHeroCards() {
   }
 }
 buildLobbyHeroCards();
+
+// ─── DIFFICULTY SELECTOR ───────────────────────────────────────────────────────
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    setDifficulty(btn.dataset.diff);
+    G.difficulty = btn.dataset.diff;
+  });
+});
 
 // Client: when host starts, receive hero/side and start game
 mpLobby.onStartSignal((data) => {

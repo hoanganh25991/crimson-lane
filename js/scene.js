@@ -59,8 +59,8 @@ export function onResize() {
   renderer.setSize(w, h);
 }
 
-// Offset so view matches minimap: base at bottom-left, hero in lower-left of screen
-const CAM_LOOK_OFFSET = 18;
+// Small offset so hero sits slightly toward upper-left of center (Dota 1 feel)
+const CAM_LOOK_OFFSET = 8;
 
 export function updateCamera(_dt, playerHero) {
   if (playerHero && playerHero.alive) {

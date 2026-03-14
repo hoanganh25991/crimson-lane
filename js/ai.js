@@ -7,10 +7,20 @@ import { applyDamage, getEnemiesOf, getEnemyHeroesOf, findEnemyNear, killEntity,
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
 
+export const DIFFICULTY_PROFILES = {
+  easy:   { reactionTime: [8, 12],  retreatHpPct: 0.40, castAccuracy: 0.5,  itemBuyFreq: 0.3 },
+  normal: { reactionTime: [6, 10],  retreatHpPct: 0.25, castAccuracy: 0.75, itemBuyFreq: 0.6 },
+  hard:   { reactionTime: [2, 5],   retreatHpPct: 0.15, castAccuracy: 0.95, itemBuyFreq: 0.9 },
+};
+export let currentDifficulty = 'normal';
+export function setDifficulty(d) { currentDifficulty = d; }
+
 export function updateAI(hero, dt) {
   if(!hero.alive) return;
   if(hero.stunTimer>0){hero.stunTimer-=dt;return;}
   if(hero.slowTimer>0) hero.slowTimer-=dt;
+
+  const profile = DIFFICULTY_PROFILES[currentDifficulty] || DIFFICULTY_PROFILES.normal;
 
   // Mana regen near fountain
   const fountain = hero.team==='scourge'?{x:10,z:10}:{x:90,z:90};
@@ -35,8 +45,8 @@ export function updateAI(hero, dt) {
     if(d<nearestHeroDist){nearestHeroDist=d;nearestHero=eh;}
   }
 
-  // State transitions
-  if(hero.hp < hero.maxHp*0.25) { hero.aiState='retreat'; }
+  // State transitions — retreat threshold tuned by difficulty
+  if(hero.hp < hero.maxHp * profile.retreatHpPct) { hero.aiState='retreat'; }
   else if(nearestHero && nearestHeroDist <= hero.def.range+1) hero.aiState='fight';
   else if(hero.aiState==='fight' && (!nearestHero || nearestHeroDist > hero.def.range+4)) hero.aiState='march';
 
@@ -81,12 +91,12 @@ export function updateAI(hero, dt) {
         moveToward(hero, target.x, target.z, dt);
       }
 
-      // Skill casting
+      // Skill casting — reaction time tuned by difficulty
       if(nearestHero && nearestHeroDist < 20) {
         hero.aiCastTimer -= dt;
         if(hero.aiCastTimer<=0) {
-          hero.aiCastTimer = 6 + Math.random()*4;
-          castAISkill(hero, nearestHero);
+          hero.aiCastTimer = profile.reactionTime[0] + Math.random() * (profile.reactionTime[1] - profile.reactionTime[0]);
+          castAISkill(hero, nearestHero, profile);
         }
       }
     } else {
@@ -118,9 +128,11 @@ export function updateAI(hero, dt) {
   }
 }
 
-function castAISkill(aiHero, target) {
+function castAISkill(aiHero, target, profile) {
   const mod = HERO_REGISTRY[aiHero.type];
   if (!mod || !mod.castAISkill) return;
+  // Cast accuracy: lower difficulty bots miss spells
+  if (Math.random() > (profile ? profile.castAccuracy : 1)) return;
   const manaCost = 100;
   if (aiHero.mp < manaCost) return;
   aiHero.mp -= manaCost;

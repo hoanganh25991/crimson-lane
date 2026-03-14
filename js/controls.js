@@ -2,7 +2,7 @@
 import { G } from './state.js';
 import { camera, groundPlane } from './scene.js';
 import { castSkill } from './skills.js';
-import { getEnemiesOf } from './combat.js';
+import { getEnemiesOf, floatDamage } from './combat.js';
 
 export const joystick = {active:false, dx:0, dz:0, wx:0, wz:0, startX:0, startY:0, ox:0, oy:0};
 export const keys = {};
@@ -121,6 +121,30 @@ export function initControls() {
       return;
     }
 
+    if(G.selectingTPTarget) {
+      const hits = raycaster.intersectObject(groundPlane);
+      if(hits.length) {
+        const pos = hits[0].point;
+        const alliedStructures = G.towers.filter(t => t.team === h.team && t.alive);
+        let nearest = null, nearestDist = Infinity;
+        for(const t of alliedStructures) {
+          const dx = t.x - pos.x, dz = t.z - pos.z;
+          const d = Math.sqrt(dx*dx + dz*dz);
+          if(d < nearestDist) { nearestDist = d; nearest = t; }
+        }
+        G.selectingTPTarget = false;
+        if(nearest && nearestDist <= 20) {
+          h.tpTarget = { x: nearest.x, z: nearest.z };
+        } else {
+          // Fallback: teleport to own base fountain
+          h.tpTarget = { x: h.team==='scourge'?10:90, z: h.team==='scourge'?10:90 };
+        }
+        h.channeling = 3;
+        floatDamage(h.x, h.z, 'TELEPORTING...', '#44ffcc');
+      }
+      return;
+    }
+
     // Attack targets: enemies + neutral creeps + deniable allied creeps (<50% HP)
     const enemyHeroes = G.heroList.filter(eh=>eh&&eh.alive&&eh.team!==h.team);
     const allEntities = [...G.creeps, ...G.towers, ...G.barracks, ...enemyHeroes].filter(e=>e&&e.alive);
@@ -154,6 +178,14 @@ export function initControls() {
       case 'w': case 'W': castSkill('W'); break;
       case 'e': case 'E': castSkill('E'); break;
       case 'r': case 'R': castSkill('R'); break;
+      case 'Escape':
+        if(G.targetingSkill){
+          G.targetingSkill=null;
+          document.body.classList.remove('targeting-skill');
+          ['Q','W','E','R'].forEach(k=>{const el=document.getElementById('sb'+k);if(el)el.classList.remove('active-target');});
+        }
+        if(G.selectingTPTarget){G.selectingTPTarget=false;}
+        break;
       case ' ': if(h){h.moveTarget=null;h.attackTarget=null;} e.preventDefault(); break;
       case 'b': case 'B': if(window.toggleShop) window.toggleShop(); break;
       case 'a': case 'A': {
@@ -178,13 +210,106 @@ export function initControls() {
     camera.updateProjectionMatrix();
   });
 
-  // Mobile skill buttons
-  document.querySelectorAll('.skill-btn').forEach(btn=>{
-    btn.addEventListener('touchstart', e=>{
+  // ─── Mobile skill buttons: drag-to-aim + double-tap auto-target ─────────────
+  const DRAG_THRESHOLD = 20;    // px — below this is a tap, not a drag
+  const DOUBLE_TAP_MS  = 300;   // ms — window for double-tap detection
+  const CAST_RANGE     = 500;   // world units — drag-cast projection distance
+
+  const aimIndicator = document.getElementById('aim-indicator');
+  const aimArrow     = document.getElementById('aim-arrow');
+
+  const skillDrag    = { active: false, key: null, startX: 0, startY: 0, touchId: -1 };
+  const lastSkillTap = { key: null, time: 0 };
+
+  const dragRaycaster = new THREE.Raycaster();
+  const dragMouse     = new THREE.Vector2();
+
+  function touchWorldPos(clientX, clientY) {
+    dragMouse.x = (clientX / window.innerWidth) * 2 - 1;
+    dragMouse.y = -(clientY / window.innerHeight) * 2 + 1;
+    dragRaycaster.setFromCamera(dragMouse, camera);
+    const hits = dragRaycaster.intersectObject(groundPlane);
+    return hits.length ? { x: hits[0].point.x, z: hits[0].point.z } : null;
+  }
+
+  document.querySelectorAll('.skill-btn').forEach(btn => {
+    btn.addEventListener('touchstart', e => {
       e.preventDefault();
-      const key = e.currentTarget.id.replace('sb','');
-      castSkill(key);
-    },{passive:false});
+      const key = btn.id.replace('sb', '');
+      const t   = e.changedTouches[0];
+      skillDrag.active  = true;
+      skillDrag.key     = key;
+      skillDrag.startX  = t.clientX;
+      skillDrag.startY  = t.clientY;
+      skillDrag.touchId = t.identifier;
+      aimIndicator.style.left    = t.clientX + 'px';
+      aimIndicator.style.top     = t.clientY + 'px';
+      aimIndicator.style.display = 'block';
+      aimArrow.style.transform   = 'rotate(0deg)';
+    }, { passive: false });
+
+    btn.addEventListener('touchmove', e => {
+      e.preventDefault();
+      if (!skillDrag.active) return;
+      const t = Array.from(e.changedTouches).find(ct => ct.identifier === skillDrag.touchId);
+      if (!t) return;
+      const dx    = t.clientX - skillDrag.startX;
+      const dy    = t.clientY - skillDrag.startY;
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      aimArrow.style.transform = `rotate(${angle}deg)`;
+    }, { passive: false });
+
+    btn.addEventListener('touchend', e => {
+      e.preventDefault();
+      if (!skillDrag.active) return;
+      const t = Array.from(e.changedTouches).find(ct => ct.identifier === skillDrag.touchId);
+      if (!t) return;
+      const dx   = t.clientX - skillDrag.startX;
+      const dy   = t.clientY - skillDrag.startY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const key  = skillDrag.key;
+      skillDrag.active = false;
+      aimIndicator.style.display = 'none';
+
+      if (dist >= DRAG_THRESHOLD) {
+        // ── Drag cast: project finger endpoint to world ground ──────────────
+        const worldPos = touchWorldPos(t.clientX, t.clientY);
+        if (worldPos) {
+          castSkill(key, worldPos, null);
+        } else {
+          // Fallback: project drag direction from hero position
+          const h = G.playerHero;
+          if (h && dist > 0) {
+            // Camera is from west: screenX→world+Z, screenY→world+X (inverted)
+            const nx = dx / dist, ny = dy / dist;
+            castSkill(key, { x: h.x + (-ny) * CAST_RANGE * 0.5, z: h.z + nx * CAST_RANGE * 0.5 }, null);
+          }
+        }
+      } else {
+        // ── Tap: check for double-tap ────────────────────────────────────────
+        const now = Date.now();
+        if (lastSkillTap.key === key && (now - lastSkillTap.time) < DOUBLE_TAP_MS) {
+          lastSkillTap.key = null;
+          // Double-tap: auto-cast on nearest enemy hero in range
+          const h = G.playerHero;
+          if (h) {
+            const enemies = getEnemiesOf(h.team).filter(en => en.alive);
+            let best = null, bestD = Infinity;
+            for (const en of enemies) {
+              const edx = en.x - h.x, edz = en.z - h.z;
+              const d   = Math.sqrt(edx * edx + edz * edz);
+              if (d <= CAST_RANGE && d < bestD) { bestD = d; best = en; }
+            }
+            castSkill(key, best ? { x: best.x, z: best.z } : null, best || null);
+          }
+        } else {
+          // Single tap: enter targeting mode or cast (existing behavior)
+          lastSkillTap.key  = key;
+          lastSkillTap.time = now;
+          castSkill(key);
+        }
+      }
+    }, { passive: false });
   });
 
   // Attack button — find nearest enemy, set target, fire immediately

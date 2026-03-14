@@ -2,7 +2,7 @@
 
 **Purpose:** Single entry point for the Dota 1–like mobile game. Scope, specs, progress, and backlog live here.
 
-**Stack:** Three.js · HTML/CSS/JS · Solo vs AI · WebRTC/PeerJS multiplayer (host/join, room code, QR).
+**Stack:** Three.js · HTML/CSS/JS · Solo vs AI · WebRTC/Trystero multiplayer (host/join, room code, QR).
 
 ---
 
@@ -72,13 +72,16 @@ Verified against code — these features are shipped and working.
 | **Creeps** | Lane creeps (melee + ranged), waypoints, last hit, deny, XP, gold. |
 | **Neutral camps** | 6 camps, tiered units, leash radius, respawn timer, gold/XP rewards. |
 | **Structures** | 18 towers (tier 1–4), 6 barracks (destroyable, HP, death → mega-creep upgrade), 2 Ancients (win condition). |
-| **Items** | 13 items (6 basic, 6 upgrade, TP Scroll), recipes, passives, actives (Blink, Teleport, Mana Restore, Void Burst), shop, 6-slot inventory. |
-| **HUD** | Top bar (portraits, HP, time, gold), hero bars (HP/MP/XP/level/KDA), skill bar (Q/W/E/R, cooldowns, mana), attack button, inventory, shop button, minimap (click-to-pan), announcer (First Blood, Kill Streak, Barracks Fallen, etc.). |
+| **Items** | 13 items (6 basic, 6 upgrade, TP Scroll), recipes, passives, actives (Blink, Teleport, Mana Restore, Void Burst), shop, 6-slot inventory. TP Scroll full spec: stun cancels channel entirely (not just pauses); player selects any allied tower as TP target via click-to-target mode with HUD banner; base fountain fallback; Escape to cancel. |
+| **HUD** | Top bar (portraits, HP, time, gold), hero bars (HP/MP/XP/level/KDA), skill bar (Q/W/E/R, cooldowns, mana), attack button, inventory (2×3 grid right-side above skillbar), shop button (top of inventory panel), minimap (click-to-pan), announcer (First Blood, Kill Streak, Barracks Fallen, etc.). Layout improved: inventory moved from bottom-center to right side freeing up game view; HUD panels semi-transparent (idle-fade to 0.35 after 4s); camera offset reduced to keep hero more centered. |
 | **Match end** | Victory / Defeat screen on Ancient destruction. |
-| **Multiplayer** | PeerJS networking (`js/net/`: peer, protocol, host, client, lobby). Create/Join game, room code, QR code, hero pick (both host and client pick own hero in lobby), host starts; host broadcasts state snapshots. Fixed: MP screen visibility (z-index + showScreen integration), loading/error feedback on connect, client hero picker with "WAITING FOR HOST" start button. Fixed join stuck: 20s timeout on `joinRoom`/`createRoom`, `cancelJoin()` in lobby.js; Back button aborts in-flight connection immediately; Connect btn shows countdown `Connecting... (Ns)` and clears error on retry. Connection reliability: always uses cloud PeerJS (`0.peerjs.com`) + 4× Google STUN + free public TURN relay (`openrelay.metered.ca`) — works across different networks/NATs and same-machine browser tabs. Removed local PeerJS server auto-detection (caused "host not reached" timeout). Rotate peer ID automatically on "ID taken" error. Optional Metered TURN via `METERED_TURN_APP_NAME`+`METERED_TURN_API_KEY` in `js/net/peer.js`. Actionable error messages distinguish timeout vs signaling vs NAT failure. |
+| **Multiplayer** | Trystero networking (`js/net/`: peer, protocol, host, client, lobby). Create/Join game, room code, QR code, hero pick (both host and client pick own hero in lobby), host starts; host broadcasts state snapshots. **Migrated PeerJS → Trystero (torrent strategy)**: signaling now uses distributed BitTorrent tracker infrastructure instead of a single cloud server (`0.peerjs.com`) — eliminates the recurring "Connection timed out" failure. 20 s join timeout, `cancelJoin()`, Back button abort, `hostReady` handshake all preserved. 4× Google STUN + openrelay TURN still configured for symmetric-NAT traversal. Trystero loaded via `esm.sh` CDN import in `js/net/peer.js`; external peer API unchanged so all callers are unaffected. |
 | **Controls** | Desktop (arrow keys, click move/attack, Q/W/E/R, Space stop, scroll zoom, B shop). Mobile (joystick, attack button, skill buttons). |
-| **AI** | Hero bots (lane march, fight, retreat, fountain regen, skill casting, item buying). Creep AI (lane pathing, target priority). |
+| **AI** | Hero bots (lane march, fight, retreat, fountain regen, skill casting, item buying). Creep AI (lane pathing, target priority). **Bot difficulty presets** (Easy/Normal/Hard) tuning retreat HP threshold, cast reaction time, spell accuracy, and item-buy frequency — lobby UI selector wired through `js/ai.js` → `js/items.js`. |
 | **Audio** | 18 SFX (hit, ranged, magic, death, levelup, gold, spawn, respawn, tower hit/death, frost, shrapnel, chain frost, assassinate channel/fire, fire, windrun, buy). Procedural main theme. |
+| **Polish VFX** | Level-up ring burst: two `spawnRing` calls (gold 1.5u + white 0.8u) added to `onLevelUp()` in `combat.js`. Hero death white flash: `group.traverse` sets emissive to white on kill, `setTimeout 200ms` hides the group. Respawn rotation fix: `animations.js` now checks `_prevAnim === 'die'` before overwriting it, resetting `group.rotation.x/z` when leaving die state. |
+| **Minimap fog of war & entity dots** | Enemy heroes hidden on minimap unless within vision of any allied hero (15u), tower (12u), or creep (10u). Barracks dots drawn (green=allied, red=enemy). Recenter ⌖ button below minimap snaps camera to player hero. (js/hud.js, index.html, js/main.js) |
+| **Ability UX — drag-to-aim & double-tap** | Mobile skill buttons (Q/W/E/R) support three gestures: (1) drag >20px → gold arrow aim indicator at touchstart, casts at lift-off world position (raycasted to ground plane); (2) double-tap within 300ms → auto-casts on nearest enemy hero within 500u; (3) single tap → existing click-to-confirm targeting mode. Pulsing "TAP TARGET" hint above skill bar during targeting. Escape cancels targeting mode. (js/controls.js, index.html) |
 
 ### Requirements Plan `#mvp`
 
@@ -86,11 +89,7 @@ Scoped and spec'd — ready to implement. Ordered by priority.
 
 | # | Item | Tags | Spec detail |
 |---|------|------|-------------|
-| 1 | **Minimap — fog of war & entity dots** | `#ui` `#ux` | Fog of war overlay; show dots for towers, barracks, creeps, heroes; recenter button. |
-| 2 | **Ability UX — drag-to-aim & double-tap** | `#ux` `#skills` | Drag-to-aim directional/area skills; double-tap for auto-target nearest; skill-specific VFX per [heroes.md](heroes.md). |
-| 3 | **TP Scroll — full spec** | `#items` `#ux` | Interrupt channel on stun/death; restrict target to allied structures only (not just base). Currently teleports to base with 3s channel. |
-| 4 | **Bot difficulty presets** | `#ai` | Easy / Normal / Hard with tunable aggression, cast accuracy, item buy priority, reaction time. |
-| 5 | **Tests & balance** | `#technical` | Unit/simulation tests for combat formulas; balance doc for hero stats, item costs, XP/gold curves. |
+| 1 | **Tests & balance** | `#technical` | Unit/simulation tests for combat formulas; balance doc for hero stats, item costs, XP/gold curves. |
 
 ### Backlog (future — not yet scoped)
 
