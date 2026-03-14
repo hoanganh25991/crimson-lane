@@ -580,6 +580,9 @@ document.getElementById('btn-play').onclick = () => {
   playModeOptions.style.display = 'none';
   playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
   playSideOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  // Default team size selection (3 vs 3)
+  const defaultModeBtn = playModeOptions.querySelector('.opt-btn[data-mode="' + (G.teamSize || 3) + '"]');
+  if (defaultModeBtn) defaultModeBtn.classList.add('selected');
   // Ensure a side is always selected so G.playerSide is never wrong
   let sideSelected = playSideOptions.querySelector('.opt-btn.selected');
   if (!sideSelected) {
@@ -620,6 +623,11 @@ document.getElementById('play-continue-btn').onclick = () => {
     playFlowTitle.textContent = 'Choose team size';
     playSideOptions.style.display = 'none';
     playModeOptions.style.display = 'flex';
+    let modeSelected = playModeOptions.querySelector('.opt-btn.selected');
+    if (!modeSelected) {
+      const defaultModeBtn = playModeOptions.querySelector('.opt-btn[data-mode="' + (G.teamSize || 3) + '"]');
+      if (defaultModeBtn) { defaultModeBtn.classList.add('selected'); modeSelected = defaultModeBtn; }
+    }
     return;
   }
   const modeSelected = playModeOptions.querySelector('.opt-btn.selected');
@@ -663,6 +671,9 @@ window.lobbyBack = function() {
   playFlowTitle.textContent = 'Choose team size';
   playSideOptions.style.display = 'none';
   playModeOptions.style.display = 'flex';
+  playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  const defaultModeBtn = playModeOptions.querySelector('.opt-btn[data-mode="' + (G.teamSize || 3) + '"]');
+  if (defaultModeBtn) defaultModeBtn.classList.add('selected');
 };
 
 // Start on main menu; lobby hidden until Play → Continue
