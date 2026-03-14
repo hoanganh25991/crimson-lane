@@ -3,7 +3,7 @@ import { WAYPOINTS } from './constants.js';
 import { G } from './state.js';
 import { HERO_REGISTRY } from './heroes/registry.js';
 import { scene } from './scene.js';
-import { applyDamage, getEnemiesOf, getEnemyHeroesOf, spawnProjectile, spawnSpellProjectile, moveToward } from './combat.js';
+import { applyDamage, getEnemiesOf, getEnemyHeroesOf, findEnemyNear, killEntity, floatDamage, spawnProjectile, spawnSpellProjectile, moveToward } from './combat.js';
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
 
