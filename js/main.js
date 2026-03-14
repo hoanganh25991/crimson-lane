@@ -545,6 +545,7 @@ document.getElementById('play-continue-btn').onclick = () => {
   if (playFlowStep === 0) {
     const sideSelected = playSideOptions.querySelector('.opt-btn.selected');
     if (!sideSelected) return;
+    G.playerSide = sideSelected.dataset.side; // sync from visible selection so lobby always has correct side
     playFlowStep = 1;
     playFlowTitle.textContent = 'Choose team size';
     playSideOptions.style.display = 'none';
@@ -554,6 +555,8 @@ document.getElementById('play-continue-btn').onclick = () => {
   const modeSelected = playModeOptions.querySelector('.opt-btn.selected');
   if (!modeSelected) return;
   G.teamSize = parseInt(modeSelected.dataset.mode, 10);
+  const sideEl = document.getElementById('lobby-side-name');
+  if (sideEl) sideEl.textContent = (G.playerSide === 'sentinel' ? 'Sentinel' : 'Scourge');
   showScreen('lobby');
 };
 

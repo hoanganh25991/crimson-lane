@@ -196,10 +196,11 @@ function onLevelUp(h) {
 }
 
 // ─── Enemy/Ally queries ─────────────────────────────────────────────────────────
+// Use actual hero.team so either side can be player or AI
 export function getEnemiesOf(team) {
   const enemies = [];
-  const eh = team==='scourge' ? G.aiHero : G.playerHero;
-  if(eh && eh.alive) enemies.push(eh);
+  if (G.playerHero && G.playerHero.alive && G.playerHero.team !== team) enemies.push(G.playerHero);
+  if (G.aiHero && G.aiHero.alive && G.aiHero.team !== team) enemies.push(G.aiHero);
   for(const c of G.creeps) { if(c.alive && c.team !== team && c.team !== 'neutral') enemies.push(c); }
   for(const t of G.towers) { if(t.alive && t.team !== team) enemies.push(t); }
   for(const b of G.barracks) { if(b.alive && b.team !== team) enemies.push(b); }
