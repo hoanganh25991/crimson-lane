@@ -22,7 +22,6 @@ export function playSound(type) {
       case 'death': osc.type='sawtooth'; osc.frequency.setValueAtTime(300,t); osc.frequency.exponentialRampToValueAtTime(80,t+0.6); gain.gain.setValueAtTime(0.15,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.7); break;
       case 'levelup': osc.type='sine'; osc.frequency.setValueAtTime(523,t); osc.frequency.setValueAtTime(659,t+0.1); osc.frequency.setValueAtTime(784,t+0.2); gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.5); break;
       case 'gold': osc.type='sine'; osc.frequency.value=880; gain.gain.setValueAtTime(0.12,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.15); break;
-      case 'tower': osc.type='square'; osc.frequency.setValueAtTime(120,t); gain.gain.setValueAtTime(0.15,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.1); break;
       case 'spawn': osc.type='sine'; osc.frequency.setValueAtTime(300,t); osc.frequency.exponentialRampToValueAtTime(600,t+0.4); gain.gain.setValueAtTime(0.18,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.5); break;
       case 'ranged_hit': osc.type='square'; osc.frequency.value=220; gain.gain.setValueAtTime(0.08,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.06); break;
       case 'tower_hit': osc.type='square'; osc.frequency.value=140; gain.gain.setValueAtTime(0.13,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.09); break;
@@ -33,6 +32,9 @@ export function playSound(type) {
       case 'assassinate_channel': osc.type='sine'; osc.frequency.value=440; gain.gain.setValueAtTime(0.08,t); gain.gain.linearRampToValueAtTime(0.15,t+1.7); break;
       case 'assassinate_fire': osc.type='sawtooth'; osc.frequency.setValueAtTime(600,t); osc.frequency.exponentialRampToValueAtTime(150,t+0.5); gain.gain.setValueAtTime(0.2,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.6); break;
       case 'respawn': osc.type='sine'; osc.frequency.setValueAtTime(400,t); osc.frequency.setValueAtTime(600,t+0.15); osc.frequency.setValueAtTime(800,t+0.3); gain.gain.setValueAtTime(0.15,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.5); break;
+      case 'fire': osc.type='sawtooth'; osc.frequency.setValueAtTime(200,t); osc.frequency.exponentialRampToValueAtTime(80,t+0.4); gain.gain.setValueAtTime(0.14,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.45); break;
+      case 'windrun': osc.type='sine'; osc.frequency.setValueAtTime(300,t); osc.frequency.exponentialRampToValueAtTime(800,t+0.15); osc.frequency.exponentialRampToValueAtTime(400,t+0.35); gain.gain.setValueAtTime(0.12,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.4); break;
+      case 'buy': osc.type='sine'; osc.frequency.setValueAtTime(660,t); osc.frequency.setValueAtTime(880,t+0.08); gain.gain.setValueAtTime(0.13,t); gain.gain.exponentialRampToValueAtTime(0.001,t+0.25); break;
     }
     osc.start(t); osc.stop(t+1);
   } catch(e){}

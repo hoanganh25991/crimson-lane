@@ -102,6 +102,7 @@ export function initControls() {
     const h = G.playerHero;
     switch(e.key) {
       case 'q': case 'Q': castSkill('Q'); break;
+      case 'w': case 'W': castSkill('W'); break;
       case 'e': case 'E': castSkill('E'); break;
       case 'r': case 'R': castSkill('R'); break;
       case ' ': if(h){h.moveTarget=null;h.attackTarget=null;} e.preventDefault(); break;

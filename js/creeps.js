@@ -225,7 +225,7 @@ export function updateCreeps(dt) {
       }
     } else {
       creep.attackTarget = null;
-      if(creep.wpIndex < creep.wps.length) {
+      if(creep.wps && creep.wpIndex < creep.wps.length) {
         const wp = creep.wps[creep.wpIndex];
         const dx=wp.x-creep.x, dz=wp.z-creep.z;
         if(Math.sqrt(dx*dx+dz*dz)<1.5) creep.wpIndex++;

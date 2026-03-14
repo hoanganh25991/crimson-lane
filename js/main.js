@@ -169,10 +169,10 @@ function updateHeroes(dt) {
       else {
         // Arrow/WASD continuous movement (with camera fix: screen-up = world +x+z)
         let kx=0, kz=0;
-        if(keys['ArrowUp']   ||keys['w']||keys['W']) { kx+=1; kz+=1; }
-        if(keys['ArrowDown'] ||keys['s']||keys['S']) { kx-=1; kz-=1; }
-        if(keys['ArrowRight']||keys['d']||keys['D']) { kx-=1; kz+=1; }
-        if(keys['ArrowLeft']) { kx+=1; kz-=1; }
+        if(keys['ArrowUp'])    { kx+=1; kz+=1; }
+        if(keys['ArrowDown'])  { kx-=1; kz-=1; }
+        if(keys['ArrowRight']) { kx-=1; kz+=1; }
+        if(keys['ArrowLeft'])  { kx+=1; kz-=1; }
         if(kx!==0||kz!==0) {
           const len=Math.sqrt(kx*kx+kz*kz);
           const spd = (h.def.move+(h.itemBonus?.move||0)) * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);

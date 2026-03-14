@@ -189,7 +189,7 @@ function castDragonKnightSkill(hero, key, _pos, ent) {
     G.effects.push({mesh:flash,life:0.3,maxLife:0.3,type:'ring'});
   }
   if(key==='E') { // Breathe Fire — cone in facing direction
-    playSound('frost');
+    playSound('fire');
     const dmg = [75,150,225,300][lvl-1]||75;
     const fwdX = Math.sin(hero.group.rotation.y), fwdZ = Math.cos(hero.group.rotation.y);
     const enemies = getEnemiesOf(hero.team);
@@ -325,7 +325,7 @@ function castWindrunnerSkill(hero, key, pos, ent) {
     floatDamage(hero.x,hero.z,'POWERSHOT!','#88ff44');
   }
   if(key==='E') { // Windrun — speed + evasion
-    playSound('spawn');
+    playSound('windrun');
     hero.windrunActive = true;
     hero.windrunTimer = 3;
     spawnParticles(hero.x,hero.z,0x88ffcc,8);

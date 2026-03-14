@@ -51,7 +51,7 @@ export function buyItem(hero, itemId) {
   }
   hero.inventory.push(itemId);
   applyItemBonuses(hero, def);
-  playSound('gold');
+  playSound('buy');
   floatDamage(hero.x, hero.z, def.name, '#ffcc44');
   return true;
 }
