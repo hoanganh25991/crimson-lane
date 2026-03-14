@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Crimson Lane — Single Player</title>
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/hero-viewer.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -719,6 +720,12 @@ body.targeting-skill #targeting-hint{display:block}
   // Start idle timer after game loads
   setTimeout(()=>{ idleTimer = setTimeout(sleepPanels, IDLE_MS); }, 3000);
 })();
+</script>
+<script>
+// PWA: register service worker for offline caching
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js').catch(function() {});
+}
 </script>
 </body>
 </html>

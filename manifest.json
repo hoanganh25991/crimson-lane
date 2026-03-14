@@ -1,0 +1,13 @@
+{
+  "name": "Crimson Lane",
+  "short_name": "Crimson Lane",
+  "description": "Mobile browser MOBA — Three.js, solo vs AI, multiplayer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "theme_color": "#07070f",
+  "background_color": "#07070f",
+  "scope": "./",
+  "lang": "en",
+  "categories": ["games", "entertainment"]
+}
