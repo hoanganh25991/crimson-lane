@@ -155,11 +155,7 @@ export function initControls() {
       case ' ': if(h){h.moveTarget=null;h.attackTarget=null;} e.preventDefault(); break;
       case 'b': case 'B': if(window.toggleShop) window.toggleShop(); break;
       case 'a': case 'A': {
-        if(!h||!h.alive) break;
-        const enems = getEnemiesOf(h.team).filter(en=>en.alive);
-        let best=null,bd=Infinity;
-        for(const en of enems){const dx=en.x-h.x,dz=en.z-h.z,d=dx*dx+dz*dz;if(d<bd){bd=d;best=en;}}
-        if(best){h.attackTarget=best;h.moveTarget=null;}
+        doAttackNearest();
         break;
       }
     }
