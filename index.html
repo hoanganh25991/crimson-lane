@@ -70,6 +70,10 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #startBtn{background:#1a1a2a;border:2px solid #ffcc44;color:#ffcc44;font-size:1rem;letter-spacing:3px;text-transform:uppercase;padding:14px 48px;cursor:pointer;border-radius:3px;transition:background 0.15s}
 #startBtn:hover{background:#2a2a3a}
 #startBtn:disabled{border-color:#333;color:#555;cursor:not-allowed}
+#hero-count-hint{flex-shrink:0;text-align:center;padding:6px 16px 0;color:#555577;font-size:0.78rem;letter-spacing:1px}
+#hero-count-hint strong{color:#7777aa}
+#scroll-hint{display:none;align-items:center;justify-content:center;gap:6px;padding:4px 0 8px;color:#44445a;font-size:0.75rem;letter-spacing:1px;animation:scroll-pulse 2s ease-in-out infinite}
+@keyframes scroll-pulse{0%,100%{opacity:0.4;transform:translateY(0)}50%{opacity:0.9;transform:translateY(3px)}}
 
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none}
@@ -127,8 +131,8 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #joystick-area:active{opacity:1;}
 #joystick-outer{position:absolute;bottom:20px;left:20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12)}
 #joystick-inner{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.3);border:2px solid rgba(255,255,255,0.45);left:38px;top:38px;pointer-events:none}
-#attack-btn{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));right:calc(130px + env(safe-area-inset-right));width:54px;height:54px;border-radius:50%;background:#4a1111;border:2px solid #882222;color:#ff6666;font-size:0.7rem;font-weight:bold;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;user-select:none;opacity:0.85;transition:opacity 0.2s;}
-#attack-btn:hover,#attack-btn:active{opacity:1;}
+#attack-btn{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));right:calc(130px + env(safe-area-inset-right));width:60px;height:60px;border-radius:50%;background:#4a1111;border:2px solid #882222;color:#ff6666;font-size:0.7rem;font-weight:bold;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;user-select:none;opacity:0.85;transition:opacity 0.2s,transform 0.1s;}
+#attack-btn:hover,#attack-btn:active{opacity:1;transform:scale(0.92);}
 
 /* Announcer */
 #announcer{position:absolute;top:35%;left:50%;transform:translateX(-50%);font-size:2rem;font-weight:bold;letter-spacing:4px;text-align:center;pointer-events:none;opacity:0;transition:opacity 0.2s;text-shadow:0 2px 8px rgba(0,0,0,0.8);white-space:nowrap}
@@ -207,8 +211,8 @@ body.targeting-skill #targeting-hint{display:block}
 .inv-name{font-size:0.42rem;color:#ddd;text-align:center;letter-spacing:0.5px;pointer-events:none;line-height:1.2}
 .inv-cd{position:absolute;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#fff;font-weight:bold;pointer-events:none}
 
-/* Shop overlay */
-#shop{position:fixed;bottom:calc(env(safe-area-inset-bottom) + 8px + 130px + 200px);right:calc(env(safe-area-inset-right) + 8px);left:auto;transform:none;background:#0d0d1aee;border:1px solid #2a2a4a;border-radius:4px;width:min(92vw,360px);max-height:55vh;display:flex;flex-direction:column;z-index:50;overflow:hidden;pointer-events:auto}
+/* Shop overlay — centered modal */
+#shop{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0d0d1aee;border:1px solid #2a2a4a;border-radius:4px;width:min(92vw,380px);max-height:70vh;display:flex;flex-direction:column;z-index:100;overflow:hidden;pointer-events:auto;box-shadow:0 8px 32px rgba(0,0,0,0.7)}
 .shop-hdr{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#111122;border-bottom:1px solid #1e1e2e;flex-shrink:0}
 #shop-items{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px;overflow-y:auto;scrollbar-width:thin}
 .shop-item{background:#111118;border:1px solid #1e1e2e;border-radius:3px;padding:5px 6px;cursor:pointer;transition:border-color 0.12s;user-select:none}
@@ -395,8 +399,10 @@ body.targeting-skill #targeting-hint{display:block}
       <span id="lobby-mp-room"></span> · <span id="lobby-mp-players"></span>
     </div>
   </div>
+  <div id="hero-count-hint"></div>
   <div id="lobby-scroll">
     <div class="hero-picks" id="hero-picks-container"></div>
+    <div id="scroll-hint">▼ scroll for more heroes ▼</div>
   </div>
   <div id="lobby-actions">
     <button type="button" onclick="lobbyBack()" style="background:#1e1e2e;border:1px solid #3a3a5a;color:#888;padding:12px 24px;font-size:0.9rem;cursor:pointer;border-radius:4px">← Back</button>
@@ -477,7 +483,7 @@ body.targeting-skill #targeting-hint{display:block}
   </div>
 
   <!-- Attack button -->
-  <div id="attack-btn">ATK
+  <div id="attack-btn"><span style="font-size:1.6rem;line-height:1;display:block;">👊</span>
     <div id="atk-cd" style="position:absolute;inset:0;background:rgba(0,0,0,0.65);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:0.75rem;color:#fff;font-weight:bold;pointer-events:none"></div>
   </div>
 
@@ -510,6 +516,9 @@ body.targeting-skill #targeting-hint{display:block}
     <div class="inv-slot" id="inv4" onclick="useItemSlot(4)"><span class="inv-name" id="inv-name4"></span><div class="inv-cd" id="inv-cd4" style="display:none"></div></div>
     <div class="inv-slot" id="inv5" onclick="useItemSlot(5)"><span class="inv-name" id="inv-name5"></span><div class="inv-cd" id="inv-cd5" style="display:none"></div></div>
   </div>
+
+  <!-- Shop backdrop -->
+  <div id="shop-backdrop" onclick="toggleShop()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:99;pointer-events:auto"></div>
 
   <!-- Shop overlay -->
   <div id="shop" style="display:none">

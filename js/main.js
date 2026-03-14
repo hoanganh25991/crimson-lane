@@ -488,9 +488,11 @@ function updateInventoryHUD() {
 
 function toggleShop() {
   const shop=document.getElementById('shop');
+  const backdrop=document.getElementById('shop-backdrop');
   if(!shop) return;
   const visible=shop.style.display!=='none'&&shop.style.display!=='';
   shop.style.display=visible?'none':'flex';
+  if(backdrop) backdrop.style.display=visible?'none':'block';
   if(!visible) renderShopItems();
 }
 
@@ -609,6 +611,9 @@ function showScreen(show) {
   settingsScreen.classList.toggle('show', show === 'settings');
   lobby.classList.toggle('show', show === 'lobby');
   if (mpSetupEl) mpSetupEl.style.display = show === 'multiplayer' ? 'flex' : 'none';
+  if (show === 'lobby' && ALL_HERO_IDS.length > 0 && !G.pickedHero) {
+    selectHero(ALL_HERO_IDS[0]);
+  }
 }
 
 document.getElementById('btn-play').onclick = () => {
@@ -806,6 +811,7 @@ settingsScreen.querySelectorAll('.set-tab').forEach(tab => {
 });
 
 window.lobbyBack = function() {
+  G.pickedHero = null;
   if (G.isMultiplayer) {
     G.isMultiplayer = false;
     G.isHost = false;
@@ -835,6 +841,7 @@ function buildLobbyHeroCards() {
   const container = document.getElementById('hero-picks-container');
   if (!container) return;
   container.innerHTML = '';
+  let count = 0;
   for (const id of ALL_HERO_IDS) {
     const mod = HERO_REGISTRY[id];
     if (!mod || !mod.def) continue;
@@ -852,12 +859,26 @@ function buildLobbyHeroCards() {
       '<div class="hteam" style="color:' + teamColor + '">' + (d.team || 'sentinel').toUpperCase() + '</div>' +
       '<div class="hstats">HP: ' + (d.hp || 0) + ' · MP: ' + (d.mp || 0) + '<br>' + rangeText + ' · DMG: ' + (d.dmgMin || 0) + '-' + (d.dmgMax || 0) + '</div>';
     container.appendChild(card);
+    count++;
   }
   for (const id of ALL_HERO_IDS) {
     drawPortrait(id + '-portrait', id);
   }
+  const hint = document.getElementById('hero-count-hint');
+  if (hint) hint.innerHTML = '<strong>' + count + ' heroes</strong> available — click to pick';
+  const scrollHint = document.getElementById('scroll-hint');
+  if (scrollHint) scrollHint.style.display = count > 4 ? 'flex' : 'none';
 }
 buildLobbyHeroCards();
+
+// Hide scroll hint once user scrolls (discovered it)
+const lobbyScrollEl = document.getElementById('lobby-scroll');
+if (lobbyScrollEl) {
+  lobbyScrollEl.addEventListener('scroll', () => {
+    const sh = document.getElementById('scroll-hint');
+    if (sh) sh.style.display = 'none';
+  }, { once: true });
+}
 
 // ─── DIFFICULTY SELECTOR ───────────────────────────────────────────────────────
 document.querySelectorAll('.diff-btn').forEach(btn => {

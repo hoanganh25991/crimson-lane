@@ -1,6 +1,7 @@
 // ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 export const MAP_SIZE = 100;
 export const ZOOM = 22;
+export const ZOOM_MOBILE = 15; // max zoom-in on mobile for easier play
 export const CREEP_SPAWN_INTERVAL = 30;
 export const GOLD_TICK = 3;
 export const GOLD_PER_TICK = 3;

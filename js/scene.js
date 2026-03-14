@@ -1,5 +1,8 @@
 // ─── THREE.JS SCENE SETUP ──────────────────────────────────────────────────────
-import { ZOOM } from './constants.js';
+import { ZOOM, ZOOM_MOBILE } from './constants.js';
+
+const isMobile = /Mobi|Android|iPhone|iPad|iPod|Touch/i.test(navigator.userAgent) || window.innerWidth <= 768;
+let activeZoom = isMobile ? ZOOM_MOBILE : ZOOM;
 
 export let scene, camera, renderer, camTarget, groundPlane;
 
@@ -9,7 +12,7 @@ export function initThree() {
   scene.background = new THREE.Color(0x07070f);
 
   const aspect = window.innerWidth / window.innerHeight;
-  camera = new THREE.OrthographicCamera(-ZOOM*aspect, ZOOM*aspect, ZOOM, -ZOOM, -500, 500);
+  camera = new THREE.OrthographicCamera(-activeZoom*aspect, activeZoom*aspect, activeZoom, -activeZoom, -500, 500);
   camTarget = new THREE.Vector3(50, 0, 50);
   // Dota-style isometric: camera from the west so lane (+X,+Z) runs bottom-left → top-right
   camera.position.set(camTarget.x - 30, 35, camTarget.z);
@@ -53,8 +56,9 @@ export function initThree() {
 export function onResize() {
   const w = window.innerWidth, h = window.innerHeight;
   const aspect = w/h;
-  camera.left = -ZOOM*aspect; camera.right = ZOOM*aspect;
-  camera.top = ZOOM; camera.bottom = -ZOOM;
+  // Preserve whatever zoom level is currently set (user may have scrolled to adjust)
+  const z = camera.top || activeZoom;
+  camera.left = -z*aspect; camera.right = z*aspect;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
 }
