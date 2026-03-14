@@ -11,5 +11,11 @@ export const G = {
   megaLanes: {scourge:{top:false,mid:false,bot:false}, sentinel:{top:false,mid:false,bot:false}},
   lastSpawn: 0, goldTimer: 0, aiCastTimer: 0,
   attackMode: false, targetingSkill: null,
-  firstBlood: false, killStreak: 0
+  firstBlood: false, killStreak: 0,
+  // Multiplayer
+  isHost: false,
+  isMultiplayer: false,
+  connections: [],
+  lastSnapshot: null,
+  pendingCommands: []
 };
