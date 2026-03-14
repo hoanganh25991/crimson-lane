@@ -48,6 +48,29 @@ export function initControls() {
     joystickInner.style.left='38px'; joystickInner.style.top='38px';
   },{passive:false});
 
+  // Mouse joystick support (desktop)
+  joystickArea.addEventListener('mousedown', e=>{
+    joystick.active=true;
+    joystick.startX=e.clientX; joystick.startY=e.clientY;
+  });
+  document.addEventListener('mousemove', e=>{
+    if(!joystick.active) return;
+    const dx=e.clientX-joystick.startX, dy=e.clientY-joystick.startY;
+    const len=Math.sqrt(dx*dx+dy*dy);
+    const maxR=38, clampLen=Math.min(len,maxR);
+    const nx=len>0?dx/len:0, ny=len>0?dy/len:0;
+    joystickInner.style.left=(60+nx*clampLen-22)+'px';
+    joystickInner.style.top=(60+ny*clampLen-22)+'px';
+    joystick.dx=nx; joystick.dz=ny;
+    joystick.wx=-(joystick.dx+joystick.dz)*0.707;
+    joystick.wz=(joystick.dx-joystick.dz)*0.707;
+  });
+  document.addEventListener('mouseup', e=>{
+    if(!joystick.active) return;
+    joystick.active=false; joystick.dx=0; joystick.dz=0; joystick.wx=0; joystick.wz=0;
+    joystickInner.style.left='38px'; joystickInner.style.top='38px';
+  });
+
   // Desktop click
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
