@@ -20,13 +20,6 @@ let _onStartAsHost = null;
 let _onStartAsClient = null;
 let _joinCancelled = false;
 
-function randomRoomCode() {
-  const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
-  let s = '';
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
-}
-
 function generateQR(urlOrText) {
   if (typeof qrcode !== 'undefined' && qrcode) {
     try {
@@ -67,10 +60,10 @@ export function hideMultiplayerSetup() {
   peer.disconnect();
 }
 
-/** Create game as host. Returns room code. */
+/** Create game as host. Uses persistent peer ID (same device = same room code). Returns room code. */
 export function createGame() {
-  _roomCode = randomRoomCode();
-  return peer.createRoom(_roomCode).then(() => {
+  return peer.createRoom().then(() => {
+    _roomCode = peer.getRoomCode();
     showMPPanel('host');
     if (MP_ROOM_CODE_DISPLAY) MP_ROOM_CODE_DISPLAY.textContent = _roomCode;
     const url = window.location.href.split('?')[0] + '?room=' + _roomCode;

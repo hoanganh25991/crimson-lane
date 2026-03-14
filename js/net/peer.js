@@ -38,10 +38,40 @@ function getPeer() {
   return null;
 }
 
-/** Create a new peer and become host with given id (room code). Returns peer id. */
-export async function createRoom(roomCode) {
+const STORAGE_KEY_PEER_ID = 'dota_peer_id';
+
+/** This device's persistent Peer ID (UUID). Host and joiner use the same ID forever; host = room code. */
+export function getOrCreatePersistentPeerId() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+  }
+  let id = localStorage.getItem(STORAGE_KEY_PEER_ID);
+  if (!id) {
+    id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = (Math.random() * 16) | 0;
+          const v = c === 'x' ? r : (r & 0x3) | 0x8;
+          return v.toString(16);
+        });
+    try {
+      localStorage.setItem(STORAGE_KEY_PEER_ID, id);
+    } catch (_) {}
+  }
+  return id;
+}
+
+/** Create a new peer and become host. Uses persistent peer ID (same device = same room code forever). Returns peer id. */
+export async function createRoom() {
   const Peer = getPeer();
   if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
+  const roomCode = getOrCreatePersistentPeerId();
   const iceServers = await getIceServersAsync();
   return new Promise((resolve, reject) => {
     if (_peer) { _peer.destroy(); _peer = null; }
