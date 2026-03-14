@@ -146,8 +146,11 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #joystick-area:active{opacity:1;}
 #joystick-outer{position:absolute;bottom:20px;left:20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12)}
 #joystick-inner{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.3);border:2px solid rgba(255,255,255,0.45);left:38px;top:38px;pointer-events:none}
-#attack-btn{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));right:calc(130px + env(safe-area-inset-right));width:60px;height:60px;border-radius:50%;background:#4a1111;border:2px solid #882222;color:#ff6666;font-size:0.7rem;font-weight:bold;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;user-select:none;opacity:0.85;transition:opacity 0.2s,transform 0.1s;}
-#attack-btn:hover,#attack-btn:active{opacity:1;transform:scale(0.92);}
+#attack-btn{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));right:calc(130px + env(safe-area-inset-right));width:60px;height:60px;border-radius:50%;background:#1a0808;border:2px solid #3a1111;color:#aa4444;font-size:0.7rem;font-weight:bold;letter-spacing:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:none;user-select:none;opacity:0.28;transition:opacity 0.2s,transform 0.1s,box-shadow 0.2s,border-color 0.2s,color 0.2s;}
+/* Target in range — button lights up and becomes tappable */
+#attack-btn.has-target{pointer-events:auto;opacity:0.92;background:#4a1111;border-color:#cc3333;color:#ff8888;animation:atkPulse 1.1s ease-in-out infinite;}
+#attack-btn.has-target:active{transform:scale(0.88);opacity:1;animation:none;}
+@keyframes atkPulse{0%,100%{box-shadow:0 0 6px #ff333344}50%{box-shadow:0 0 18px #ff4444aa,0 0 6px #ff6666}}
 
 /* Announcer */
 #announcer{position:absolute;top:35%;left:50%;transform:translateX(-50%);font-size:2rem;font-weight:bold;letter-spacing:4px;text-align:center;pointer-events:none;opacity:0;transition:opacity 0.2s;text-shadow:0 2px 8px rgba(0,0,0,0.8);white-space:nowrap}

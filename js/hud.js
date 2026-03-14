@@ -3,6 +3,7 @@ import { G } from './state.js';
 import { camera } from './scene.js';
 import { HERO_REGISTRY } from './heroes/registry.js';
 import { t } from './i18n.js';
+import { getEnemiesOf } from './combat.js';
 
 export function showAnnouncer(text, color, dur=2500) {
   const el = document.getElementById('announcer');
@@ -110,6 +111,36 @@ export function updateHUD() {
   } else {
     const ro = document.getElementById('respawn-overlay');
     if(ro) ro.style.display='none';
+  }
+
+  // Attack button range gate — only light up when a target is within attack range
+  const atkBtn = document.getElementById('attack-btn');
+  if(atkBtn) {
+    let hasTarget = false;
+    if(h.alive) {
+      // Same range used by doAttackNearest() in controls.js
+      const range = (h.def.range || 3) + 4;
+      const rangeSq = range * range;
+      // Check enemy heroes + lane creeps
+      const enemies = getEnemiesOf(h.team);
+      for(const en of enemies) {
+        if(!en.alive) continue;
+        const dx = en.x - h.x, dz = en.z - h.z;
+        if(dx*dx + dz*dz <= rangeSq) { hasTarget = true; break; }
+      }
+      // Check neutral creep camps
+      if(!hasTarget && G.neutralCreeps) {
+        outer: for(const camp of G.neutralCreeps) {
+          if(!camp.units) continue;
+          for(const u of camp.units) {
+            if(!u || !u.alive) continue;
+            const dx = u.x - h.x, dz = u.z - h.z;
+            if(dx*dx + dz*dz <= rangeSq) { hasTarget = true; break outer; }
+          }
+        }
+      }
+    }
+    atkBtn.classList.toggle('has-target', hasTarget);
   }
 }
 
