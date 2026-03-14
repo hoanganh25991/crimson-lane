@@ -254,7 +254,7 @@ export function endGame(playerWon) {
   el.style.justifyContent='center';
   document.getElementById('end-title').textContent = playerWon ? t('end.victory') : t('end.defeat');
   document.getElementById('end-title').style.color = playerWon ? '#ffcc44' : '#ff2222';
-  document.getElementById('end-sub').textContent = playerWon ? '🏰 The enemy Ancient has been destroyed!' : '😔 Your Ancient has fallen.';
+  document.getElementById('end-sub').textContent = playerWon ? t('end.victory_sub') : t('end.defeat_sub');
 }
 
 // ─── HERO UPDATE ───────────────────────────────────────────────────────────────
@@ -446,7 +446,7 @@ function respawnHero(hero) {
     hero.wpIndex = 0;
   }
   if(hero.isPlayer) {
-    showAnnouncer('✨ RESPAWNED', '#88aaff', 1500);
+    showAnnouncer(t('announce.respawned'), '#88aaff', 1500);
     playSound('respawn');
   }
   spawnParticles(hero.x, hero.z, hero.team==='scourge'?0xff2200:0x2244ff, 8);
@@ -519,8 +519,8 @@ function renderShopItems() {
     const owned=h.inventory.includes(id);
     const div=document.createElement('div');
     div.className='shop-item'+(canAfford&&!owned?' can-buy':'')+(owned?' owned':'');
-    div.innerHTML=`<div class="si-name" style="color:${def.color}">${def.name}</div>`+
-      `<div class="si-cost">${owned?'OWNED':cost+'g'}</div>`+
+    div.innerHTML=`<div class="si-name" style="color:${def.color}">${t('item.'+id, {})}</div>`+
+      `<div class="si-cost">${owned ? t('shop.owned') : cost+'g'}</div>`+
       `<div class="si-bonus">${formatBonuses(def.bonuses)}</div>`+
       (def.components.length?`<div class="si-recipe">= ${def.components.map(c=>ITEM_DEFS[c]?.short||c).join(' + ')}</div>`:'');
     if(!owned) {
@@ -627,7 +627,7 @@ function showScreen(show) {
 document.getElementById('btn-play').onclick = () => {
   showScreen('play');
   playFlowStep = 0;
-  playFlowTitle.textContent = 'Choose your side';
+  playFlowTitle.textContent = t('flow.choose_side');
   playSideOptions.style.display = 'flex';
   playModeOptions.style.display = 'none';
   playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
@@ -659,15 +659,15 @@ document.getElementById('btn-multiplayer').onclick = () => {
 document.getElementById('mp-create-btn').onclick = () => {
   const btn = document.getElementById('mp-create-btn');
   btn.disabled = true;
-  btn.textContent = 'Creating...';
+  btn.textContent = t('mp.creating');
   mpLobby.createGame().then(() => {
     btn.disabled = false;
-    btn.textContent = 'Create Game';
+    btn.textContent = t('mp.create_game');
   }).catch((err) => {
     btn.disabled = false;
-    btn.textContent = 'Create Game';
+    btn.textContent = t('mp.create_game');
     const errEl = document.getElementById('mp-create-error');
-    if (errEl) errEl.textContent = 'Failed to create room: ' + (err && err.message ? err.message : 'Server unavailable. Try again.');
+    if (errEl) errEl.textContent = t('mp.err_create', { msg: err && err.message ? err.message : t('mp.err_server') });
   });
 };
 document.getElementById('mp-join-btn').onclick = () => {
@@ -679,7 +679,7 @@ function _resetConnectBtn() {
   const btn = document.getElementById('mp-connect-btn');
   if (_connectCountdown) { clearInterval(_connectCountdown); _connectCountdown = null; }
   btn.disabled = false;
-  btn.textContent = 'Connect';
+  btn.textContent = t('mp.connect');
 }
 document.getElementById('mp-connect-btn').onclick = () => {
   const code = document.getElementById('mp-room-code-in').value.trim().toLowerCase();
@@ -689,11 +689,11 @@ document.getElementById('mp-connect-btn').onclick = () => {
   if (errEl) errEl.textContent = '';
   btn.disabled = true;
   let secsLeft = 20;
-  btn.textContent = `Connecting... (${secsLeft}s)`;
+  btn.textContent = t('mp.connecting', { n: secsLeft });
   if (_connectCountdown) clearInterval(_connectCountdown);
   _connectCountdown = setInterval(() => {
     secsLeft--;
-    if (secsLeft > 0) btn.textContent = `Connecting... (${secsLeft}s)`;
+    if (secsLeft > 0) btn.textContent = t('mp.connecting', { n: secsLeft });
   }, 1000);
   mpLobby.joinGame(code).then(() => {
     _resetConnectBtn();
@@ -706,15 +706,15 @@ document.getElementById('mp-connect-btn').onclick = () => {
     const lobbyEl = document.getElementById('lobby');
     if (lobbyEl) { lobbyEl.style.display = 'flex'; lobbyEl.classList.add('show'); }
     const sub = document.getElementById('lobby-sub');
-    if (sub) sub.textContent = 'MULTIPLAYER — Pick your hero (waiting for host to start)';
+    if (sub) sub.textContent = t('mp.pick_hero_wait');
     const sideEl = document.getElementById('lobby-side-name');
-    if (sideEl) sideEl.textContent = G.playerSide === 'sentinel' ? 'Sentinel' : 'Scourge';
+    if (sideEl) sideEl.textContent = G.playerSide === 'sentinel' ? t('viewer.sentinel') : t('viewer.scourge');
     const startBtn = document.getElementById('startBtn');
-    if (startBtn) { startBtn.disabled = true; startBtn.textContent = 'WAITING FOR HOST'; }
+    if (startBtn) { startBtn.disabled = true; startBtn.textContent = t('mp.waiting_for_host'); }
   }).catch((err) => {
     _resetConnectBtn();
     if (err && err.message === 'Cancelled') return;
-    if (errEl) errEl.textContent = 'Connection failed: ' + (err && err.message ? err.message : 'Room not found or server unavailable');
+    if (errEl) errEl.textContent = t('mp.err_connect', { msg: err && err.message ? err.message : t('mp.err_room') });
   });
 };
 document.getElementById('mp-join-back').onclick = () => {
@@ -730,7 +730,7 @@ document.getElementById('mp-copy-room-btn').onclick = () => {
   if (el && el.textContent && el.textContent !== '------') {
     navigator.clipboard.writeText(el.textContent.trim()).then(() => {
       const btn = document.getElementById('mp-copy-room-btn');
-      if (btn) { const t = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = t; }, 1500); }
+      if (btn) { const orig = btn.textContent; btn.textContent = t('mp.copied'); setTimeout(() => { btn.textContent = orig; }, 1500); }
     }).catch(() => {});
   }
 };
@@ -740,13 +740,13 @@ document.getElementById('mp-to-lobby-btn').onclick = () => {
   G.isHost = true;
   showScreen('lobby');
   const sub = document.getElementById('lobby-sub');
-  if (sub) sub.textContent = 'MULTIPLAYER — Pick your hero';
+  if (sub) sub.textContent = t('mp.pick_hero');
   const info = document.getElementById('lobby-mp-info');
   if (info) { info.style.display = 'block'; }
   const roomEl = document.getElementById('lobby-mp-room');
-  if (roomEl) roomEl.textContent = 'Room: ' + (mpLobby.getRoomCode() || '');
+  if (roomEl) roomEl.textContent = t('mp.room', { code: mpLobby.getRoomCode() || '' });
   const playersEl = document.getElementById('lobby-mp-players');
-  if (playersEl) playersEl.textContent = 'Players: ' + mpLobby.getConnectionCount();
+  if (playersEl) playersEl.textContent = t('mp.players', { n: mpLobby.getConnectionCount() });
 };
 document.getElementById('mp-setup-back').onclick = () => {
   mpLobby.hideMultiplayerSetup();
@@ -774,7 +774,7 @@ document.getElementById('play-continue-btn').onclick = () => {
     if (!sideSelected) return;
     G.playerSide = sideSelected.dataset.side; // sync from visible selection so lobby always has correct side
     playFlowStep = 1;
-    playFlowTitle.textContent = 'Choose team size';
+    playFlowTitle.textContent = t('flow.choose_size');
     playSideOptions.style.display = 'none';
     playModeOptions.style.display = 'flex';
     let modeSelected = playModeOptions.querySelector('.opt-btn.selected');
@@ -788,14 +788,14 @@ document.getElementById('play-continue-btn').onclick = () => {
   if (!modeSelected) return;
   G.teamSize = parseInt(modeSelected.dataset.mode, 10);
   const sideEl = document.getElementById('lobby-side-name');
-  if (sideEl) sideEl.textContent = (G.playerSide === 'sentinel' ? 'Sentinel' : 'Scourge');
+  if (sideEl) sideEl.textContent = G.playerSide === 'sentinel' ? t('viewer.sentinel') : t('viewer.scourge');
   showScreen('lobby');
 };
 
 document.getElementById('play-back-btn').onclick = () => {
   if (playFlowStep === 1) {
     playFlowStep = 0;
-    playFlowTitle.textContent = 'Choose your side';
+    playFlowTitle.textContent = t('flow.choose_side');
     playModeOptions.style.display = 'none';
     playSideOptions.style.display = 'flex';
     playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
@@ -808,7 +808,7 @@ document.getElementById('settings-back-btn').onclick = () => showScreen('menu');
 
 settingsScreen.querySelectorAll('.set-tab').forEach(tab => {
   tab.onclick = () => {
-    settingsScreen.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
+    settingsScreen.querySelectorAll('.set-tab').forEach(tb => tb.classList.remove('active'));
     settingsScreen.querySelectorAll('.set-pane').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
     const pane = settingsScreen.querySelector('.set-pane[data-pane="' + tab.dataset.tab + '"]');
@@ -819,6 +819,22 @@ settingsScreen.querySelectorAll('.set-tab').forEach(tab => {
   };
 });
 
+// ─── Language selector (Settings → General) ─────────────────────────────────────
+const _langSelect = document.getElementById('lang-select');
+const _langReloadRow = document.getElementById('lang-reload-row');
+const _langReloadBtn = document.getElementById('lang-reload-btn');
+if (_langSelect) {
+  _langSelect.value = getLang();
+  _langSelect.onchange = () => {
+    setLang(_langSelect.value);
+    if (_langReloadRow) _langReloadRow.style.display = _langSelect.value !== getLang() ? 'none' : 'flex';
+    _langReloadRow.style.display = 'flex';
+  };
+}
+if (_langReloadBtn) {
+  _langReloadBtn.onclick = () => location.reload();
+}
+
 window.lobbyBack = function() {
   G.pickedHero = null;
   if (G.isMultiplayer) {
@@ -827,14 +843,14 @@ window.lobbyBack = function() {
     const info = document.getElementById('lobby-mp-info');
     if (info) info.style.display = 'none';
     const sub = document.getElementById('lobby-sub');
-    if (sub) sub.textContent = 'SINGLE PLAYER VS AI';
+    if (sub) sub.textContent = t('lobby.single_player');
     mpLobby.hideMultiplayerSetup();
     showScreen('menu');
     return;
   }
   showScreen('play');
   playFlowStep = 1;
-  playFlowTitle.textContent = 'Choose team size';
+  playFlowTitle.textContent = t('flow.choose_size');
   playSideOptions.style.display = 'none';
   playModeOptions.style.display = 'flex';
   playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
@@ -857,7 +873,7 @@ function buildLobbyHeroCards() {
     const d = mod.def;
     const colorHex = '#' + (d.color != null ? Number(d.color).toString(16).padStart(6, '0') : '888888');
     const teamColor = d.team === 'scourge' ? '#882222' : '#1a4a8a';
-    const rangeText = (d.range != null && d.range >= 4) ? ('Range: ' + d.range) : 'Melee';
+    const rangeText = (d.range != null && d.range >= 4) ? t('card.range', { n: d.range }) : t('card.melee');
     const card = document.createElement('div');
     card.className = 'hero-card';
     card.id = 'pick-' + id;
@@ -866,7 +882,7 @@ function buildLobbyHeroCards() {
       '<canvas width="120" height="88" id="' + id + '-portrait"></canvas>' +
       '<div class="hname" style="color:' + colorHex + '">' + (d.name || id.toUpperCase()) + '</div>' +
       '<div class="hteam" style="color:' + teamColor + '">' + (d.team || 'sentinel').toUpperCase() + '</div>' +
-      '<div class="hstats">HP: ' + (d.hp || 0) + ' · MP: ' + (d.mp || 0) + '<br>' + rangeText + ' · DMG: ' + (d.dmgMin || 0) + '-' + (d.dmgMax || 0) + '</div>';
+      '<div class="hstats">' + t('card.hp_mp', { hp: d.hp || 0, mp: d.mp || 0 }) + '<br>' + rangeText + ' · ' + t('card.dmg', { min: d.dmgMin || 0, max: d.dmgMax || 0 }) + '</div>';
     container.appendChild(card);
     count++;
   }
@@ -874,7 +890,7 @@ function buildLobbyHeroCards() {
     drawPortrait(id + '-portrait', id);
   }
   const hint = document.getElementById('hero-count-hint');
-  if (hint) hint.innerHTML = '<strong>' + count + ' heroes</strong> available — click to pick';
+  if (hint) hint.innerHTML = '<strong>' + t('lobby.heroes_available', { n: count }) + '</strong>';
   const scrollHint = document.getElementById('scroll-hint');
   if (scrollHint) scrollHint.style.display = count > 4 ? 'flex' : 'none';
 }

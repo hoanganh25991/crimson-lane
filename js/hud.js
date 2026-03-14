@@ -2,6 +2,7 @@
 import { G } from './state.js';
 import { camera } from './scene.js';
 import { HERO_REGISTRY } from './heroes/registry.js';
+import { t } from './i18n.js';
 
 export function showAnnouncer(text, color, dur=2500) {
   const el = document.getElementById('announcer');
