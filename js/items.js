@@ -142,6 +142,8 @@ const AI_BUILD = {
 
 export function updateAIItems(hero, dt) {
   if(!hero||!hero.alive) return;
+  if(hero.aiGold===undefined) hero.aiGold=625;
+
   hero.aiBuyTimer=(hero.aiBuyTimer||0)-dt;
   if(hero.aiBuyTimer>0) return;
   hero.aiBuyTimer=8;
@@ -150,23 +152,15 @@ export function updateAIItems(hero, dt) {
     if(hero.inventory.includes(itemId)) continue;
     if(hero.inventory.length>=6) break;
     const cost=getItemBuyCost(hero,itemId);
-    if(G.gold>=cost*0.5) { // AI spends from shared gold pool (simplified)
-      // AI buys using separate gold tracking to avoid depleting player gold
-      if(hero.aiGold===undefined) hero.aiGold=625;
-      if(hero.aiGold>=cost) {
-        hero.aiGold-=cost;
-        // apply bonuses directly (bypass G.gold)
-        for(const comp of ITEM_DEFS[itemId].components) {
-          const idx=hero.inventory.indexOf(comp);
-          if(idx>=0) { unapplyItemBonuses(hero,ITEM_DEFS[comp]); hero.inventory.splice(idx,1); }
-        }
-        hero.inventory.push(itemId);
-        applyItemBonuses(hero,ITEM_DEFS[itemId]);
+    if(hero.aiGold>=cost) {
+      hero.aiGold-=cost;
+      for(const comp of ITEM_DEFS[itemId].components) {
+        const idx=hero.inventory.indexOf(comp);
+        if(idx>=0) { unapplyItemBonuses(hero,ITEM_DEFS[comp]); hero.inventory.splice(idx,1); }
       }
+      hero.inventory.push(itemId);
+      applyItemBonuses(hero,ITEM_DEFS[itemId]);
     }
-    break; // try one item per tick
+    break;
   }
-  // AI accumulates gold over time
-  if(hero.aiGold===undefined) hero.aiGold=625;
-  hero.aiGold+=G.gold*0.001; // small passive gain
 }

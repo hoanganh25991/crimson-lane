@@ -121,7 +121,8 @@ export function initControls() {
     }
 
     // Attack targets: enemies + neutral creeps + deniable allied creeps (<50% HP)
-    const allEntities = [...G.creeps, ...G.towers, ...G.barracks, G.aiHero].filter(e=>e&&e.alive);
+    const enemyHeroes = G.heroList.filter(eh=>eh&&eh.alive&&eh.team!==h.team);
+    const allEntities = [...G.creeps, ...G.towers, ...G.barracks, ...enemyHeroes].filter(e=>e&&e.alive);
     let hitTarget = null;
     for(const ent of allEntities) {
       const ex = ent.x||(ent.def?.x)||0, ez = ent.z||(ent.def?.z)||0;

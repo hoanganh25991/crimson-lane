@@ -141,7 +141,7 @@ function castSniperSkill(hero, key, pos, ent) {
     zone.rotation.x = -Math.PI/2;
     zone.position.set(pos.x, 0.03, pos.z);
     scene.add(zone);
-    G.effects.push({mesh:zone, life:4, maxLife:4, type:'shrapnel', x:pos.x, z:pos.z, radius, dps:15, tickTimer:0.5});
+    G.effects.push({mesh:zone, life:4, maxLife:4, type:'shrapnel', x:pos.x, z:pos.z, radius, dps:15, tickTimer:0.5, casterTeam:hero.team});
   }
   else if(key==='W') { floatDamage(hero.x, hero.z, 'HEADSHOT', '#ffcc44'); } // Passive
   else if(key==='E') { floatDamage(hero.x, hero.z, 'AIM +RANGE', '#88ff88'); } // Passive

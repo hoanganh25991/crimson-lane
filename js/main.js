@@ -23,18 +23,13 @@ window._hudFns = { showAnnouncer, updateSkillUI };
 window._endGame = endGame;
 
 // ─── Shrapnel tick handler ───────────────────────────────────────────────────────
-// Registered after module loads so combat is available
 window._shrapnelTick = function(e) {
-  // Deal DPS in shrapnel zone to all enemies of whoever cast it
-  // Shrapnel is always cast targeting enemies, so apply to enemies of player's team
-  const ph = G.playerHero;
-  if(!ph) return;
-  // Get all units not on player team (i.e., enemies)
-  const allUnits = [...G.creeps, ...G.towers];
-  if(G.aiHero && G.aiHero.alive) allUnits.push(G.aiHero);
+  const casterTeam = e.casterTeam || (G.playerHero && G.playerHero.team);
+  if(!casterTeam) return;
+  const allUnits = [...G.creeps, ...G.towers, ...G.heroList.filter(h=>h&&h.alive)];
   for(const en of allUnits) {
     if(!en.alive) continue;
-    if(en.team === ph.team) continue; // skip allies
+    if(en.team === casterTeam) continue;
     const dx=en.x-e.x, dz=en.z-e.z;
     if(Math.sqrt(dx*dx+dz*dz)<=e.radius) {
       applyDamage(en, e.dps*0.5, 'magic');
@@ -71,36 +66,75 @@ export function startGame() {
   buildTowers();
   buildBarracks();
 
-  const others = ALL_HEROES.filter(h => h !== G.pickedHero);
-  const aiType = others[Math.floor(Math.random() * others.length)];
-  // Team and spawn come only from chosen side (G.playerSide), not from hero type
   const playerSide = G.playerSide || 'scourge';
+  const enemySide = playerSide === 'sentinel' ? 'scourge' : 'sentinel';
   const playerBase = playerSide === 'sentinel' ? { x: 90, z: 90 } : { x: 10, z: 10 };
   const aiBase = playerSide === 'sentinel' ? { x: 10, z: 10 } : { x: 90, z: 90 };
+  const lanes = ['top', 'mid', 'bot'];
+  const teamSize = G.teamSize || 1;
+  const allyBotCount = teamSize - 1;
+  const enemyBotCount = teamSize;
 
+  // Reset multi-hero arrays
+  G.heroList = [];
+  G.allyBots = [];
+  G.enemyBots = [];
+
+  // Pick random heroes for bots (allow duplicates)
+  const otherHeroes = ALL_HEROES.filter(h => h !== G.pickedHero);
+  function pickRandomHero() { return otherHeroes[Math.floor(Math.random() * otherHeroes.length)]; }
+
+  // Create player hero
   G.playerHero = createHero(G.pickedHero, true);
   G.playerHero.team = playerSide;
   G.playerHero.x = playerBase.x;
   G.playerHero.z = playerBase.z;
   G.playerHero.group.position.set(playerBase.x, 0, playerBase.z);
+  G.heroList.push(G.playerHero);
 
-  G.aiHero = createHero(aiType, false);
-  G.aiHero.team = playerSide === 'sentinel' ? 'scourge' : 'sentinel';
-  G.aiHero.x = aiBase.x;
-  G.aiHero.z = aiBase.z;
-  G.aiHero.group.position.set(aiBase.x, 0, aiBase.z);
-  G.aiHero.wpIndex = 0;
+  // Create ally bots (same team as player)
+  for(let i=0; i<allyBotCount; i++) {
+    const heroType = pickRandomHero();
+    const bot = createHero(heroType, false);
+    bot.team = playerSide;
+    bot.isAllyBot = true;
+    bot.aiLane = lanes[(i + 1) % 3]; // skip mid (player likely mid), assign top/bot
+    bot.x = playerBase.x + (Math.random()-0.5)*6;
+    bot.z = playerBase.z + (Math.random()-0.5)*6;
+    bot.group.position.set(bot.x, 0, bot.z);
+    bot.wpIndex = 0;
+    bot.aiCastTimer = 5 + Math.random()*5;
+    G.allyBots.push(bot);
+    G.heroList.push(bot);
+  }
 
-  // Initial camera: view matches minimap (base bottom-left), hero in lower-left of screen
+  // Create enemy bots
+  for(let i=0; i<enemyBotCount; i++) {
+    const heroType = pickRandomHero();
+    const bot = createHero(heroType, false);
+    bot.team = enemySide;
+    bot.aiLane = lanes[i % 3];
+    bot.x = aiBase.x + (Math.random()-0.5)*6;
+    bot.z = aiBase.z + (Math.random()-0.5)*6;
+    bot.group.position.set(bot.x, 0, bot.z);
+    bot.wpIndex = 0;
+    bot.aiCastTimer = 5 + Math.random()*5;
+    G.enemyBots.push(bot);
+    G.heroList.push(bot);
+  }
+
+  // Backward compat: G.aiHero points to first enemy bot
+  G.aiHero = G.enemyBots[0] || null;
+
+  // Initial camera
   camTarget.set(G.playerHero.x + 18, 0, G.playerHero.z + 18);
 
   const heroNameEl = document.getElementById('hero-name');
   if(heroNameEl) heroNameEl.textContent = HERO_DEFS[G.pickedHero].name;
   updateSkillUI();
 
-  // Draw small portraits in topbar
-  drawPortrait('port-canvas-player', G.pickedHero);
-  drawPortrait('port-canvas-enemy', aiType);
+  // Build topbar portraits dynamically
+  buildTopbarPortraits();
 
   // Wire minimap click
   const minimapEl = document.getElementById('minimap');
@@ -132,6 +166,40 @@ export function startGame() {
   requestAnimationFrame(loop);
 }
 
+function buildTopbarPortraits() {
+  const teamLeft = document.getElementById('team-left');
+  const teamRight = document.getElementById('team-right');
+  teamLeft.innerHTML = '';
+  teamRight.innerHTML = '';
+
+  const playerTeam = G.playerHero.team;
+
+  for(const hero of G.heroList) {
+    const slot = document.createElement('div');
+    slot.className = 'port-slot';
+    slot.id = 'port-' + hero._uid;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 36; canvas.height = 36;
+    canvas.id = 'port-canvas-' + hero._uid;
+    slot.appendChild(canvas);
+
+    const hpBar = document.createElement('div');
+    hpBar.className = 'port-hp-bar';
+    const hpFill = document.createElement('div');
+    hpFill.className = 'port-hp-fill' + (hero.team !== playerTeam ? ' enemy' : '');
+    hpFill.id = 'port-hp-' + hero._uid;
+    hpFill.style.width = '100%';
+    hpBar.appendChild(hpFill);
+    slot.appendChild(hpBar);
+
+    if(hero.team === playerTeam) teamLeft.appendChild(slot);
+    else teamRight.appendChild(slot);
+
+    drawPortrait(canvas.id, hero.type);
+  }
+}
+
 // ─── GOLD + INCOME ─────────────────────────────────────────────────────────────
 function updateGold(dt) {
   G.goldTimer += dt;
@@ -157,12 +225,12 @@ export function endGame(playerWon) {
 
 // ─── HERO UPDATE ───────────────────────────────────────────────────────────────
 function updateHeroes(dt) {
+  // ── Player hero ────────────────────────────────────────────────────────────
   const h = G.playerHero;
   if(h) {
     if(!h.alive) {
       h.respawnTimer -= dt;
       if(h.respawnTimer <= 0) respawnHero(h);
-      // Don't return here so AI still updates
     } else {
       if(h.slowTimer>0) h.slowTimer-=dt;
       if(h.stunTimer>0){h.stunTimer-=dt;}
@@ -193,7 +261,6 @@ function updateHeroes(dt) {
           h.moveTarget=null;
         }
 
-        // Joystick movement (using world-relative direction)
         if(joystick.active) {
           const spd = (h.def.move+(h.itemBonus?.move||0)) * (h.slowTimer>0?0.7:1) * (h.windrunActive?1.5:1);
           h.x = Math.max(0.5, Math.min(99.5, h.x + joystick.wx*spd*dt));
@@ -206,7 +273,6 @@ function updateHeroes(dt) {
           h.moveTarget = null;
         }
 
-        // Click-to-move
         if(h.moveTarget && !joystick.active && kx===0 && kz===0) {
           const dx=h.moveTarget.x-h.x, dz=h.moveTarget.z-h.z;
           const d=Math.sqrt(dx*dx+dz*dz);
@@ -219,12 +285,10 @@ function updateHeroes(dt) {
           } else { h.moveTarget=null; }
         }
 
-        // Focus Fire forces target lock (Windrunner R)
         if(h.focusFireActive && h.focusFireTarget && h.focusFireTarget.alive) {
           h.attackTarget = h.focusFireTarget;
         }
 
-        // Auto-attack
         if(h.attackTarget && h.attackTarget.alive) {
           const dx=h.attackTarget.x-h.x, dz=h.attackTarget.z-h.z;
           const d=Math.sqrt(dx*dx+dz*dz);
@@ -261,16 +325,6 @@ function updateHeroes(dt) {
         }
       }
 
-      // HP bar update
-      h.hpFillMesh.scale.x = Math.max(0.001, h.hp/h.maxHp);
-      h.hpFillMesh.position.x = -(1-h.hp/h.maxHp)*0.6;
-      h.mpFillMesh.scale.x = Math.max(0.001, h.mp/h.maxMp);
-      h.mpFillMesh.position.x = -(1-h.mp/h.maxMp)*0.6;
-
-      // Billboard HP bars face camera
-      h.hpFillMesh.rotation.y = -h.group.rotation.y;
-      h.mpFillMesh.rotation.y = -h.group.rotation.y;
-
       // Mana regen near fountain
       const fountain = h.team==='scourge'?{x:10,z:10}:{x:90,z:90};
       const fdx=h.x-fountain.x, fdz=h.z-fountain.z;
@@ -279,7 +333,7 @@ function updateHeroes(dt) {
         h.mp = Math.min(h.maxMp, h.mp + 15*dt);
       }
 
-      // Dragon Blood passive regen (Dragon Knight Q)
+      // Dragon Blood passive regen
       if(h.type==='dragon_knight' && G.skillLevels['Q']>0) {
         const regen = [1,2,3,4][G.skillLevels['Q']-1]||1;
         h.hp = Math.min(h.maxHp, h.hp + regen*dt);
@@ -289,30 +343,38 @@ function updateHeroes(dt) {
       if(h.dragonFormActive) { h.dragonFormTimer-=dt; if(h.dragonFormTimer<=0) h.dragonFormActive=false; }
       if(h.windrunActive) { h.windrunTimer-=dt; if(h.windrunTimer<=0) h.windrunActive=false; }
       if(h.focusFireActive) { h.focusFireTimer-=dt; if(h.focusFireTimer<=0){h.focusFireActive=false;h.focusFireTarget=null;} }
-
-      // Windrun speed multiplier already applied via slowTimer check — override move speed
     }
   }
 
-  // Animations
-  if(G.playerHero) updateHeroAnim(G.playerHero, dt);
-  if(G.aiHero) {
-    const ai = G.aiHero;
-    if(!ai.alive) {
-      ai.respawnTimer -= dt;
-      if(ai.respawnTimer<=0) respawnHero(ai);
+  // ── All bot heroes (ally + enemy) ──────────────────────────────────────────
+  const allBots = [...G.allyBots, ...G.enemyBots];
+  for(const bot of allBots) {
+    if(!bot.alive) {
+      bot.respawnTimer -= dt;
+      if(bot.respawnTimer<=0) respawnHero(bot);
     } else {
-      updateAI(ai, dt);
-      ai._isMoving = ai.aiState !== 'fight';
-      // Dragon Blood passive for AI Dragon Knight
-      if(ai.type==='dragon_knight') ai.hp = Math.min(ai.maxHp, ai.hp + 2*dt);
-      ai.hpFillMesh.scale.x = Math.max(0.001, ai.hp/ai.maxHp);
-      ai.hpFillMesh.position.x = -(1-ai.hp/ai.maxHp)*0.6;
-      ai.mpFillMesh.scale.x = Math.max(0.001, ai.mp/ai.maxMp);
-      ai.mpFillMesh.position.x = -(1-ai.mp/ai.maxMp)*0.6;
+      updateAI(bot, dt);
+      bot._isMoving = bot.aiState !== 'fight';
+
+      // Passive gold income for bots
+      bot.aiGold = (bot.aiGold||625) + 1.5*dt;
     }
-    updateHeroAnim(ai, dt);
+    updateHeroAnim(bot, dt);
   }
+
+  // ── Update 3D HP/MP bars for ALL heroes ────────────────────────────────────
+  for(const hero of G.heroList) {
+    if(!hero.alive) continue;
+    hero.hpFillMesh.scale.x = Math.max(0.001, hero.hp/hero.maxHp);
+    hero.hpFillMesh.position.x = -(1-hero.hp/hero.maxHp)*0.6;
+    hero.mpFillMesh.scale.x = Math.max(0.001, hero.mp/hero.maxMp);
+    hero.mpFillMesh.position.x = -(1-hero.mp/hero.maxMp)*0.6;
+    hero.hpFillMesh.rotation.y = -hero.group.rotation.y;
+    hero.mpFillMesh.rotation.y = -hero.group.rotation.y;
+  }
+
+  // Animations for player
+  if(G.playerHero) updateHeroAnim(G.playerHero, dt);
 
   // Tower HP bars
   for(const t of G.towers) {
@@ -333,6 +395,11 @@ function respawnHero(hero) {
   hero.channeling = 0;
   hero.group.rotation.x = 0;
   hero.atkTimer = 0; hero._atkAnimTimer = 0; hero._castAnimTimer = 0; hero._prevAnim = null;
+  // Reset bot AI state to march from base
+  if(!hero.isPlayer) {
+    hero.aiState = 'march';
+    hero.wpIndex = 0;
+  }
   if(hero.isPlayer) {
     showAnnouncer('— RESPAWNED —', '#88aaff', 1500);
     playSound('respawn');
@@ -462,7 +529,10 @@ function loop(ts) {
     updateCamera(dt, G.playerHero);
     updateGold(dt);
     updateItemCooldowns(G.playerHero, dt);
-    if(G.aiHero) updateAIItems(G.aiHero, dt);
+    for(const bot of [...G.allyBots, ...G.enemyBots]) {
+      updateAIItems(bot, dt);
+      updateItemCooldowns(bot, dt);
+    }
     updateInventoryHUD();
     updateAttackBtnHUD();
     updateHUD();

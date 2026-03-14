@@ -72,14 +72,13 @@ function onHeroDeath(hero) {
   hero.attackTarget = null;
   hero.channeling = 0;
 
-  // Import these lazily to avoid circular deps - use G references
   const { showAnnouncer } = window._hudFns || {};
 
   if(hero.isPlayer) {
     G.deaths++;
     if(showAnnouncer) showAnnouncer('YOU DIED', '#ff4444', 2000);
-    else { const el=document.getElementById('announcer'); if(el){el.textContent='YOU DIED';el.style.color='#ff4444';el.style.opacity='1';setTimeout(()=>el.style.opacity='0',1600);} }
-  } else {
+  } else if(hero.team !== G.playerHero.team) {
+    // Enemy hero killed — reward player team
     const goldGain = 200 + 50*G.level;
     G.gold += goldGain;
     G.kills++;
@@ -87,15 +86,25 @@ function onHeroDeath(hero) {
     if(!G.firstBlood) {
       G.firstBlood = true;
       if(showAnnouncer) showAnnouncer('FIRST BLOOD!', '#ff4444');
-      else { const el=document.getElementById('announcer'); if(el){el.textContent='FIRST BLOOD!';el.style.color='#ff4444';el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2100);} }
       playSound('gold');
     } else if(G.killStreak >= 2) {
       if(showAnnouncer) showAnnouncer('KILL STREAK!', '#ff8800');
-      else { const el=document.getElementById('announcer'); if(el){el.textContent='KILL STREAK!';el.style.color='#ff8800';el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2100);} }
     }
     floatDamage(hero.x, hero.z, '+'+goldGain+'g', '#ffcc44');
     if(G.playerHero) addXP(100 + 20*G.playerHero.level);
     playSound('gold');
+  } else if(hero.isAllyBot) {
+    // Ally bot died
+    if(showAnnouncer) showAnnouncer('ALLY KILLED', '#ff8844', 1500);
+  }
+
+  // Give gold to nearby enemy bot heroes (for their item buys)
+  for(const h of G.heroList) {
+    if(!h || !h.alive || h.isPlayer || h.team === hero.team) continue;
+    const dx=h.x-hero.x, dz=h.z-hero.z;
+    if(Math.sqrt(dx*dx+dz*dz) < 30) {
+      h.aiGold = (h.aiGold||625) + 150 + hero.level*20;
+    }
   }
 }
 
@@ -103,15 +112,14 @@ function onTowerDeath(tower) {
   tower.group.visible = false;
   const { showAnnouncer } = window._hudFns || {};
   if(showAnnouncer) showAnnouncer('TOWER DESTROYED', '#ffcc44');
-  else { const el=document.getElementById('announcer'); if(el){el.textContent='TOWER DESTROYED';el.style.color='#ffcc44';el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2100);} }
   playSound('tower_death');
 
-  if(tower.lane === 'ancient') {
+  if(tower.lane === 'ancient' && G.playerHero) {
     const playerWon = (tower.team !== G.playerHero.team);
     if(window._endGame) window._endGame(playerWon);
   }
 
-  if(tower.team !== G.playerHero.team) {
+  if(G.playerHero && tower.team !== G.playerHero.team) {
     const g = tower.tier === 4 ? 200 : 80+tower.tier*30;
     G.gold += g;
     floatDamage(G.playerHero.x, G.playerHero.z, '+'+g+'g', '#ffcc44');
@@ -137,25 +145,35 @@ function onBarracksDeath(barracks) {
 
 function onCreepDeath(creep) {
   creep.group.visible = false;
-  const ph = G.playerHero;
-  if(!ph || !ph.alive) return;
-  const dx = ph.x - creep.x, dz = ph.z - creep.z;
-  const dist = Math.sqrt(dx*dx+dz*dz);
+  const xpAmount = creep.type === 'neutral' ? (creep.tier===2 ? 80 : 50) : 50;
 
   // Last hit gold — only the killer gets gold
-  if(creep.lastHitter === ph) {
+  if(creep.lastHitter) {
     let gold;
     if(creep.type === 'neutral') gold = (creep.tier===2 ? 90 : 55) + Math.floor(Math.random()*15);
     else if(creep.type === 'ranged') gold = 55 + Math.floor(Math.random()*15);
     else gold = 40 + Math.floor(Math.random()*15);
-    G.gold += gold;
-    floatDamage(creep.x, creep.z, '+'+gold+'g', '#ffcc44');
-    playSound('gold');
+
+    if(creep.lastHitter === G.playerHero) {
+      G.gold += gold;
+      floatDamage(creep.x, creep.z, '+'+gold+'g', '#ffcc44');
+      playSound('gold');
+    } else if(creep.lastHitter.aiGold !== undefined) {
+      creep.lastHitter.aiGold += gold;
+    }
   }
 
-  // XP to nearby player regardless of who killed
-  if(dist < 20) {
-    addXP(creep.type === 'neutral' ? (creep.tier===2 ? 80 : 50) : 50);
+  // XP to ALL nearby heroes
+  for(const h of G.heroList) {
+    if(!h || !h.alive) continue;
+    const dx = h.x - creep.x, dz = h.z - creep.z;
+    if(Math.sqrt(dx*dx+dz*dz) < 20) {
+      if(h.isPlayer) {
+        addXP(xpAmount);
+      } else {
+        addHeroXP(h, xpAmount);
+      }
+    }
   }
 
   // Neutral camp respawn
@@ -180,13 +198,23 @@ export function addXP(amount) {
   }
 }
 
+export function addHeroXP(hero, amount) {
+  if(!hero || hero.isPlayer) { if(hero && hero.isPlayer) addXP(amount); return; }
+  hero.xp += amount;
+  while(hero.xp >= hero.xpNext && hero.level < 25) {
+    hero.xp -= hero.xpNext;
+    hero.level++;
+    hero.xpNext = 50 * hero.level * hero.level;
+    onBotLevelUp(hero);
+  }
+}
+
 function onLevelUp(h) {
   playSound('levelup');
   h.maxHp += 40; h.hp = Math.min(h.hp+40, h.maxHp);
   h.maxMp += 20; h.mp = Math.min(h.mp+20, h.maxMp);
   const { showAnnouncer, updateSkillUI } = window._hudFns || {};
   if(showAnnouncer) showAnnouncer('LEVEL UP! '+h.level, '#ffcc44', 1500);
-  else { const el=document.getElementById('announcer'); if(el){el.textContent='LEVEL UP! '+h.level;el.style.color='#ffcc44';el.style.opacity='1';setTimeout(()=>el.style.opacity='0',1100);} }
   const keys = ['Q','W','E','R'];
   const min = Math.min(...keys.map(k=>G.skillLevels[k]));
   const toUp = keys.find(k=>G.skillLevels[k]===min && G.skillLevels[k]<4);
@@ -195,12 +223,17 @@ function onLevelUp(h) {
   spawnParticles(h.x, h.z, 0xffcc44, 8);
 }
 
+function onBotLevelUp(hero) {
+  hero.maxHp += 40; hero.hp = Math.min(hero.hp+40, hero.maxHp);
+  hero.maxMp += 20; hero.mp = Math.min(hero.mp+20, hero.maxMp);
+  hero.atkCd = Math.max(0.3, hero.atkCd * 0.97);
+  spawnParticles(hero.x, hero.z, 0xffcc44, 5);
+}
+
 // ─── Enemy/Ally queries ─────────────────────────────────────────────────────────
-// Use actual hero.team so either side can be player or AI
 export function getEnemiesOf(team) {
   const enemies = [];
-  if (G.playerHero && G.playerHero.alive && G.playerHero.team !== team) enemies.push(G.playerHero);
-  if (G.aiHero && G.aiHero.alive && G.aiHero.team !== team) enemies.push(G.aiHero);
+  for(const h of G.heroList) { if(h && h.alive && h.team !== team) enemies.push(h); }
   for(const c of G.creeps) { if(c.alive && c.team !== team && c.team !== 'neutral') enemies.push(c); }
   for(const t of G.towers) { if(t.alive && t.team !== team) enemies.push(t); }
   for(const b of G.barracks) { if(b.alive && b.team !== team) enemies.push(b); }
@@ -209,9 +242,14 @@ export function getEnemiesOf(team) {
 
 export function getAlliesOf(team) {
   const allies = [];
+  for(const h of G.heroList) { if(h && h.alive && h.team === team) allies.push(h); }
   for(const c of G.creeps) { if(c.alive && c.team===team) allies.push(c); }
   for(const t of G.towers) { if(t.alive && t.team===team) allies.push(t); }
   return allies;
+}
+
+export function getEnemyHeroesOf(team) {
+  return G.heroList.filter(h => h && h.alive && h.team !== team);
 }
 
 export function findEnemyNear(x, z, radius) {

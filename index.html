@@ -325,24 +325,14 @@ body.targeting-skill{cursor:crosshair}
 
 <!-- HUD -->
 <div id="hud">
-  <!-- Topbar — Dota 1 portrait strip -->
+  <!-- Topbar — Dota 1 portrait strip (populated dynamically by JS) -->
   <div id="topbar">
-    <div id="team-left">
-      <div class="port-slot" id="port-player">
-        <canvas id="port-canvas-player" width="36" height="36"></canvas>
-        <div class="port-hp-bar"><div class="port-hp-fill" id="port-hp-player" style="width:100%"></div></div>
-      </div>
-    </div>
+    <div id="team-left"></div>
     <div id="topbar-center">
       <div id="time-display" style="font-size:1.1rem;color:#ffcc44;font-weight:bold;letter-spacing:2px">00:00</div>
       <div id="gold-display" style="font-size:0.7rem;color:#c8a84a">◆ 625</div>
     </div>
-    <div id="team-right">
-      <div class="port-slot" id="port-enemy">
-        <canvas id="port-canvas-enemy" width="36" height="36"></canvas>
-        <div class="port-hp-bar"><div class="port-hp-fill enemy" id="port-hp-enemy" style="width:100%"></div></div>
-      </div>
-    </div>
+    <div id="team-right"></div>
   </div>
 
   <!-- Minimap — below topbar -->

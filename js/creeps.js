@@ -215,8 +215,8 @@ export function updateCreeps(dt) {
           const dmg = creep.dmgMin + Math.random()*(creep.dmgMax-creep.dmgMin);
           spawnProjectile(creep, creep.attackTarget, creep.team==='scourge'?0xff4444:0x4488ff, dmg, 'physical', null);
           playSound('hit');
-          // Frost armor proc (Lich passive)
-          if(G.playerHero && G.playerHero.type==='lich' && creep.attackTarget===G.playerHero) {
+          // Frost armor proc: slow attacker if target is a lich hero
+          if(creep.attackTarget && creep.attackTarget.type==='lich' && creep.attackTarget.isPlayer !== undefined) {
             creep.slowTimer = 2;
           }
         }

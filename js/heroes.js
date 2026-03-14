@@ -5,6 +5,8 @@ import { buildLich, buildSniper, buildDragonKnight, buildShadowFiend, buildWindr
 
 const BUILDERS = { lich: buildLich, sniper: buildSniper, dragon_knight: buildDragonKnight, shadow_fiend: buildShadowFiend, windrunner: buildWindrunner };
 
+let _heroUidCounter = 0;
+
 export function createHero(type, isPlayer) {
   const def = HERO_DEFS[type];
 
@@ -39,6 +41,7 @@ export function createHero(type, isPlayer) {
   group.position.set(0, 0, 0);
 
   const hero = {
+    _uid: 'hero' + (_heroUidCounter++),
     type, group, parts, selRing, hpFillMesh, mpFillMesh,
     body: null, head: null,
     def, team: 'scourge', // overwritten by main.js from G.playerSide
@@ -64,6 +67,8 @@ export function createHero(type, isPlayer) {
     itemCDs: {},
     itemBonus: {maxHp:0,maxMp:0,dmgMin:0,dmgMax:0,armor:0,move:0},
     aiBuyTimer: 0, aiGold: 625,
+    aiLane: 'mid', aiCastTimer: 5 + Math.random()*5,
+    isAllyBot: false,
     // Animation state
     animTime: 0, _prevAnim: null,
     _atkAnimTimer: 0,

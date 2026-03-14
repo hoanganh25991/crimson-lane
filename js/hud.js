@@ -57,18 +57,13 @@ export function updateHUD() {
   const xpFill = document.getElementById('xp-bar-fill');
   if(xpFill) xpFill.style.width = Math.max(0,(h.xp/h.xpNext)*100)+'%';
 
-  // Portrait HP bars
-  const portHpPlayer = document.getElementById('port-hp-player');
-  if(portHpPlayer) portHpPlayer.style.width = Math.max(0,(h.hp/h.maxHp)*100)+'%';
-  const portSlotPlayer = document.getElementById('port-player');
-  if(portSlotPlayer) portSlotPlayer.classList.toggle('dead', !h.alive);
-
-  if(G.aiHero) {
-    const ai = G.aiHero;
-    const portHpEnemy = document.getElementById('port-hp-enemy');
-    if(portHpEnemy) portHpEnemy.style.width = Math.max(0,(ai.hp/ai.maxHp)*100)+'%';
-    const portSlotEnemy = document.getElementById('port-enemy');
-    if(portSlotEnemy) portSlotEnemy.classList.toggle('dead', !ai.alive);
+  // Portrait HP bars for all heroes
+  for(const hero of G.heroList) {
+    if(!hero || !hero._uid) continue;
+    const portHp = document.getElementById('port-hp-' + hero._uid);
+    if(portHp) portHp.style.width = Math.max(0,(hero.hp/hero.maxHp)*100)+'%';
+    const portSlot = document.getElementById('port-' + hero._uid);
+    if(portSlot) portSlot.classList.toggle('dead', !hero.alive);
   }
 
   // Skill cooldowns
@@ -161,21 +156,24 @@ export function updateMinimap() {
     ctx.fillRect(mx-1,H-mz-1,2,2);
   }
 
-  // AI hero
-  if(G.aiHero && G.aiHero.alive) {
-    ctx.fillStyle='#ff4444';
-    const mx=(G.aiHero.x/100)*W, mz=(G.aiHero.z/100)*H;
-    ctx.beginPath(); ctx.arc(mx,H-mz,2.5,0,Math.PI*2); ctx.fill();
-  }
-
-  // Player hero
-  if(G.playerHero && G.playerHero.alive) {
-    ctx.fillStyle='#ffff00';
-    const mx=(G.playerHero.x/100)*W, mz=(G.playerHero.z/100)*H;
-    ctx.beginPath(); ctx.arc(mx,H-mz,3,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#ffff00';
-    ctx.lineWidth=1;
-    ctx.beginPath(); ctx.arc(mx,H-mz,4,0,Math.PI*2); ctx.stroke();
+  // All heroes on minimap
+  const playerTeam = G.playerHero ? G.playerHero.team : 'scourge';
+  for(const hero of G.heroList) {
+    if(!hero || !hero.alive) continue;
+    const mx=(hero.x/100)*W, mz=(hero.z/100)*H;
+    if(hero.isPlayer) {
+      ctx.fillStyle='#ffff00';
+      ctx.beginPath(); ctx.arc(mx,H-mz,3,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#ffff00';
+      ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(mx,H-mz,4,0,Math.PI*2); ctx.stroke();
+    } else if(hero.team === playerTeam) {
+      ctx.fillStyle='#44ff44';
+      ctx.beginPath(); ctx.arc(mx,H-mz,2.5,0,Math.PI*2); ctx.fill();
+    } else {
+      ctx.fillStyle='#ff4444';
+      ctx.beginPath(); ctx.arc(mx,H-mz,2.5,0,Math.PI*2); ctx.fill();
+    }
   }
 }
 
