@@ -16,6 +16,7 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #main-menu .sub{color:#666688;font-size:0.9rem;letter-spacing:2px;margin-bottom:48px}
 .menu-btns{display:flex;flex-direction:column;gap:14px;align-items:center}
 .menu-btn{background:#1a1a2a;border:2px solid #3a3a5a;color:#e0d8c8;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;padding:16px 56px;cursor:pointer;border-radius:4px;transition:all 0.2s;min-width:220px}
+#main-menu .menu-btn{width:260px;min-width:260px}
 .menu-btn:hover{border-color:#ffcc44;color:#ffcc44;background:#1e1e32}
 .menu-btn:disabled{border-color:#2a2a3a;color:#555;cursor:not-allowed;opacity:0.7}
 
@@ -315,7 +316,7 @@ body.targeting-skill #targeting-hint{display:block}
       <button type="button" class="opt-btn" data-mode="1" data-i18n="flow.1v1">🤺 1 vs 1</button>
     </div>
     <div class="flow-actions">
-      <button type="button" id="play-back-btn" class="secondary" data-i18n="flow.back">Back</button>
+      <button type="button" id="play-back-btn" class="secondary" data-i18n="flow.back">🔙</button>
       <button type="button" id="play-continue-btn" data-i18n="flow.continue">Continue</button>
     </div>
   </div>
@@ -325,7 +326,7 @@ body.targeting-skill #targeting-hint{display:block}
 <div id="settings-screen">
   <div class="set-header">
     <h2 data-i18n="settings.title">Settings</h2>
-    <button type="button" class="back-btn" id="settings-back-btn" data-i18n="settings.back">← Back</button>
+    <button type="button" class="back-btn" id="settings-back-btn" data-i18n="settings.back">🔙</button>
   </div>
   <div class="set-tabs">
     <button type="button" class="set-tab" data-tab="hero-viewer" data-i18n="settings.tab.hero_viewer">Hero Viewer</button>
@@ -434,7 +435,7 @@ body.targeting-skill #targeting-hint{display:block}
     <input type="text" id="mp-room-code-in" maxlength="64" data-i18n-placeholder="mp.code_placeholder" placeholder="Paste host's code (e.g. uuid)" style="background:#1a1a2a;border:2px solid #3a3a5a;color:#fff;padding:12px 20px;font-size:0.95rem;border-radius:4px;margin-bottom:12px;width:min(320px,90vw)" />
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button type="button" id="mp-connect-btn" class="menu-btn" data-i18n="mp.connect">Connect</button>
-      <button type="button" id="mp-join-back" class="menu-btn secondary" data-i18n="mp.back">Back</button>
+      <button type="button" id="mp-join-back" class="menu-btn secondary" data-i18n="mp.back">🔙</button>
     </div>
     <div id="mp-join-error" style="display:block;color:#ff4444;font-size:0.85rem;margin-top:8px;min-height:20px;text-align:center;max-width:400px"></div>
   </div>
@@ -450,7 +451,7 @@ body.targeting-skill #targeting-hint{display:block}
     <p style="color:#22cc22;margin-bottom:8px" data-i18n="mp.connected">Connected to host.</p>
     <p style="color:#888" data-i18n="mp.waiting_host">Waiting for host to start the game...</p>
   </div>
-  <button type="button" id="mp-setup-back" class="menu-btn secondary" style="margin-top:32px;display:none" data-i18n="mp.back_menu">← Back to menu</button>
+  <button type="button" id="mp-setup-back" class="menu-btn secondary" style="margin-top:32px;display:none" data-i18n="mp.back_menu">🔙</button>
 </div>
 
 <!-- LOBBY (hero pick; shown after Play → side → mode → Continue) -->
@@ -477,7 +478,7 @@ body.targeting-skill #targeting-hint{display:block}
     <div id="scroll-hint" data-i18n="lobby.scroll_hint">▼ scroll for more heroes ▼</div>
   </div>
   <div id="lobby-actions">
-    <button type="button" onclick="lobbyBack()" style="background:#1e1e2e;border:1px solid #3a3a5a;color:#888;padding:12px 24px;font-size:0.9rem;cursor:pointer;border-radius:4px" data-i18n="lobby.back">← Back</button>
+    <button type="button" onclick="lobbyBack()" style="background:#1e1e2e;border:1px solid #3a3a5a;color:#888;padding:12px 24px;font-size:0.9rem;cursor:pointer;border-radius:4px" data-i18n="lobby.back">🔙</button>
     <button id="startBtn" onclick="startGame()" disabled data-i18n="lobby.select_hero">🗡️ SELECT A HERO</button>
   </div>
 </div>
