@@ -74,15 +74,15 @@ export function startGame() {
   const others = ALL_HEROES.filter(h => h !== G.pickedHero);
   const aiType = others[Math.floor(Math.random() * others.length)];
   G.playerHero = createHero(G.pickedHero, true);
-  // Player always starts at scourge base (bottom-left)
-  G.playerHero.team = 'scourge';
-  G.playerHero.x = 10; G.playerHero.z = 10;
-  G.playerHero.group.position.set(10, 0, 10);
+  G.playerHero.team = G.playerSide || 'scourge';
+  const playerBase = G.playerSide === 'sentinel' ? { x: 90, z: 90 } : { x: 10, z: 10 };
+  const aiBase = G.playerSide === 'sentinel' ? { x: 10, z: 10 } : { x: 90, z: 90 };
+  G.playerHero.x = playerBase.x; G.playerHero.z = playerBase.z;
+  G.playerHero.group.position.set(playerBase.x, 0, playerBase.z);
   G.aiHero = createHero(aiType, false);
-  // AI always starts at sentinel base (top-right)
-  G.aiHero.team = 'sentinel';
-  G.aiHero.x = 90; G.aiHero.z = 90;
-  G.aiHero.group.position.set(90, 0, 90);
+  G.aiHero.team = G.playerSide === 'sentinel' ? 'scourge' : 'sentinel';
+  G.aiHero.x = aiBase.x; G.aiHero.z = aiBase.z;
+  G.aiHero.group.position.set(aiBase.x, 0, aiBase.z);
   G.aiHero.wpIndex = 0;
 
   const heroNameEl = document.getElementById('hero-name');
@@ -476,7 +476,102 @@ window.selectHero = selectHero;
 window.startGame = startGame;
 window.castSkill = castSkill;
 
-// Draw lobby portraits on load
+// ─── MAIN MENU & PLAY FLOW & SETTINGS ──────────────────────────────────────────
+const mainMenu = document.getElementById('main-menu');
+const playFlow = document.getElementById('play-flow');
+const settingsScreen = document.getElementById('settings-screen');
+const lobby = document.getElementById('lobby');
+const playSideOptions = document.getElementById('play-side-options');
+const playModeOptions = document.getElementById('play-mode-options');
+const playFlowTitle = document.getElementById('play-flow-title');
+let playFlowStep = 0; // 0 = side, 1 = mode
+
+function showScreen(show) {
+  mainMenu.style.display = show === 'menu' ? 'flex' : 'none';
+  playFlow.classList.toggle('show', show === 'play');
+  settingsScreen.classList.toggle('show', show === 'settings');
+  lobby.classList.toggle('show', show === 'lobby');
+}
+
+document.getElementById('btn-play').onclick = () => { showScreen('play'); playFlowStep = 0; playFlowTitle.textContent = 'Choose your side'; playSideOptions.style.display = 'flex'; playModeOptions.style.display = 'none'; playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); playSideOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected')); };
+document.getElementById('btn-settings').onclick = () => {
+  showScreen('settings');
+  settingsScreen.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
+  settingsScreen.querySelectorAll('.set-pane').forEach(p => p.classList.remove('active'));
+  settingsScreen.querySelector('.set-tab[data-tab="general"]').classList.add('active');
+  settingsScreen.querySelector('.set-pane[data-pane="general"]').classList.add('active');
+};
+
+playSideOptions.querySelectorAll('.opt-btn').forEach(btn => {
+  btn.onclick = () => {
+    playSideOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    G.playerSide = btn.dataset.side;
+  };
+});
+playModeOptions.querySelectorAll('.opt-btn').forEach(btn => {
+  btn.onclick = () => {
+    playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    G.teamSize = parseInt(btn.dataset.mode, 10);
+  };
+});
+
+document.getElementById('play-continue-btn').onclick = () => {
+  if (playFlowStep === 0) {
+    const sideSelected = playSideOptions.querySelector('.opt-btn.selected');
+    if (!sideSelected) return;
+    playFlowStep = 1;
+    playFlowTitle.textContent = 'Choose team size';
+    playSideOptions.style.display = 'none';
+    playModeOptions.style.display = 'flex';
+    return;
+  }
+  const modeSelected = playModeOptions.querySelector('.opt-btn.selected');
+  if (!modeSelected) return;
+  G.teamSize = parseInt(modeSelected.dataset.mode, 10);
+  showScreen('lobby');
+};
+
+document.getElementById('play-back-btn').onclick = () => {
+  if (playFlowStep === 1) {
+    playFlowStep = 0;
+    playFlowTitle.textContent = 'Choose your side';
+    playModeOptions.style.display = 'none';
+    playSideOptions.style.display = 'flex';
+    playModeOptions.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+    return;
+  }
+  showScreen('menu');
+};
+
+document.getElementById('settings-back-btn').onclick = () => showScreen('menu');
+
+settingsScreen.querySelectorAll('.set-tab').forEach(tab => {
+  tab.onclick = () => {
+    settingsScreen.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
+    settingsScreen.querySelectorAll('.set-pane').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    const pane = settingsScreen.querySelector('.set-pane[data-pane="' + tab.dataset.tab + '"]');
+    if (pane) pane.classList.add('active');
+    if (tab.dataset.tab === 'hero-viewer') {
+      import('./hero-viewer.js').then(m => { m.initHeroViewer(); });
+    }
+  };
+});
+
+window.lobbyBack = function() {
+  showScreen('play');
+  playFlowStep = 1;
+  playFlowTitle.textContent = 'Choose team size';
+  playSideOptions.style.display = 'none';
+  playModeOptions.style.display = 'flex';
+};
+
+// Start on main menu; lobby hidden until Play → Continue
+showScreen('menu');
+
+// Draw lobby portraits (used when lobby is shown)
 drawPortrait('lich-portrait','lich');
 drawPortrait('sniper-portrait','sniper');
 drawPortrait('dragon_knight-portrait','dragon_knight');
