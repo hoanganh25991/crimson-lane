@@ -697,6 +697,15 @@ document.getElementById('mp-join-back').onclick = () => {
   document.getElementById('mp-join-panel').style.display = 'none';
   document.getElementById('mp-choose').style.display = 'flex';
 };
+document.getElementById('mp-copy-room-btn').onclick = () => {
+  const el = document.getElementById('mp-room-code-display');
+  if (el && el.textContent && el.textContent !== '------') {
+    navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+      const btn = document.getElementById('mp-copy-room-btn');
+      if (btn) { const t = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = t; }, 1500); }
+    }).catch(() => {});
+  }
+};
 document.getElementById('mp-to-lobby-btn').onclick = () => {
   mpLobby.hostGoToLobby();
   G.isMultiplayer = true;

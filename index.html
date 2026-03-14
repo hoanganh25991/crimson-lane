@@ -308,8 +308,8 @@ body.targeting-skill{cursor:crosshair}
   </div>
   <div id="mp-create-error" style="display:block;color:#ff4444;font-size:0.85rem;margin-top:-12px;min-height:20px;text-align:center;max-width:400px"></div>
   <div id="mp-join-panel" style="display:none;text-align:center">
-    <label style="display:block;margin-bottom:8px;color:#888">Room code</label>
-    <input type="text" id="mp-room-code-in" maxlength="12" placeholder="e.g. abc123" style="background:#1a1a2a;border:2px solid #3a3a5a;color:#fff;padding:12px 20px;font-size:1.1rem;letter-spacing:4px;border-radius:4px;margin-bottom:12px;text-transform:uppercase" />
+    <label style="display:block;margin-bottom:8px;color:#888">Connection code (host's UUID)</label>
+    <input type="text" id="mp-room-code-in" maxlength="64" placeholder="Paste host's code (e.g. uuid)" style="background:#1a1a2a;border:2px solid #3a3a5a;color:#fff;padding:12px 20px;font-size:0.95rem;border-radius:4px;margin-bottom:12px;width:min(320px,90vw)" />
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
       <button type="button" id="mp-connect-btn" class="menu-btn">Connect</button>
       <button type="button" id="mp-join-back" class="menu-btn secondary">Back</button>
@@ -317,8 +317,9 @@ body.targeting-skill{cursor:crosshair}
     <div id="mp-join-error" style="display:block;color:#ff4444;font-size:0.85rem;margin-top:8px;min-height:20px;text-align:center;max-width:400px"></div>
   </div>
   <div id="mp-host-panel" style="display:none;text-align:center">
-    <p style="color:#888;margin-bottom:8px">Share this code with friends</p>
-    <p id="mp-room-code-display" style="font-size:1.8rem;letter-spacing:8px;color:#ffcc44;font-weight:bold;margin-bottom:16px">------</p>
+    <p style="color:#888;margin-bottom:8px">Share this connection code (same code every time on this device)</p>
+    <p id="mp-room-code-display" style="font-size:0.95rem;word-break:break-all;color:#ffcc44;font-weight:bold;margin-bottom:8px;max-width:min(360px,92vw)">------</p>
+    <button type="button" id="mp-copy-room-btn" class="menu-btn secondary" style="margin-bottom:16px;font-size:0.85rem">Copy code</button>
     <div id="mp-qr-container" style="margin:16px auto;background:#fff;padding:8px;border-radius:4px;display:inline-block"></div>
     <p id="mp-players-count" style="color:#aaa;margin-top:12px">Players: 1 (you are host)</p>
     <button type="button" id="mp-to-lobby-btn" class="menu-btn" style="margin-top:16px">Pick hero &amp; Start</button>
