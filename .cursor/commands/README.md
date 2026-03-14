@@ -2,9 +2,48 @@
 
 Type `/` in Cursor chat to see and run these.
 
+## `/orchestrate` — Plan → Implement (parallel) → Verify
+
+Multi-agent orchestrator pattern. Spawns specialist subagents to handle complex features end-to-end.
+
+**How it works:**
+
+```
+Requirement → Planner → Implementers (parallel) → Verifier → Report
+```
+
+1. **Planner** agent analyzes the requirement, reads docs/specs, and produces a structured plan with workstreams grouped into parallel batches.
+2. **Implementer** agents (one per workstream) run in parallel within each batch. Specialized by domain: UI, gameplay, AI, scene, audio, general/core.
+3. **Verifier** agent reads all changes, checks completeness and integration, outputs a pass/fail report.
+
+**Usage:**
+
+- In chat, type: `/orchestrate`
+- Then describe the goal or point to a spec, e.g.:
+  - "Implement barracks destruction and mega-creep spawning"
+  - "Implement the WIP items from docs/index.md"
+
+The orchestrator shows the plan before implementing, giving you a chance to adjust. After all implementers finish, the verifier confirms everything works together.
+
+**Agent definitions** live in `.cursor/agents/`:
+
+| File | Role |
+|------|------|
+| `planner.md` | Analyzes requirements, creates structured plan |
+| `implementer-ui.md` | HUD, menus, controls, HTML/CSS |
+| `implementer-gameplay.md` | Combat, heroes, skills, items, creeps, towers |
+| `implementer-ai.md` | Bot behavior, difficulty, decisions |
+| `implementer-scene.md` | Map, 3D models, particles, animations |
+| `implementer-audio.md` | SFX, music, announcer |
+| `implementer-general.md` | State, game loop, constants, docs, cross-cutting |
+| `verifier.md` | Checks completeness, integration, quality |
+| `plan-template.md` | Structured plan output format |
+
+---
+
 ## `/complete-plan` — work until the plan is done
 
-Runs the agent on a **detail plan** and keeps going until every step is complete (or the run hits Cursor’s iteration limit).
+Runs the agent on a **detail plan** and keeps going until every step is complete (or the run hits Cursor's iteration limit).
 
 **Usage:**
 
@@ -17,7 +56,7 @@ The agent will create a plan if you only give a goal, then execute each step wit
 
 ---
 
-## True “infinite” loop (multiple runs)
+## True "infinite" loop (multiple runs)
 
 Cursor limits how many steps one agent run can take. To have it **keep re-running** until the plan is fully done:
 

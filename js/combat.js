@@ -79,7 +79,7 @@ function onHeroDeath(hero) {
     if(showAnnouncer) showAnnouncer('YOU DIED', '#ff4444', 2000);
   } else if(hero.team !== G.playerHero.team) {
     // Enemy hero killed — reward player team
-    const goldGain = 200 + 50*G.level;
+    const goldGain = 200 + 50*(hero.level||1);
     G.gold += goldGain;
     G.kills++;
     G.killStreak++;
@@ -135,7 +135,7 @@ function onBarracksDeath(barracks) {
   // Opposing team gets mega creeps on that lane
   const enemy = barracks.team === 'scourge' ? 'sentinel' : 'scourge';
   G.megaLanes[enemy][barracks.lane] = true;
-  if(barracks.team !== G.playerHero.team) {
+  if(G.playerHero && barracks.team !== G.playerHero.team) {
     G.gold += 250;
     floatDamage(G.playerHero.x, G.playerHero.z, '+250g BARRACKS', '#ffcc44');
     addXP(200);
