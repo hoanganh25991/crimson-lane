@@ -660,7 +660,7 @@ document.getElementById('mp-connect-btn').onclick = () => {
   const errEl = document.getElementById('mp-join-error');
   if (errEl) errEl.textContent = '';
   btn.disabled = true;
-  let secsLeft = 12;
+  let secsLeft = 20;
   btn.textContent = `Connecting... (${secsLeft}s)`;
   if (_connectCountdown) clearInterval(_connectCountdown);
   _connectCountdown = setInterval(() => {
