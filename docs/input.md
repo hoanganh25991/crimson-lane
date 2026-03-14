@@ -1,27 +1,12 @@
-I want to create dota 1 game, where having character with skills and a map to play with friend (multiplayer)
+# Original brief
 
+**Category:** Spec · **Tags:** #vision #multiplayer #mobile
 
+---
 
-I plan to use threejs, js, html, css for 3d and animation, skills, models,...
-
-webrtc to connect 2 players, can be with like peerjs or something similar and fast
-
-
-
-than can we easily, host -> then joiner scan qr to get roomId -> connect and play
-
-
-
-close to dota 1, map, with trees, with auto spawn,... exactly same
-
-
-
-then can we control and play, but focus for mobile, this like "Garena Arena", where have virutla joystick on mobile screen to control move, skill at bottom-right,...
-
-
-
-exactly game play and ui/ux with dota 1 and focus for mobile control
-
-give me plan, and plan on detail of each
-
-than we continue until implemented
+- Dota 1–style game: characters with skills, map, play with a friend (multiplayer).
+- **Tech:** Three.js, JS, HTML, CSS for 3D, animation, skills, models. WebRTC (e.g. PeerJS) to connect 2 players.
+- **Flow:** Host → joiner scans QR for room ID → connect and play.
+- **Map:** Close to Dota 1 — trees, auto spawn.
+- **Controls:** Mobile-first, Garena-style — virtual joystick to move, skills at bottom-right. Same gameplay and UI/UX feel as Dota 1, focused on mobile.
+- **Ask:** Plan and detailed plan for each part, then implement.

@@ -1,5 +1,7 @@
 # 🧙 Dota 1 — 5 Hero Design Document
 
+**Category:** Design · **Tags:** #content #heroes #skills #art
+
 > All heroes are drawn using **Three.js geometry only** (no external assets).  
 > Each hero has a **unique silhouette** recognizable from Dota 1.  
 > Attack animation speed scales directly with attack speed stat.  

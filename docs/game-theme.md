@@ -1,5 +1,7 @@
 # Game Theme — Dota 1 Mobile
 
+**Category:** Design · **Tags:** #art #ui #audio #ux
+
 > **Tone:** Nostalgic · Tactical · Dark Fantasy
 > **Audience:** People who played Dota 1 / Warcraft III era games (2005–2010)
 > **Platform:** Mobile browser, single `.html` file

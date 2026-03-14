@@ -1,5 +1,7 @@
 # Mobile Dota-Inspired Web Game Spec for Claude Code
 
+**Category:** Spec · **Tags:** #mvp #requirements #technical #phases
+
 This file is now written in **Option B** format:
 
 1. **Master Prompt** — short instruction for Claude Code

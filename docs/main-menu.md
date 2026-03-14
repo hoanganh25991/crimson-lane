@@ -1,5 +1,7 @@
 # Main Menu
 
+**Category:** Plan · **Tags:** #ui #flow #implemented
+
 This document describes the main menu system: entry screen, play flow (side + team size), settings with tabs, and how the Hero Viewer is integrated.
 
 ---
@@ -60,7 +62,7 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 | What | Where |
 |------|--------|
 | **HTML** | `index.html`: `#main-menu`, `#play-flow`, `#settings-screen`, `#lobby`, and Hero Viewer panel inside `#hero-viewer-panel` |
-| **Styles** | `index.html`: Main menu, play flow, settings tabs, and all `#hero-viewer-panel` / `hv-*` styles |
+| **Styles** | `index.html`: Main menu, play flow, settings tabs. **Hero Viewer:** `css/hero-viewer.css` (all `#hero-viewer-panel` / `hv-*` styles) |
 | **Logic** | `js/main.js`: `showScreen()`, button handlers, tab switching, dynamic `import('./hero-viewer.js')` when Hero Viewer tab is opened |
 | **State** | `js/state.js`: `G.playerSide` (`'sentinel' \| 'scourge'`), `G.teamSize` (1, 3, or 5) |
 | **Game start** | `js/main.js` `startGame()`: uses `G.playerSide` for player spawn (Sentinel = top-right base, Scourge = bottom-left); AI uses the opposite side |
@@ -124,7 +126,10 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 
 | File | Role |
 |------|------|
-| `index.html` | Main menu, play flow, settings, Hero Viewer panel markup and CSS |
+| `index.html` | Main menu, play flow, settings, Hero Viewer panel markup; links `css/hero-viewer.css` |
+| `css/hero-viewer.css` | All Hero Viewer panel styles (scoped under `#hero-viewer-panel`, `hv-` IDs); one place to maintain viewer UI |
 | `js/main.js` | Menu/play/settings wiring, `showScreen()`, `lobbyBack()`, tab click → Hero Viewer import + init |
 | `js/state.js` | `G.playerSide`, `G.teamSize` |
 | `js/hero-viewer.js` | Hero Viewer logic and Three.js scene; `initHeroViewer()` called when Hero Viewer tab is first opened |
+
+**Note:** The standalone `hero-viewer.html` was removed; the viewer lives only inside the app (Settings → Hero Viewer).
