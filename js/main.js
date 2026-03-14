@@ -246,10 +246,11 @@ function updateHeroes(dt) {
       }
       else {
         let kx=0, kz=0;
-        if(keys['ArrowUp'])    { kx+=1; kz+=1; }
-        if(keys['ArrowDown'])  { kx-=1; kz-=1; }
-        if(keys['ArrowRight']) { kx-=1; kz+=1; }
-        if(keys['ArrowLeft'])  { kx+=1; kz-=1; }
+        // Camera from west: screen up = +X, screen right = +Z
+        if(keys['ArrowUp'])    { kx+=1; }
+        if(keys['ArrowDown'])  { kx-=1; }
+        if(keys['ArrowRight']) { kz+=1; }
+        if(keys['ArrowLeft'])  { kz-=1; }
         h._isMoving = (kx!==0||kz!==0) || joystick.active || !!(h.moveTarget);
         if(kx!==0||kz!==0) {
           const len=Math.sqrt(kx*kx+kz*kz);

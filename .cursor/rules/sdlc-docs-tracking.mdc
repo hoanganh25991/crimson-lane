@@ -1,19 +1,37 @@
 ---
 alwaysApply: true
 ---
-# SDLC — Docs as source of truth (project has docs hub)
+# SDLC — docs/index.md is the source of truth
 
-When the project has a **docs** folder used as SDLC (e.g. **docs/index.md** with a Plan / Done / WIP / Backlog section):
+This project tracks all progress in **docs/index.md**. You MUST follow this workflow for every implementation task.
 
-1. **Use docs as the authority** for what is in scope, what is done, and what is next. Before implementing, check docs/index.md and the linked spec docs.
+## Before writing any code
 
-2. **After implementing or changing scope**, update the docs hub (usually docs/index.md):
-   - Add or move completed work under Done / implemented.
-   - Add or move in-progress work under WIP with correct tags.
-   - Keep Backlog and any “backlog by category” in sync.
+1. **Read `docs/index.md`** — check the Done, Requirements Plan, and Backlog sections. Confirm the task is in scope.
+2. **Read the relevant spec** — follow links in index.md to the spec that covers your task (plan.md, heroes.md, theme.md, menu.md).
+3. If the task is not listed in Requirements Plan or Backlog, confirm with the user before implementing.
 
-3. **Keep specs and code aligned.** If code diverges from a spec in docs, either update the code to match the spec or update the spec and note the change.
+## After implementing
 
-4. **Entry point:** The main doc (e.g. docs/index.md) is the single place to see current state and which spec to follow. Keep its Plan section and tags up to date when shipping or changing features.
+1. **Update `docs/index.md`** immediately:
+   - If you completed a Requirements Plan item → move it to **Done** with a description of what was shipped.
+   - If you partially completed it → leave it in Requirements Plan and note what remains.
+   - If you added something new (not previously listed) → add it to **Done**.
+2. **If code diverges from a spec**, update the spec doc or the code to keep them aligned.
 
-This rule applies when working in or with files under **docs/** so that implementation stays tracked and reflected in the project’s SDLC docs.
+## Structure of docs/index.md Plan section
+
+- **Done** — verified shipped features.
+- **Requirements Plan** — scoped items ready to implement (numbered, prioritized).
+- **Backlog** — future items, not yet scoped.
+
+## Docs files
+
+| File | Content |
+|------|---------|
+| `docs/index.md` | SDLC hub — progress tracking |
+| `docs/plan.md` | Game rules & systems spec |
+| `docs/heroes.md` | Hero geometry, stats, skills |
+| `docs/theme.md` | Visual/audio theme |
+| `docs/menu.md` | Menu flow |
+| `docs/brief.md` | Original brief |

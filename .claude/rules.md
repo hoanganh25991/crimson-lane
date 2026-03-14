@@ -1,25 +1,28 @@
 # Project rules — SDLC and docs
 
-Implementation in this repo is tracked with **docs** as the SDLC. Specs and progress live in docs; keep them in sync with code.
+All progress is tracked in **docs/index.md**. Follow this workflow for every implementation task.
 
-## Rule: Track implementation in docs
+## Before writing any code
 
-1. **docs/index.md** is the SDLC hub. Use it to see:
-   - What’s **Done** (implemented)
-   - What’s **WIP / to finish** (with tags)
-   - What’s **Backlog** (future)
+1. **Read `docs/index.md`** — check Done, Requirements Plan, and Backlog. Confirm the task is in scope.
+2. **Read the relevant spec** — plan.md, heroes.md, theme.md, or menu.md as needed.
+3. If the task is not in Requirements Plan or Backlog, confirm with the user.
 
-2. **Before implementing:** Read the relevant spec in docs (e.g. plan.md, heroes.md) and docs/index.md Plan section. Implement only what is in scope or specified.
+## After implementing
 
-3. **After implementing or changing scope:**
-   - Update **docs/index.md**:
-     - Add or move completed work under **Done**.
-     - Add or move in-progress work under **WIP / to finish** with correct tags.
-     - Keep **Backlog** and **Backlog by category** in sync.
-   - If code and spec diverge, update either the spec or the code and note the change.
+1. **Update `docs/index.md`** immediately:
+   - Completed item → move to **Done** with description.
+   - Partial completion → update Requirements Plan with what remains.
+   - New work not previously listed → add to **Done**.
+2. **Keep specs and code aligned** — if code diverges from a spec, update one or the other.
 
-4. **Specs:** Requirements and design live in docs (plan.md, brief.md, heroes.md, theme.md, menu.md). Implementation should reflect these; any deliberate deviation should be documented.
+## Docs files
 
-## Entry point
-
-Always use **docs/index.md** to see current state and which spec applies. Keep its Plan section (Done · WIP · Backlog) and tags up to date when you ship or change features.
+| File | Content |
+|------|---------|
+| `docs/index.md` | SDLC hub — Done / Requirements Plan / Backlog |
+| `docs/plan.md` | Game rules & systems spec |
+| `docs/heroes.md` | Hero geometry, stats, skills |
+| `docs/theme.md` | Visual/audio theme |
+| `docs/menu.md` | Menu flow |
+| `docs/brief.md` | Original brief |

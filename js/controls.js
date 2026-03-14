@@ -59,8 +59,9 @@ export function initControls() {
     joystickInner.style.left = (60+nx*clampLen-22)+'px';
     joystickInner.style.top = (60+ny*clampLen-22)+'px';
     joystick.dx = nx; joystick.dz = ny;
-    joystick.wx = -(joystick.dx + joystick.dz) * 0.707;
-    joystick.wz = (joystick.dx - joystick.dz) * 0.707;
+    // Camera from west: screen right = world +Z, screen up = world +X
+    joystick.wz = joystick.dx;
+    joystick.wx = -joystick.dz;
   },{passive:false});
 
   joystickArea.addEventListener('touchend', e=>{
@@ -85,8 +86,8 @@ export function initControls() {
     joystickInner.style.left=(60+nx*clampLen-22)+'px';
     joystickInner.style.top=(60+ny*clampLen-22)+'px';
     joystick.dx=nx; joystick.dz=ny;
-    joystick.wx=-(joystick.dx+joystick.dz)*0.707;
-    joystick.wz=(joystick.dx-joystick.dz)*0.707;
+    joystick.wz = joystick.dx;
+    joystick.wx = -joystick.dz;
   });
   document.addEventListener('mouseup', ()=>{
     if(!joystick.active) return;
