@@ -1,6 +1,9 @@
 // ─── PEERJS WRAPPER ────────────────────────────────────────────────────────────
 // Create/join room, send/receive. Requires PeerJS loaded (e.g. from CDN).
-// Uses explicit STUN (and optional TURN) for better reliability when default PeerJS cloud is flaky.
+//
+// Signaling strategy:
+//   Always uses PeerJS cloud (0.peerjs.com) + STUN + public TURN relay.
+//   Works across different networks, NATs, and same-machine browser tabs.
 
 let _peer = null;
 let _roomCode = null;
@@ -51,6 +54,12 @@ async function getIceServersAsync() {
   return ICE_SERVERS_DEFAULT;
 }
 
+/** Build PeerJS constructor options — always uses cloud PeerJS + STUN + TURN. */
+async function buildPeerOptions(peerId) {
+  const iceServers = await getIceServersAsync();
+  return { id: peerId, opts: { debug: 0, config: { iceServers } } };
+}
+
 function getPeer() {
   if (typeof window !== 'undefined' && window.Peer) return window.Peer;
   return null;
@@ -96,7 +105,7 @@ function _freshPeerId() {
   return id;
 }
 
-function _tryCreatePeer(Peer, roomCode, iceServers, onConnection) {
+function _tryCreatePeer(Peer, roomCode, peerOpts, onConnection) {
   return new Promise((resolve, reject) => {
     if (_peer) { _peer.destroy(); _peer = null; }
     _connections.clear();
@@ -115,7 +124,7 @@ function _tryCreatePeer(Peer, roomCode, iceServers, onConnection) {
       done(reject, new Error('Could not reach the signaling server. Check your internet connection and try again.'));
     }, 14000);
 
-    _peer = new Peer(roomCode, { debug: 0, config: { iceServers } });
+    _peer = new Peer(roomCode, peerOpts);
     _peer.on('open', () => done(resolve, _peer.id));
     _peer.on('error', (err) => done(reject, err));
     _peer.on('connection', onConnection);
@@ -126,7 +135,6 @@ function _tryCreatePeer(Peer, roomCode, iceServers, onConnection) {
 export async function createRoom() {
   const Peer = getPeer();
   if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
-  const iceServers = await getIceServersAsync();
 
   const onConnection = (conn) => {
     conn.on('open', () => {
@@ -141,8 +149,10 @@ export async function createRoom() {
   let roomCode = getOrCreatePersistentPeerId();
   _roomCode = roomCode;
 
+  const { opts } = await buildPeerOptions(roomCode);
+
   try {
-    const id = await _tryCreatePeer(Peer, roomCode, iceServers, onConnection);
+    const id = await _tryCreatePeer(Peer, roomCode, opts, onConnection);
     return id;
   } catch (err) {
     // "unavailable-id" means our persisted peer ID is still registered on the server.
@@ -152,7 +162,8 @@ export async function createRoom() {
       console.warn('[P2P] Peer ID taken — rotating to fresh ID and retrying.');
       roomCode = _freshPeerId();
       _roomCode = roomCode;
-      return _tryCreatePeer(Peer, roomCode, iceServers, onConnection);
+      const { opts: opts2 } = await buildPeerOptions(roomCode);
+      return _tryCreatePeer(Peer, roomCode, opts2, onConnection);
     }
     throw err;
   }
@@ -162,7 +173,9 @@ export async function createRoom() {
 export async function joinRoom(hostPeerId) {
   const Peer = getPeer();
   if (!Peer) return Promise.reject(new Error('PeerJS not loaded. Check your internet connection.'));
-  const iceServers = await getIceServersAsync();
+
+  const { opts } = await buildPeerOptions(null);
+
   return new Promise((resolve, reject) => {
     if (_peer) { _peer.destroy(); _peer = null; }
     _connections.clear();
@@ -175,19 +188,17 @@ export async function joinRoom(hostPeerId) {
       fn(val);
     };
 
-    // Extended timeout: TURN relay negotiation can take up to ~15s on slow networks
     const timer = setTimeout(() => {
       if (_peer) { _peer.destroy(); _peer = null; }
       _connections.clear();
       done(reject, new Error(
-        'Connection timed out. Make sure the host is online and sharing the correct room code. ' +
-        'If on different networks, try the same WiFi network.'
+        'Connection timed out. Make sure the host is online and sharing the correct room code.'
       ));
     }, 20000);
 
-    _peer = new Peer({ debug: 0, config: { iceServers } });
+    _peer = new Peer(opts);
     _peer.on('open', () => {
-      // Brief delay so signaling server has joiner registered (PeerJS timing quirk)
+      // Brief delay so cloud signaling server has joiner registered (PeerJS timing quirk)
       setTimeout(() => {
         if (settled || !_peer) return;
         const conn = _peer.connect(hostPeerId, { reliable: true });
