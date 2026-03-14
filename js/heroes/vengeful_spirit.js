@@ -22,6 +22,7 @@ export default {
   skillCosts: { Q: [110, 110, 110, 110], W: [40, 40, 40, 40], E: [0, 0, 0, 0], R: [100, 100, 100, 100] },
   skillCDs: { Q: [13, 13, 13, 13], W: [15, 15, 15, 15], E: [0, 0, 0, 0], R: [45, 45, 45, 45] },
   skillNames: { Q: 'MAGIC MISSILE', W: 'WAVE OF TERROR', E: 'VENGEANCE AURA', R: 'NETHER SWAP' },
+  skillTypes: { E: 'passive' },
   aiBuild: ['boots_of_speed', 'magic_charm', 'vitality_gem'],
 
   buildModel() {

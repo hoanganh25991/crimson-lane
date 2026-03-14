@@ -1,5 +1,6 @@
 import { stdMat, glowMat, metalMat, transMat } from './hero-models.js';
 import { HERO_REGISTRY, ALL_HERO_IDS } from './heroes/registry.js';
+import { t } from './i18n.js';
 
 let heroViewerInited = false;
 export function initHeroViewer() {
@@ -39,21 +40,21 @@ export function initHeroViewer() {
       const def = mod.def;
       const extra = VIEWER_STATS[id] || { primary: 'str', str: 20, strG: 2, agi: 20, agiG: 2, int: 20, intG: 2, hpLvl: 19, manaLvl: 13 };
       const team = (def.team || 'scourge').toLowerCase();
-      const teamLabel = team === 'sentinel' ? 'Sentinel' : 'Scourge';
-      const primaryLabel = extra.primary === 'str' ? 'Strength' : extra.primary === 'agi' ? 'Agility' : 'Intelligence';
+      const teamLabel = team === 'sentinel' ? t('viewer.sentinel') : t('viewer.scourge');
+      const primaryLabel = extra.primary === 'str' ? t('viewer.strength') : extra.primary === 'agi' ? t('viewer.agility') : t('viewer.intelligence');
       const skills = keys.map((key, i) => {
         const name = mod.skillNames?.[key] || def.skills?.[i] || key;
         const costs = mod.skillCosts?.[key];
         const cds = mod.skillCDs?.[key];
         const costStr = Array.isArray(costs) ? (costs[0] ?? costs) : (costs ?? 0);
         const cdVal = Array.isArray(cds) ? (cds[0] ?? cds) : (cds ?? 0);
-        const meta = costStr > 0 ? `Mana ${costStr}` : 'Passive';
-        const meta2 = cdVal > 0 ? `CD ${cdVal}s` : '';
+        const meta = costStr > 0 ? t('viewer.mana_cost', { n: costStr }) : t('viewer.passive');
+        const meta2 = cdVal > 0 ? t('viewer.cooldown', { n: cdVal }) : '';
         return {
           key,
           name: typeof name === 'string' ? name : (name && name.name) || key,
           meta: [meta, meta2].filter(Boolean).join(' · '),
-          desc: 'Use in game to see full effect.',
+          desc: t('viewer.skill_desc'),
           anim: key === 'R' ? 'castR' : 'castQ',
         };
       });
@@ -692,7 +693,7 @@ function updateUI() {
 
   const sg = document.getElementById('hv-statGrid');
   sg.innerHTML = [
-    ['Damage',h.dmg],['Armor',h.armor],['Range',h.range],['Move Spd',h.ms]
+    [t('viewer.damage'),h.dmg],[t('viewer.armor'),h.armor],[t('viewer.range'),h.range],[t('viewer.move_spd'),h.ms]
   ].map(([k,v])=>`<div class="hv-stat-item"><span>${k}</span><span>${v}</span></div>`).join('');
 
   const skGrid = document.getElementById('hv-skillGrid');

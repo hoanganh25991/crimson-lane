@@ -5,6 +5,7 @@ import { applyDamage, getEnemiesOf, floatDamage } from './combat.js';
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
 import { DIFFICULTY_PROFILES, currentDifficulty } from './ai.js';
+import { t } from './i18n.js';
 
 export const ITEM_DEFS = {
   // ── Basic Components ──────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ export function buyItem(hero, itemId) {
   hero.inventory.push(itemId);
   applyItemBonuses(hero, def);
   playSound('buy');
-  floatDamage(hero.x, hero.z, def.name, '#ffcc44');
+  floatDamage(hero.x, hero.z, t('item.' + def.id), '#ffcc44');
   return true;
 }
 

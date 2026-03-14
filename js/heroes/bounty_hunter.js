@@ -22,6 +22,7 @@ export default {
   skillCosts: { Q: [90, 90, 90, 90], W: [0, 0, 0, 0], E: [50, 50, 50, 50], R: [50, 50, 50, 50] },
   skillCDs: { Q: [10, 10, 10, 10], W: [0, 0, 0, 0], E: [15, 15, 15, 15], R: [5, 5, 5, 5] },
   skillNames: { Q: 'SHURIKEN', W: 'JINADA', E: 'SHADOW WALK', R: 'TRACK' },
+  skillTypes: { W: 'passive' },
   aiBuild: ['boots_of_speed', 'blades_of_attack', 'vitality_gem'],
 
   buildModel() {

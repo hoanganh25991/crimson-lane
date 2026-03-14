@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [110, 110, 110, 110], W: 0, E: [0, 0, 0, 0], R: [100, 100, 100] },
   skillCDs: { Q: [14, 14, 14, 14], W: 0, E: 0, R: [30, 30, 30] },
   skillNames: { Q: 'MEAT HOOK', W: 'ROT', E: 'FLESH HEAP', R: 'DISMEMBER' },
+  skillTypes: { W: 'toggle', E: 'passive' },
   aiBuild: ['boots_of_speed', 'vitality_gem', 'ring_of_protection', 'power_boots'],
 
   buildModel() {
@@ -81,6 +82,11 @@ export default {
 
   needsTarget(key) {
     return key === 'Q' || key === 'R';
+  },
+
+  getToggleState(hero, key) {
+    if (key === 'W') return !!hero.rotActive;
+    return false;
   },
 
   castSkill(hero, key, lvl, targetPos, targetEntity, ctx) {

@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [0, 0, 0, 0], W: [100, 100, 100, 100], E: [100, 115, 115, 130], R: [0, 0, 0, 0] },
   skillCDs: { Q: 0, W: 9, E: 15, R: 100 },
   skillNames: { Q: 'DRGN BLOOD', W: 'DRGN TAIL', E: 'BREATHE', R: 'ELDER FORM' },
+  skillTypes: { Q: 'passive' },
   aiBuild: ['boots_of_speed', 'vitality_gem', 'ring_of_protection', 'aura_shield', 'power_boots'],
 
   buildModel() {

@@ -23,6 +23,7 @@ export default {
   skillCosts: { Q: [120, 120, 120, 120], W: [140, 140, 140, 140], E: [0, 0, 0, 0], R: [200, 200, 200] },
   skillCDs: { Q: [42, 42, 42, 42], W: [60, 60, 60, 60], E: [0, 0, 0, 0], R: [130, 130, 130] },
   skillNames: { Q: 'Blade Fury', W: 'Healing Ward', E: 'Blade Dance', R: 'Omnislash' },
+  skillTypes: { E: 'passive' },
   aiBuild: [],
 
   buildModel() {

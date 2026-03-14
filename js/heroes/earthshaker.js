@@ -23,6 +23,7 @@ export default {
   skillCosts: { Q: [125, 125, 125, 125], W: [20, 20, 20, 20], E: [0, 0, 0, 0], R: [145, 145, 145] },
   skillCDs: { Q: [15, 15, 15, 15], W: [6, 6, 6, 6], E: [0, 0, 0, 0], R: [150, 150, 150] },
   skillNames: { Q: 'Fissure', W: 'Enchant Totem', E: 'Aftershock', R: 'Echo Slam' },
+  skillTypes: { E: 'passive' },
   aiBuild: [],
 
   buildModel() {

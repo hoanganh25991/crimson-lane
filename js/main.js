@@ -1,8 +1,5 @@
 // ─── MAIN ENTRY POINT ──────────────────────────────────────────────────────────
 import { initI18n, t, applyDOM, getLang, setLang } from './i18n.js';
-await initI18n();
-applyDOM();
-
 import { CREEP_SPAWN_INTERVAL, GOLD_TICK, GOLD_PER_TICK } from './constants.js';
 import { HERO_REGISTRY, ALL_HERO_IDS } from './heroes/registry.js';
 import { G } from './state.js';
@@ -21,6 +18,10 @@ import { spawnParticles, updateParticles, updateEffects } from './particles.js';
 import { updateHeroAnim } from './animations.js';
 import { buyItem, useItem, updateItemCooldowns, updateAIItems, ITEM_DEFS } from './items.js';
 import * as mpLobby from './net/lobby.js';
+
+// ─── i18n init (runs before any UI text renders) ────────────────────────────────
+await initI18n();
+applyDOM();
 
 // ─── Expose HUD functions for combat.js bridge ──────────────────────────────────
 window._hudFns = { showAnnouncer, updateSkillUI };
@@ -361,7 +362,16 @@ function updateHeroes(dt) {
                 const prev=onHitFn;
                 onHitFn=(t,actualDmg)=>{ if(prev)prev(t,actualDmg); if(actualDmg>0){h.hp=Math.min(h.maxHp,h.hp+Math.floor(actualDmg*0.2));} };
               }
-              spawnProjectile(h, h.attackTarget, h.team==='scourge'?0xcc88ff:0x88ccff, dmg, 'physical', onHitFn);
+              // Drow Ranger Frost Arrows orb: slows target on hit
+              if(h.type==='drow_ranger' && h.frostArrowsActive) {
+                const lvl = G.skillLevels['Q'] || 1;
+                const slowDur = [1.5, 2, 2.5, 3][lvl - 1] || 1.5;
+                const frostBonusDmg = [15, 25, 35, 45][lvl - 1] || 15;
+                dmg += frostBonusDmg;
+                const prev=onHitFn;
+                onHitFn=(t,actualDmg)=>{ if(prev)prev(t,actualDmg); if(t&&t.alive){ t.slowTimer=Math.max(t.slowTimer||0,slowDur); } };
+              }
+              spawnProjectile(h, h.attackTarget, h.type==='drow_ranger'&&h.frostArrowsActive?0x88aacc:(h.team==='scourge'?0xcc88ff:0x88ccff), dmg, 'physical', onHitFn);
               playSound(h.def.range <= 3 ? 'hit' : 'ranged_hit');
               // Single-swing mode (attack button on mobile): clear target after one hit
               if(h.attackSingle) { h.attackTarget = null; h.attackSingle = false; }
@@ -927,3 +937,6 @@ mpLobby.onStartSignal((data) => {
   if (lobbyEl) { lobbyEl.style.display = 'none'; lobbyEl.classList.remove('show'); }
   startGame();
 });
+
+// Dismiss the loading screen — JS is fully initialized
+if (typeof window._appReady === 'function') window._appReady();

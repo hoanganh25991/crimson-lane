@@ -22,6 +22,7 @@ export default {
   skillCosts: { Q: [130, 130, 130, 130], W: [115, 115, 115, 115], E: [0, 0, 0, 0], R: [200, 200, 200, 200] },
   skillCDs: { Q: [12, 12, 12, 12], W: [10, 10, 10, 10], E: [0, 0, 0, 0], R: [90, 90, 90, 90] },
   skillNames: { Q: 'CRYSTAL NOVA', W: 'FROSTBITE', E: 'ARCANE AURA', R: 'FREEZING FIELD' },
+  skillTypes: { E: 'passive' },
   aiBuild: ['boots_of_speed', 'magic_charm', 'void_staff', 'vitality_gem'],
 
   buildModel() {

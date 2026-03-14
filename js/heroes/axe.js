@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [80, 80, 80, 80], W: [75, 75, 75, 75], E: [0, 0, 0, 0], R: [120, 120, 120] },
   skillCDs: { Q: [14, 14, 14, 14], W: [20, 20, 20, 20], E: 0, R: [75, 75, 75] },
   skillNames: { Q: 'BERSERKER', W: 'BATTLE HUNGER', E: 'COUNTER HELIX', R: 'CULLING BLADE' },
+  skillTypes: { E: 'passive' },
   aiBuild: ['boots_of_speed', 'vitality_gem', 'ring_of_protection', 'power_boots'],
 
   buildModel() {

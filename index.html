@@ -125,6 +125,14 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 .skill-btn.ready{border-color:#3a3a5a}
 .skill-btn.active-target{border-color:#ffcc44;box-shadow:0 0 8px #ffcc4488}
 .skill-btn.no-mana{filter:saturate(0.2);animation:shake 0.3s}
+/* Passive skills — greyed, not interactive */
+.skill-btn.skill-passive{opacity:0.45;border-color:#252525!important;cursor:default;pointer-events:none}
+.skill-btn.skill-passive:active{transform:none}
+.skill-btn.skill-passive .skill-key{color:#555}
+.skill-passive-badge{position:absolute;top:2px;right:3px;font-size:0.48rem;color:#555;font-weight:bold;pointer-events:none;letter-spacing:0}
+/* Toggle skills — light blue border when active */
+.skill-btn.skill-toggled-on{border-color:#44aaff;box-shadow:0 0 10px #44aaff55;background:#06121e}
+.skill-btn.skill-toggled-on .skill-key{color:#44aaff}
 .skill-key{font-size:0.75rem;color:#ffcc44;font-weight:bold}
 .skill-name{font-size:0.5rem;color:#888;letter-spacing:1px}
 .skill-cd{position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:#fff;font-weight:bold;pointer-events:none}
@@ -171,6 +179,19 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 .gen-hint{color:#666688;font-size:0.8rem;flex:1}
 .gen-reload-btn{background:#1a1a2a;border:1px solid #ffcc44;color:#ffcc44;padding:6px 16px;font-size:0.85rem;cursor:pointer;border-radius:4px;white-space:nowrap}
 .gen-reload-btn:hover{background:#ffcc44;color:#07070f}
+
+/* Loading screen */
+#loading-screen{position:fixed;inset:0;background:#07070f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s ease;pointer-events:all}
+#loading-screen.fade-out{opacity:0;pointer-events:none}
+#loading-screen.gone{display:none}
+#loading-title{font-size:2.8rem;letter-spacing:6px;color:#ffcc44;text-transform:uppercase;margin-bottom:6px}
+#loading-sub{color:#666688;font-size:0.9rem;letter-spacing:2px;margin-bottom:48px}
+#loading-msg{color:#888;font-size:0.8rem;letter-spacing:2px;margin-bottom:16px;min-height:1.2em;text-transform:uppercase;transition:opacity 0.2s}
+#loading-bar-wrap{width:min(300px,70vw);height:4px;background:#1a1a2a;border-radius:2px;overflow:hidden;border:1px solid #2a2a4a}
+#loading-bar-fill{height:100%;background:#ffcc44;border-radius:2px;width:0%;transition:width 0.4s ease}
+#loading-error{display:none;margin-top:20px;color:#ff4444;font-size:0.8rem;letter-spacing:1px;text-align:center;max-width:320px;line-height:1.6}
+@keyframes loading-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+#loading-msg{animation:loading-pulse 1.5s ease-in-out infinite}
 
 /* Level up flash */
 .level-flash{position:absolute;border-radius:50%;pointer-events:none;animation:lvlFlash 1s forwards}
@@ -250,14 +271,23 @@ body.targeting-skill #targeting-hint{display:block}
 </head>
 <body>
 
+<!-- LOADING SCREEN — visible immediately, dismissed once JS is ready -->
+<div id="loading-screen">
+  <div id="loading-title">DOTA 1</div>
+  <div id="loading-sub">DEFENSE OF THE ANCIENTS</div>
+  <div id="loading-msg">Loading engine…</div>
+  <div id="loading-bar-wrap"><div id="loading-bar-fill"></div></div>
+  <div id="loading-error"></div>
+</div>
+
 <!-- MAIN MENU -->
 <div id="main-menu">
   <h1 data-i18n="menu.title">DOTA 1</h1>
   <div class="sub" data-i18n="menu.subtitle">DEFENSE OF THE ANCIENTS</div>
   <div class="menu-btns">
-    <button class="menu-btn" id="btn-play" data-i18n="menu.play">⚔️ Play</button>
-    <button class="menu-btn" id="btn-multiplayer" data-i18n="menu.multiplayer">🌐 Multiplayer</button>
-    <button class="menu-btn" id="btn-settings" data-i18n="menu.settings">⚙️ Settings</button>
+    <button class="menu-btn" id="btn-play" disabled data-i18n="menu.play">⚔️ Play</button>
+    <button class="menu-btn" id="btn-multiplayer" disabled data-i18n="menu.multiplayer">🌐 Multiplayer</button>
+    <button class="menu-btn" id="btn-settings" disabled data-i18n="menu.settings">⚙️ Settings</button>
   </div>
 </div>
 
@@ -576,9 +606,72 @@ body.targeting-skill #targeting-hint{display:block}
   <button onclick="location.reload()" data-i18n="end.play_again">🔄 PLAY AGAIN</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"></script>
+<script>
+// Loading progress controller — runs before any CDN script
+(function(){
+  var bar = document.getElementById('loading-bar-fill');
+  var msg = document.getElementById('loading-msg');
+  var errEl = document.getElementById('loading-error');
+  var screen = document.getElementById('loading-screen');
+  var done = false;
+
+  // Animate bar slowly from 0→12% while waiting for first CDN file (3G feedback)
+  var fakeTimer = setInterval(function(){
+    if(done) return clearInterval(fakeTimer);
+    var cur = parseFloat(bar ? bar.style.width : '0') || 0;
+    if(cur < 12) { if(bar) bar.style.width = (cur + 0.4) + '%'; }
+    else clearInterval(fakeTimer);
+  }, 400);
+
+  window._setProgress = function(pct, text) {
+    if(bar) bar.style.width = pct + '%';
+    if(msg) msg.textContent = text;
+  };
+
+  window._appReady = function() {
+    if(done) return;
+    done = true;
+    window._setProgress(100, 'Ready!');
+    // Enable main menu buttons
+    ['btn-play','btn-multiplayer','btn-settings'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.disabled = false;
+    });
+    // Fade out after brief pause so user sees "Ready!"
+    setTimeout(function(){
+      if(screen){ screen.classList.add('fade-out'); }
+      setTimeout(function(){
+        if(screen){ screen.classList.add('gone'); }
+      }, 520);
+    }, 150);
+  };
+
+  window._loadError = function(lib) {
+    if(errEl){
+      errEl.style.display = 'block';
+      errEl.innerHTML = 'Failed to load ' + lib + '.<br>Check your connection and <a href="" style="color:#ffcc44">reload</a>.';
+    }
+    if(msg){ msg.textContent = 'Load failed'; msg.style.animationPlayState = 'paused'; }
+  };
+
+  // Warn if still loading after 90s (3G edge case)
+  setTimeout(function(){
+    if(!done && errEl && errEl.style.display === 'none'){
+      errEl.style.display = 'block';
+      errEl.innerHTML = 'Still loading… slow connection detected.<br><a href="" style="color:#ffcc44">Reload</a> if this takes too long.';
+    }
+  }, 90000);
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+  onerror="window._loadError('Three.js (3D engine)')"></script>
+<script>window._setProgress(40, 'Loading audio…');</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"
+  onerror="window._loadError('Howler.js (audio)')"></script>
+<script>window._setProgress(65, 'Loading utilities…');</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.0.3/qrcode.min.js"
+  onerror="window._loadError('QR code library')"></script>
+<script>window._setProgress(80, 'Initializing game…');</script>
 <script src="js/main.js" type="module"></script>
 <script>
 // HUD idle-fade: panels fade to low opacity when player is idle for 4s

@@ -3,6 +3,7 @@ import { G } from './state.js';
 import { camera, groundPlane } from './scene.js';
 import { castSkill } from './skills.js';
 import { getEnemiesOf, floatDamage } from './combat.js';
+import { t } from './i18n.js';
 
 export const joystick = {active:false, dx:0, dz:0, wx:0, wz:0, startX:0, startY:0, ox:0, oy:0};
 export const keys = {};
@@ -149,7 +150,7 @@ export function initControls() {
           h.tpTarget = { x: h.team==='scourge'?10:90, z: h.team==='scourge'?10:90 };
         }
         h.channeling = 3;
-        floatDamage(h.x, h.z, 'TELEPORTING...', '#44ffcc');
+        floatDamage(h.x, h.z, t('announce.teleporting'), '#44ffcc');
       }
       return;
     }
@@ -288,14 +289,45 @@ export function initControls() {
         // ── Drag cast: project finger endpoint to world ground ──────────────
         const worldPos = touchWorldPos(t.clientX, t.clientY);
         if (worldPos) {
-          castSkill(key, worldPos, null);
+          // Snap to nearby enemy unit if aim lands close to one (helps unit-target skills)
+          const h = G.playerHero;
+          let snapTarget = null;
+          if (h) {
+            const allTargetable = [
+              ...getEnemiesOf(h.team).filter(en => en.alive),
+              ...(G.neutralCreeps || []).flatMap(c => c.units || []).filter(u => u && u.alive)
+            ];
+            let snapDist = 7; // world units snap radius
+            for (const en of allTargetable) {
+              const sdx = en.x - worldPos.x, sdz = en.z - worldPos.z;
+              const sd = Math.sqrt(sdx * sdx + sdz * sdz);
+              if (sd < snapDist) { snapDist = sd; snapTarget = en; }
+            }
+          }
+          castSkill(key, worldPos, snapTarget);
         } else {
           // Fallback: project drag direction from hero position
           const h = G.playerHero;
           if (h && dist > 0) {
             // Camera is from west: screenX→world+Z, screenY→world+X (inverted)
             const nx = dx / dist, ny = dy / dist;
-            castSkill(key, { x: h.x + (-ny) * CAST_RANGE * 0.5, z: h.z + nx * CAST_RANGE * 0.5 }, null);
+            const fallbackPos = { x: h.x + (-ny) * CAST_RANGE * 0.5, z: h.z + nx * CAST_RANGE * 0.5 };
+            // Also try snapping to nearest enemy in drag direction
+            const allTargetable = [
+              ...getEnemiesOf(h.team).filter(en => en.alive),
+              ...(G.neutralCreeps || []).flatMap(c => c.units || []).filter(u => u && u.alive)
+            ];
+            let best = null, bestScore = -Infinity;
+            for (const en of allTargetable) {
+              const edx = en.x - h.x, edz = en.z - h.z;
+              const ed = Math.sqrt(edx * edx + edz * edz);
+              if (ed > CAST_RANGE) continue;
+              const dot = (edx / (ed || 1)) * (-ny) + (edz / (ed || 1)) * nx;
+              if (dot < 0.35) continue;
+              const score = dot - ed * 0.015;
+              if (score > bestScore) { bestScore = score; best = en; }
+            }
+            castSkill(key, best ? { x: best.x, z: best.z } : fallbackPos, best);
           }
         }
       } else {
@@ -303,12 +335,15 @@ export function initControls() {
         const now = Date.now();
         if (lastSkillTap.key === key && (now - lastSkillTap.time) < DOUBLE_TAP_MS) {
           lastSkillTap.key = null;
-          // Double-tap: auto-cast on nearest enemy hero in range
+          // Double-tap: auto-cast on nearest attackable unit (enemies + neutrals)
           const h = G.playerHero;
           if (h) {
-            const enemies = getEnemiesOf(h.team).filter(en => en.alive);
+            const allTargetable = [
+              ...getEnemiesOf(h.team).filter(en => en.alive),
+              ...(G.neutralCreeps || []).flatMap(c => c.units || []).filter(u => u && u.alive)
+            ];
             let best = null, bestD = Infinity;
-            for (const en of enemies) {
+            for (const en of allTargetable) {
               const edx = en.x - h.x, edz = en.z - h.z;
               const d   = Math.sqrt(edx * edx + edz * edz);
               if (d <= CAST_RANGE && d < bestD) { bestD = d; best = en; }

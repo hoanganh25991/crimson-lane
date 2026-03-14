@@ -22,6 +22,7 @@ export default {
   skillCosts: { Q: [100, 100, 100, 100], W: [90, 90, 90, 90], E: [0, 0, 0, 0], R: [280, 280, 280] },
   skillCDs: { Q: 9, W: 7, E: 0, R: 60 },
   skillNames: { Q: 'DRAGON SLAVE', W: 'LIGHT STRIKE', E: 'FIERY SOUL', R: 'LAGUNA BLADE' },
+  skillTypes: { E: 'passive' },
   aiBuild: ['boots_of_speed', 'magic_charm', 'power_boots', 'void_staff'],
 
   buildModel() {

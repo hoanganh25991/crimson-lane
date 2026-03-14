@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [120, 120, 120, 120], W: [0, 0, 0, 0], E: [0, 0, 0, 0], R: [150, 150, 150] },
   skillCDs: { Q: [12, 12, 12, 12], W: 0, E: 0, R: [150, 150, 150] },
   skillNames: { Q: 'GUSH', W: 'KRAKEN SHELL', E: 'ANCHOR SMASH', R: 'RAVAGE' },
+  skillTypes: { W: 'passive', E: 'passive' },
   aiBuild: ['boots_of_speed', 'vitality_gem', 'ring_of_protection', 'power_boots'],
 
   buildModel() {

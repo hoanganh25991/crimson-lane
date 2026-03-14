@@ -23,6 +23,8 @@ export default {
   skillCosts: { Q: [0, 0, 0, 0], W: [90, 90, 90, 90], E: [0, 0, 0, 0], R: [0, 0, 0, 0] },
   skillCDs: { Q: [0, 0, 0, 0], W: [13, 13, 13, 13], E: [0, 0, 0, 0], R: [0, 0, 0] },
   skillNames: { Q: 'Frost Arrows', W: 'Gust', E: 'Precision Aura', R: 'Marksmanship' },
+  // Q = toggle orb, E/R = passives
+  skillTypes: { Q: 'toggle', E: 'passive', R: 'passive' },
   aiBuild: [],
 
   buildModel() {
@@ -81,14 +83,24 @@ export default {
     return key === 'W';
   },
 
+  getToggleState(hero, key) {
+    if (key === 'Q') return !!hero.frostArrowsActive;
+    return false;
+  },
+
   castSkill(hero, key, lvl, targetPos, targetEntity, ctx) {
     const { scene, G, applyDamage, getEnemiesOf, findEnemyNear, spawnSpellProjectile, floatDamage, spawnParticles, playSound } = ctx;
     if (key === 'Q') {
-      hero.frostArrowsActive = true;
-      hero.frostArrowsTimer = 999;
-      floatDamage(hero.x, hero.z, 'FROST ARROWS', '#88aacc');
-      spawnParticles(hero.x, hero.z, 0x88aacc, 4);
-      playSound('frost');
+      // Toggle Frost Arrows on/off (orb effect: adds slow + bonus magic dmg to basic attacks)
+      hero.frostArrowsActive = !hero.frostArrowsActive;
+      if (hero.frostArrowsActive) {
+        floatDamage(hero.x, hero.z, 'FROST ARROWS ON', '#88aacc');
+        spawnParticles(hero.x, hero.z, 0x88aacc, 5);
+        playSound('frost');
+      } else {
+        floatDamage(hero.x, hero.z, 'FROST ARROWS OFF', '#445566');
+        spawnParticles(hero.x, hero.z, 0x334455, 2);
+      }
     } else if (key === 'W') {
       if (!targetPos) return;
       playSound('frost');

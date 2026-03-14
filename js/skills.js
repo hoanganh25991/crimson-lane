@@ -38,6 +38,14 @@ export function castSkill(key, targetPos, targetEntity) {
   const mod = HERO_REGISTRY[h.type];
   if (!mod) return;
 
+  // Passive skills cannot be manually cast — show brief feedback and bail
+  const skillType = (mod.skillTypes && mod.skillTypes[key]) || 'active';
+  if (skillType === 'passive') {
+    const btn = document.getElementById('sb' + key);
+    if (btn) { btn.style.filter = 'brightness(1.5)'; setTimeout(() => { btn.style.filter = ''; }, 250); }
+    return;
+  }
+
   const needsTarget = mod.needsTarget ? mod.needsTarget(key) : false;
   if (!targetPos && needsTarget) {
     G.targetingSkill = key;

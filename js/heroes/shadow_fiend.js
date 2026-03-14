@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [75, 75, 75, 75], W: [0, 0, 0, 0], E: [0, 0, 0, 0], R: [150, 175, 200, 200] },
   skillCDs: { Q: 10, W: 0, E: 0, R: 120 },
   skillNames: { Q: 'SHADOWRAZE', W: 'NECRO', E: 'DARK PRES', R: 'REQUIEM' },
+  skillTypes: { W: 'passive', E: 'passive' },
   aiBuild: ['boots_of_speed', 'blades_of_attack', 'iron_branch', 'lifesteal_blade'],
 
   buildModel() {

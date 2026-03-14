@@ -21,6 +21,7 @@ export default {
   skillCosts: { Q: [140, 140, 140, 140], W: [0, 0, 0, 0], E: [25, 25, 25, 25], R: [100, 100, 100] },
   skillCDs: { Q: [15, 15, 15, 15], W: 0, E: [36, 36, 36, 36], R: [80, 80, 80] },
   skillNames: { Q: 'STORM HAMMER', W: 'GREAT CLEAVE', E: 'WARCRY', R: "GOD'S STRENGTH" },
+  skillTypes: { W: 'passive' },
   aiBuild: ['boots_of_speed', 'blades_of_attack', 'vitality_gem', 'power_boots'],
 
   buildModel() {

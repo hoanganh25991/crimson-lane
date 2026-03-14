@@ -46,9 +46,9 @@ export function updateHUD() {
   if(mpFill) mpFill.style.width = Math.max(0,(h.mp/h.maxMp)*100)+'%';
   if(hpVal) hpVal.textContent = Math.ceil(h.hp)+'/'+h.maxHp;
   if(mpVal) mpVal.textContent = Math.ceil(h.mp)+'/'+h.maxMp;
-  if(goldEl) goldEl.textContent = '🪙 '+Math.floor(G.gold);
-  if(kdaEl) kdaEl.textContent = '⚔️ '+G.kills+' / 💀 '+G.deaths+' / 🤝 '+G.assists;
-  if(levelEl) levelEl.textContent = 'LVL '+h.level;
+  if(goldEl) goldEl.textContent = t('hud.gold', { n: Math.floor(G.gold) });
+  if(kdaEl) kdaEl.textContent = t('hud.kda', { k: G.kills, d: G.deaths, a: G.assists });
+  if(levelEl) levelEl.textContent = t('hud.level', { n: h.level });
 
   if(timeEl) {
     const sec = Math.floor(G.time); const m = Math.floor(sec/60); const s = sec%60;
@@ -68,8 +68,9 @@ export function updateHUD() {
     if(portSlot) portSlot.classList.toggle('dead', !hero.alive);
   }
 
-  // Skill cooldowns
+  // Skill cooldowns + toggle-on state
   const cdKeys = ['Q','W','E','R'];
+  const hudMod = h && HERO_REGISTRY[h.type];
   for(const k of cdKeys) {
     const cd = G.skillCDs[k];
     const el = document.getElementById('cd'+k);
@@ -77,12 +78,18 @@ export function updateHUD() {
       if(cd > 0) { el.style.display='flex'; el.textContent=cd.toFixed(1); }
       else { el.style.display='none'; }
     }
+    // Toggle-on highlight (blue glow when skill is toggled on)
+    const btn = document.getElementById('sb'+k);
+    if(btn && hudMod && hudMod.skillTypes && hudMod.skillTypes[k] === 'toggle') {
+      const isOn = hudMod.getToggleState ? hudMod.getToggleState(h, k) : false;
+      btn.classList.toggle('skill-toggled-on', isOn);
+    }
   }
 
   // TP target-selection banner
   const announcer = document.getElementById('announcer');
   if(G.selectingTPTarget && announcer) {
-    announcer.textContent = '— SELECT TARGET STRUCTURE —';
+    announcer.textContent = t('announce.tp_select');
     announcer.style.color = '#44ffcc';
     announcer.style.opacity = '1';
   }
@@ -110,6 +117,7 @@ export function updateSkillUI() {
   const h = G.playerHero; if(!h) return;
   const mod = HERO_REGISTRY[h.type];
   const ns = (mod && mod.skillNames) ? mod.skillNames : { Q: 'Q', W: 'W', E: 'E', R: 'R' };
+  const skillTypes = (mod && mod.skillTypes) || {};
   for(const k of ['Q','W','E','R']) {
     const snEl = document.getElementById('sn'+k);
     if(snEl) snEl.textContent = ns[k];
@@ -121,6 +129,20 @@ export function updateSkillUI() {
         const d = document.createElement('div');
         d.className = 'skill-dot' + (i<lvl?' on':'');
         dotsEl.appendChild(d);
+      }
+    }
+    // Apply passive / toggle styling
+    const btn = document.getElementById('sb'+k);
+    if(btn) {
+      const t = skillTypes[k] || 'active';
+      btn.classList.toggle('skill-passive', t === 'passive');
+      btn.classList.toggle('skill-toggle', t === 'toggle');
+      // Passive badge (P marker)
+      let badge = btn.querySelector('.skill-passive-badge');
+      if(t === 'passive') {
+        if(!badge) { badge = document.createElement('span'); badge.className='skill-passive-badge'; badge.textContent='P'; btn.appendChild(badge); }
+      } else {
+        if(badge) badge.remove();
       }
     }
   }

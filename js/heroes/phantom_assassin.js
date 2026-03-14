@@ -23,6 +23,7 @@ export default {
   skillCosts: { Q: [30, 30, 30, 30], W: [50, 50, 50, 50], E: [0, 0, 0, 0], R: [0, 0, 0, 0] },
   skillCDs: { Q: [8, 8, 8, 8], W: [20, 20, 20, 20], E: [0, 0, 0, 0], R: [0, 0, 0] },
   skillNames: { Q: 'Stifling Dagger', W: 'Phantom Strike', E: 'Blur', R: 'Coup de Grâce' },
+  skillTypes: { E: 'passive', R: 'passive' },
   aiBuild: [],
 
   buildModel() {
