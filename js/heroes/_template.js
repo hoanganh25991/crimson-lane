@@ -23,6 +23,7 @@ export default {
   },
   skillCosts: { Q: [0, 0, 0, 0], W: [0, 0, 0, 0], E: [0, 0, 0, 0], R: [0, 0, 0] },
   skillCDs: { Q: [0, 0, 0, 0], W: [0, 0, 0, 0], E: [0, 0, 0, 0], R: [0, 0, 0] },
+  // castRangeByLevel: { Q: [600,600,600,600], ... } — units; use Infinity for global, 0 for self
   skillNames: { Q: 'Q', W: 'W', E: 'E', R: 'R' },
   aiBuild: [],
 

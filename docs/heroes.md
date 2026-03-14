@@ -37,7 +37,13 @@ making the character visually feel faster.
 
 ---
 
-## 🧊 HERO 1 — Lich
+## Heroes
+
+All 20 heroes are documented below. Each skill includes a **Range** definition (see [plan.md](plan.md) §6 for the taxonomy). Heroes 1–5 have full geometry and skill writeups; heroes 6–20 use compact skill tables.
+
+---
+
+### Lich (Hero 1)
 
 **Dota 1 hero:** Lich (Undead · Scourge · Intelligence)  
 **Silhouette:** Tall robed skeleton, floating off ground, bony arms extended
@@ -83,6 +89,7 @@ Attack damage: 49–55 (magic staff)
 
 #### Q — Frost Nova
 - **Type:** Point-target AoE
+- **Range:** 600 units (cast range to place AoE center)
 - **Mana:** 120/130/145/160 | **CD:** 7/6/5/4s
 - **Damage:** 75/150/225/300 magic (primary target: +100 bonus)
 - **Slow:** 20/30/40/50% move speed, 4s duration
@@ -91,6 +98,7 @@ Attack damage: 49–55 (magic staff)
 
 #### W — Dark Ritual
 - **Type:** Unit-target (allied non-hero unit only)
+- **Range:** 400 units
 - **Mana:** 25 | **CD:** 55/45/35/25s
 - **Effect:** Sacrifices target creep → restores mana equal to 100/130/160/200% of creep's current HP
 - **Visual:** Purple spiral rises from creep → flows into Lich. Creep fades out (scale → 0).
@@ -98,6 +106,7 @@ Attack damage: 49–55 (magic staff)
 
 #### E — Chain Frost
 - **Type:** Unit-target
+- **Range:** 750 units | Bounce range: 750 units
 - **Mana:** 150/175/200 | **CD:** 8s
 - **Damage:** 280/370/460 magic per bounce, up to 10 bounces
 - **Bounce range:** 750 units | Slow: 30%, 3s
@@ -106,13 +115,14 @@ Attack damage: 49–55 (magic staff)
 
 #### R — Frost Armor (Passive)
 - **Type:** Passive aura (self + nearby allies within 900 units)
+- **Range:** N/A (passive; aura radius 900)
 - **Effect:** Adds 3/4/5/6 armor. Enemies who hit buffed unit → slowed 40% move for 3s
 - **Visual:** Faint blue hexagonal sheen pulses on any unit with buff. Slow indicator: blue trail on affected enemy.
 - **Geometry effect:** Subtle `IcosahedronGeometry` wireframe rotating slowly around Lich (scale 1.5)
 
 ---
 
-## 🔫 HERO 2 — Sniper (Kardel Sharpeye)
+### Sniper (Hero 2)
 
 **Dota 1 hero:** Sniper (Keen · Sentinel · Agility)  
 **Silhouette:** Short stout gnome, oversized rifle, wide-brimmed hat
@@ -157,6 +167,7 @@ Attack damage: 38–44 (ranged physical)
 
 #### Q — Shrapnel
 - **Type:** Point-target AoE zone
+- **Range:** 900 units
 - **Mana:** 120 | **CD:** 22s (1 charge stored per 22s, max 2)
 - **Effect:** Rains shrapnel in 350-radius zone for 9s. 15/30/45/60 DPS + 30% slow inside zone.
 - **Visual:** Yellow burst on land → zone shimmers with small metal shard particles bouncing on ground.
@@ -164,18 +175,21 @@ Attack damage: 38–44 (ranged physical)
 
 #### W — Headshot (Passive)
 - **Type:** Passive proc
+- **Range:** N/A (passive)
 - **Effect:** 40% chance on attack to deal 30/55/80/115 bonus physical damage + 0.5s mini-stun
 - **Visual:** On proc → yellow star burst on target's head, brief freeze frame 0.05s
 - **Geometry effect:** `StarGeometry` equivalent (IcosahedronGeometry scaled flat) flash on impact
 
 #### E — Aim (Passive)
 - **Type:** Passive stat
+- **Range:** N/A (passive)
 - **Effect:** Increases attack range by 75/150/225/300
 - **Visual:** At level 4, sniper has 850 attack range — show range circle glow on review screen
 - **Indicator:** Faint gold ring at edge of attack range in review mode
 
 #### R — Assassinate
-- **Type:** Unit-target (very long range: 2000/2500/3000 units)
+- **Type:** Unit-target (very long range)
+- **Range:** 2000/2500/3000 units by level
 - **Mana:** 175/250/275 | **CD:** 20s | Channel: 1.7s
 - **Damage:** 355/505/655 magic + applies Headshot slow
 - **Interrupt:** Channeling is interrupted by stun/silence
@@ -184,7 +198,7 @@ Attack damage: 38–44 (ranged physical)
 
 ---
 
-## 🔥 HERO 3 — Dragon Knight (Davion)
+### Dragon Knight (Hero 3)
 
 **Dota 1 hero:** Dragon Knight (Human · Sentinel · Strength)  
 **Silhouette:** Tall armored knight, shield + sword, dragon helmet
@@ -231,26 +245,31 @@ Attack damage: 53–59
 
 #### Q — Dragon Blood (Passive)
 - **Type:** Passive
+- **Range:** N/A (passive)
 - **Effect:** +3/6/9/12 HP regen/sec, +3/4/5/6 armor
 - **Visual:** Faint red shimmer pulses from hero body every 3s
 - **Geometry effect:** Red `SphereGeometry` corona pulse scale 1.0→1.8→0 opacity
 
 #### W — Dragon Tail
-- **Type:** Unit-target (melee range: 150 units)
+- **Type:** Unit-target (melee)
+- **Range:** 150 units
 - **Mana:** 100 | **CD:** 9s
 - **Effect:** Shield bash — 2/2/2/2.5s stun + 25/50/75/100 magic damage
 - **Visual:** Shield slams forward, gold shockwave ring at target's feet
 - **Geometry effect:** `TorusGeometry` ring (gold) pops from ground, scale 0→1.5 over 0.25s
 
 #### E — Breathe Fire
-- **Type:** Point-target line AoE (600 length cone)
+- **Type:** Point-target line AoE (cone)
+- **Range:** 600 units (cone length)
 - **Mana:** 100/110/120/130 | **CD:** 15/12/9/6s
 - **Damage:** 75/150/225/300 magic, reduces base attack damage by 35% for 5s
 - **Visual:** Fire cone sprays from hero's mouth/sword direction
 - **Geometry effect:** Orange/red `ConeGeometry` particles stream forward, fade out at range
 
 #### R — Elder Dragon Form
-- **Type:** Self-transform | **CD:** 100s | Duration: 60s
+- **Type:** Self-transform
+- **Range:** Self (no cast range)
+- **CD:** 100s | Duration: 60s
 - **Levels:** Level 1 = Green Dragon (poison slow), Level 2 = Red Dragon (+splash), Level 3 = Blue Dragon (+frost slow)
 - **Effect:** Hero transforms → dragon body. Gains ranged attack (500), +15 armor, +50 move speed
 - **Dragon geometry (replaces hero):**
@@ -263,7 +282,7 @@ Attack damage: 53–59
 
 ---
 
-## 🌑 HERO 4 — Shadow Fiend (Nevermore)
+### Shadow Fiend (Hero 4)
 
 **Dota 1 hero:** Shadow Fiend (Undead · Scourge · Agility)  
 **Silhouette:** Winged demon, hunched, two curved blades, glowing red eyes
@@ -307,7 +326,8 @@ Attack damage: 51–57 + 2 per soul (Necromastery)
 ### Skills
 
 #### Q — Shadowraze (×3 variants)
-- **Type:** No-target, 3 fixed-range AoEs
+- **Type:** No-target, 3 fixed-range AoEs (special: no target selection)
+- **Range:** Short 200 / Medium 450 / Long 700 units (fixed distances ahead)
 - **Short Raze:** 200 units ahead, Mana 75, CD 10s
 - **Medium Raze:** 450 units ahead, Mana 75, CD 10s
 - **Long Raze:** 700 units ahead, Mana 75, CD 10s
@@ -316,17 +336,20 @@ Attack damage: 51–57 + 2 per soul (Necromastery)
 
 #### W — Necromastery (Passive)
 - **Type:** Passive soul collection
+- **Range:** N/A (passive)
 - **Effect:** On unit kill, gain 1 soul (max 12/16/20/24). Each soul = +2 damage.
 - **Visual:** Red orb flies from killed unit → orbits SF hero. Orbs glow brighter near cap.
 - **Death:** SF drops 50% of souls on death.
 
 #### E — Presence of the Dark Lord (Passive Aura)
 - **Type:** Passive aura, 900 radius
+- **Range:** N/A (passive; aura radius 900)
 - **Effect:** Reduces enemy armor by 3/4/5/6 in range
 - **Visual:** Dark purple mist clouds radiate outward from SF's feet (particle drift)
 
 #### R — Requiem of Souls
-- **Type:** No-target, massive AoE (global-ish: 1000 radius)
+- **Type:** No-target, self-centered AoE (special)
+- **Range:** Self (effect radius 1000 units around caster)
 - **Mana:** 150/175/200 | **CD:** 120/110/100s
 - **Effect:** All stored souls (from Necromastery) fire as lines outward, then pull back.
   - Lines deal 80/120/160 × (souls/2) damage. Slow 20/30/50% on outward.
@@ -337,7 +360,7 @@ Attack damage: 51–57 + 2 per soul (Necromastery)
 
 ---
 
-## 🌿 HERO 5 — Windrunner (Alleria)
+### Windrunner (Hero 5)
 
 **Dota 1 hero:** Windrunner (Night Elf · Sentinel · Agility)  
 **Silhouette:** Slim female archer, hood and ponytail, longbow, green/teal colors
@@ -386,13 +409,15 @@ Attack damage: 36–46 (ranged physical)
 
 #### Q — Shackleshot
 - **Type:** Unit-target
+- **Range:** 600 units
 - **Mana:** 90/100/110/120 | **CD:** 15s
 - **Effect:** Fires arrow at target. If target is in line with a tree or another unit → both get shackled (stun 0.75/1.5/2.25/3.0s).
 - **Visual:** Arrow fires → wire/chain drawn between shackled units/tree
 - **Geometry effect:** `Line` chain drawn between two targets, gold color. Both targets flash.
 
 #### W — Powershot
-- **Type:** Vector-target (direction + range, up to 1700 units)
+- **Type:** Vector-target (direction + range)
+- **Range:** Up to 1700 units
 - **Mana:** 90/100/110/120 | **CD:** 12s
 - **Channel:** 1s charge up → releases at full charge or on re-cast
 - **Damage:** 340/480/620/760 magic (decreases 10% per unit hit)
@@ -401,13 +426,16 @@ Attack damage: 36–46 (ranged physical)
 
 #### E — Windrun
 - **Type:** No-target, self-cast
+- **Range:** Self
 - **Mana:** 100 | **CD:** 15/12/9/6s | Duration: 3s
 - **Effect:** +50% evasion, +50% move speed. Incoming projectiles miss.
 - **Visual:** Hero surrounded by green wind spiral. Movement leaves teal afterimage trail.
 - **Geometry effect:** `TorusGeometry` wind ring orbits hero horizontally. Speed of rotation = move speed. Afterimage: ghost copy of hero mesh at 20% opacity, 0.1s delayed.
 
 #### R — Focus Fire
-- **Type:** Unit-target | **CD:** 60s | Duration: 20s
+- **Type:** Unit-target
+- **Range:** 600 units (attack range)
+- **CD:** 60s | Duration: 20s
 - **Mana:** 200/275/350
 - **Effect:** Fires at max attack speed on target (400/600/800 attack speed). Each attack -8/-4/-0% damage penalty.
 - **Visual:** Hero locks on target, rapid-fire arrows. Attack animation matches ultra-high speed.
@@ -482,160 +510,209 @@ Attack damage: 36–46 (ranged physical)
 
 ---
 
-## New 15 Heroes — Specs for Implementation
+## Heroes — Full Skill SDLC (20 heroes)
 
-Each hero is implemented as `js/heroes/<id>.js` following the contract in `js/heroes/_template.js`. Use `stdMat`, `glowMat`, `metalMat`, `transMat` from `../hero-models.js`. No new builders in hero-models.js required — implement `buildModel()` inside each hero file (THREE.Group + parts with `parts.type = this.id`, `parts.glowColor`). Stats use in-game scale: `range` in world units (melee ~2.5–3, ranged 10–14), `move` ~7–9, `hp`/`mp` in hundreds.
+Each hero is implemented as `js/heroes/<id>.js` following the contract in `js/heroes/_template.js`. Use `stdMat`, `glowMat`, `metalMat`, `transMat` from `../hero-models.js`. Stats use in-game scale: `range` in world units (melee ~2.5–3, ranged 10–14), `move` ~7–9, `hp`/`mp` in hundreds.
+
+**Skill range convention:** Every skill has a **Range** line. Values: `N/A (passive)`, `Self`, `XXX units`, `global` (Zeus R), or `Self (effect radius XXX)` for self-centered AoE.
+
+---
 
 ### 6. Axe (axe) — Str, Scourge, Initiator/Tank
 
 - **Silhouette:** Large armored orc, single broad axe, horned helmet, red/dark armor.
 - **Geometry:** Box torso, shoulder pads, helmet with horns, one large axe (BoxGeometry blade + Cylinder handle), legs, boots. Colors: `#8B0000`, `#2a1510`, `#cc4422`.
 - **Stats:** hp 650, mp 220, move 8, range 2.5 (melee), dmg 52–58, armor 4, atkSpd 0.9. Str primary.
-- **Q — Berserker's Call:** No-target, taunt enemies in radius ~6 for 2s, +30 armor self. Mana 80, CD 14. Visual: red ring, enemies pull toward Axe.
-- **W — Battle Hunger:** Unit-target DoT, slow, damage over time. Mana 75, CD 20. Visual: red debuff on target.
-- **E — Counter Helix:** Passive, chance on hit to spin (AoE physical damage). Visual: spin effect on proc.
-- **R — Culling Blade:** Unit-target execute (high damage if target low HP). Mana 120, CD 75. Visual: axe chop, execute flash.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Berserker's Call | No-target, self-radius | Self (radius 275) | 80 | 14s |
+| W | Battle Hunger | Unit-target | 500 units | 75 | 20s |
+| E | Counter Helix | Passive | N/A (passive) | — | — |
+| R | Culling Blade | Unit-target | 150 units (melee) | 120 | 75s |
 
 ### 7. Pudge (pudge) — Str, Scourge, Ganker
 
 - **Silhouette:** Fat butcher, meat hook in hand, belly, chains, dark green/grey.
 - **Geometry:** Large rounded torso (sphere/cylinder), belly, head, meat hook (chain + hook geometry), legs. Colors: `#3d4a3d`, `#1a2a1a`, `#88aa88`.
 - **Stats:** hp 700, mp 280, move 7.5, range 2.5 (melee), dmg 45–51, armor 2, atkSpd 0.85. Str primary.
-- **Q — Meat Hook:** Vector/point, hook flies out, pulls first enemy hit to Pudge, damage. Mana 110, CD 14. Visual: chain line, pull.
-- **W — Rot:** Toggle AoE around Pudge, DoT to self and enemies. Visual: green gas cloud.
-- **E — Flesh Heap:** Passive, bonus str per kill; active block. Visual: stack indicator.
-- **R — Dismember:** Unit-target channel, stun + DoT. Mana 100, CD 30. Visual: channel beam.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Meat Hook | Vector/point-target | 1300 units | 110 | 14s |
+| W | Rot | Toggle | N/A (toggle; radius 250) | — | — |
+| E | Flesh Heap | Passive | N/A (passive) | — | — |
+| R | Dismember | Unit-target | 150 units (melee) | 100 | 30s |
 
 ### 8. Sven (sven) — Str, Sentinel, Carry/Stun
 
 - **Silhouette:** Knight in blue/silver armor, huge sword, cape.
 - **Geometry:** Armored torso, pauldrons, helmet, greatsword (long BoxGeometry), cape, legs, boots. Colors: `#2244aa`, `#aaccff`, `#6688cc`.
 - **Stats:** hp 620, mp 195, move 8, range 2.5 (melee), dmg 54–56, armor 3, atkSpd 0.9. Str primary.
-- **Q — Storm Hammer:** Unit-target stun + damage, small AoE. Mana 140, CD 15. Visual: hammer throw, stun ring.
-- **W — Great Cleave:** Passive, melee attacks cleave in cone. Visual: cleave arc.
-- **E — Warcry:** No-target, armor + move speed for allies in radius. Mana 25, CD 36. Visual: yellow aura.
-- **R — God's Strength:** No-target, +damage for duration. Mana 100, CD 80. Visual: golden glow, larger sword.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Storm Hammer | Unit-target | 600 units | 140 | 15s |
+| W | Great Cleave | Passive | N/A (passive) | — | — |
+| E | Warcry | No-target, self-radius | Self (radius 900) | 25 | 36s |
+| R | God's Strength | No-target, self | Self | 100 | 80s |
 
 ### 9. Tidehunter (tidehunter) — Str, Scourge, Initiator
 
 - **Silhouette:** Large fish/beast, anchor weapon, shell, teal/green.
 - **Geometry:** Rounded body, shell back, head with mouth, anchor (Cylinder + Box), webbed feet. Colors: `#2d5a4a`, `#1a3a2e`, `#88ccaa`.
 - **Stats:** hp 660, mp 234, move 7.5, range 2.5 (melee), dmg 50–56, armor 3, atkSpd 0.9. Str primary.
-- **Q — Gush:** Unit-target nuke + slow. Mana 120, CD 12. Visual: water blast.
-- **W — Kraken Shell:** Passive, block + dispel. Visual: shell shine on hit.
-- **E — Anchor Smash:** Passive, attack reduces damage of hit enemies. Visual: splash on hit.
-- **R — Ravage:** No-target, huge AoE stun + damage. Mana 150, CD 150. Visual: tentacles from ground, wave.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Gush | Unit-target | 700 units | 120 | 12s |
+| W | Kraken Shell | Passive | N/A (passive) | — | — |
+| E | Anchor Smash | Passive | N/A (passive) | — | — |
+| R | Ravage | No-target, self-radius | Self (radius 1025) | 150 | 150s |
 
 ### 10. Earthshaker (earthshaker) — Str, Sentinel, Initiator
 
 - **Silhouette:** Tall totem-carrying shaman, horned, earth tones, giant totem.
 - **Geometry:** Tall torso, totem (tall Cylinder/Box), horns, tribal armor, legs. Colors: `#4a3728`, `#8B6914`, `#2a1810`.
 - **Stats:** hp 610, mp 291, move 7.5, range 2.5 (melee), dmg 50–56, armor 3, atkSpd 0.9. Str primary.
-- **Q — Fissure:** Point-target line, creates impassable wall, stun + damage. Mana 125, CD 15. Visual: earth crack line.
-- **W — Enchant Totem:** No-target, next attack bonus damage + range. Mana 20, CD 6. Visual: totem glow.
-- **E — Aftershock:** Passive, stun/slow on cast. Visual: small quake on spell cast.
-- **R — Echo Slam:** No-target, AoE damage (more for each unit in range). Mana 145, CD 150. Visual: concentric rings, slam.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Fissure | Point-target line | 1400 units | 125 | 15s |
+| W | Enchant Totem | No-target, self | Self | 20 | 6s |
+| E | Aftershock | Passive | N/A (passive) | — | — |
+| R | Echo Slam | No-target, self-radius | Self (radius 600) | 145 | 150s |
 
 ### 11. Phantom Assassin (phantom_assassin) — Agi, Scourge, Carry/Assassin
 
 - **Silhouette:** Hooded figure, twin blades, red/black.
 - **Geometry:** Slim torso, hood, two curved blades, legs. Colors: `#2a0010`, `#aa2244`, `#440011`.
 - **Stats:** hp 530, mp 195, move 8.5, range 2.5 (melee), dmg 51–53, armor 2, atkSpd 1.0. Agi primary.
-- **Q — Stifling Dagger:** Unit-target, damage + slow. Mana 30, CD 8. Visual: dagger projectile.
-- **W — Phantom Strike:** Unit-target blink, attack speed. Mana 50, CD 20. Visual: blink in, slash.
-- **E — Blur:** Passive, evasion. Visual: blur effect when evading.
-- **R — Coup de Grâce:** Passive, crit. Visual: crit slash, big number.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Stifling Dagger | Unit-target | 525 units | 30 | 8s |
+| W | Phantom Strike | Unit-target (blink) | 1000 units | 50 | 20s |
+| E | Blur | Passive | N/A (passive) | — | — |
+| R | Coup de Grâce | Passive | N/A (passive) | — | — |
 
 ### 12. Juggernaut (juggernaut) — Agi, Sentinel, Carry/Fighter
 
 - **Silhouette:** Samurai with blade, mask, armor.
 - **Geometry:** Armored torso, mask, single long blade, bandana, legs. Colors: `#cc4422`, `#2a1510`, `#ff8844`.
 - **Stats:** hp 560, mp 195, move 8, range 2.5 (melee), dmg 46–50, armor 3, atkSpd 0.95. Agi primary.
-- **Q — Blade Fury:** No-target, spin, magic immune + AoE damage. Mana 120, CD 42. Visual: spinning blades.
-- **W — Healing Ward:** No-target, place ward that heals in AoE. Mana 140, CD 60. Visual: ward model, heal particles.
-- **E — Blade Dance:** Passive, crit. Visual: crit flash.
-- **R — Omnislash:** Unit-target, slash bounces between enemies. Mana 200, CD 130. Visual: multiple slashes, bounce.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Blade Fury | No-target, self-radius | Self (radius 250) | 120 | 42s |
+| W | Healing Ward | No-target, point-target | 400 units (place ward) | 140 | 60s |
+| E | Blade Dance | Passive | N/A (passive) | — | — |
+| R | Omnislash | Unit-target | 450 units | 200 | 130s |
 
 ### 13. Drow Ranger (drow_ranger) — Agi, Sentinel, Carry/Range
 
 - **Silhouette:** Archer, longbow, cloak, ice theme.
 - **Geometry:** Slim torso, bow (TorusGeometry half), quiver, cloak, legs, hood. Colors: `#4466aa`, `#88aacc`, `#2a3355`.
 - **Stats:** hp 530, mp 195, move 8, range 12, dmg 44–51, armor 2, atkSpd 1.0. Agi primary.
-- **Q — Frost Arrows:** Toggle/orb, slow + bonus damage. Visual: ice arrow.
-- **W — Gust:** Point-target cone, silence + knockback. Mana 90, CD 13. Visual: wind cone.
-- **E — Precision Aura:** Passive, bonus agility / damage to self (and allies if desired). Visual: aura ring.
-- **R — Marksmanship:** Passive, bonus damage; pierce evasion. Visual: crosshair glow.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Frost Arrows | Toggle | N/A (toggle; attack range) | — | — |
+| W | Gust | Point-target cone | 900 units | 90 | 13s |
+| E | Precision Aura | Passive | N/A (passive; aura 900) | — | — |
+| R | Marksmanship | Passive | N/A (passive) | — | — |
 
 ### 14. Bounty Hunter (bounty_hunter) — Agi, Scourge, Ganker/Roam
 
 - **Silhouette:** Stealthy figure, dual blades, hood.
 - **Geometry:** Lean torso, hood, two short blades, scarf, legs. Colors: `#1a2a1a`, `#558855`, `#88cc88`.
 - **Stats:** hp 550, mp 195, move 8.5, range 2.5 (melee), dmg 48–54, armor 3, atkSpd 0.95. Agi primary.
-- **Q — Shuriken Toss:** Unit-target, damage + ministun. Mana 90, CD 10. Visual: shuriken projectile.
-- **W — Jinada:** Passive, slow + bonus gold on hit. Visual: gold burst on proc.
-- **E — Shadow Walk:** No-target, invis + bonus damage on break. Mana 50, CD 15. Visual: fade, strike.
-- **R — Track:** Unit-target, vision + move speed vs target, gold on kill. Mana 50, CD 5. Visual: eye icon over target.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Shuriken Toss | Unit-target | 1200 units | 90 | 10s |
+| W | Jinada | Passive | N/A (passive) | — | — |
+| E | Shadow Walk | No-target, self | Self | 50 | 15s |
+| R | Track | Unit-target | 1200 units | 50 | 5s |
 
 ### 15. Vengeful Spirit (vengeful_spirit) — Agi, Scourge, Support/Stun
 
 - **Silhouette:** Winged archer, glowing, dark purple.
 - **Geometry:** Slim torso, wings (BoxGeometry), bow, crown/hair, legs. Colors: `#4a2a5a`, `#aa88cc`, `#2a1a3a`.
 - **Stats:** hp 530, mp 234, move 8, range 12, dmg 42–48, armor 2, atkSpd 0.95. Agi primary.
-- **Q — Magic Missile:** Unit-target stun + damage. Mana 110, CD 13. Visual: magic bolt.
-- **W — Wave of Terror:** Point-target cone, minus armor + damage. Mana 40, CD 15. Visual: wave cone.
-- **E — Vengeance Aura:** Passive, bonus damage for allies. Visual: aura.
-- **R — Nether Swap:** Unit-target, swap positions. Mana 100, CD 45. Visual: swap beam.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Magic Missile | Unit-target | 500 units | 110 | 13s |
+| W | Wave of Terror | Point-target cone | 1400 units | 40 | 15s |
+| E | Vengeance Aura | Passive | N/A (passive; aura 900) | — | — |
+| R | Nether Swap | Unit-target | 900 units | 100 | 45s |
 
 ### 16. Crystal Maiden (crystal_maiden) — Int, Sentinel, Support
 
 - **Silhouette:** Robed caster, staff with crystal, ice theme.
 - **Geometry:** Robe (Cylinder/Lathe), staff, crystal orb, hood, hair. Colors: `#4488aa`, `#aaddff`, `#2266aa`.
 - **Stats:** hp 454, mp 403, move 7, range 12, dmg 43–49, armor 1, atkSpd 0.85. Int primary.
-- **Q — Crystal Nova:** Point-target AoE, damage + slow. Mana 130, CD 12. Visual: ice burst.
-- **W — Frostbite:** Unit-target root + DoT. Mana 115, CD 10. Visual: ice bind.
-- **E — Arcane Aura:** Passive, mana regen (self + global). Visual: blue aura.
-- **R — Freezing Field:** No-target channel, random ice explosions in AoE. Mana 200, CD 90. Visual: ice explosions.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Crystal Nova | Point-target AoE | 600 units | 130 | 12s |
+| W | Frostbite | Unit-target | 500 units | 115 | 10s |
+| E | Arcane Aura | Passive | N/A (passive; global) | — | — |
+| R | Freezing Field | No-target, self-radius | Self (radius 685) | 200 | 90s |
 
 ### 17. Zeus (zeus) — Int, Sentinel, Nuker
 
 - **Silhouette:** Robed elder, lightning, beard, crown.
 - **Geometry:** Robe, beard (BoxGeometry), crown, lightning orb in hand. Colors: `#ffcc00`, `#886622`, `#fff0aa`.
 - **Stats:** hp 511, mp 351, move 7.5, range 12, dmg 41–49, armor 2, atkSpd 0.9. Int primary.
-- **Q — Arc Lightning:** Unit-target bounces to nearby enemies. Mana 65, CD 2. Visual: lightning bolt.
-- **W — Lightning Bolt:** Unit-target nuke + ministun, true sight. Mana 100, CD 7. Visual: single bolt.
-- **E — Static Field:** Passive, % current HP damage in range on cast. Visual: static on spell.
-- **R — Thundergod's Wrath:** No-target, damage all enemy heroes globally. Mana 225, CD 90. Visual: lightning from sky.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Arc Lightning | Unit-target | 700 units | 65 | 2s |
+| W | Lightning Bolt | Unit-target | 700 units | 100 | 7s |
+| E | Static Field | Passive | N/A (passive; 1200 on cast) | — | — |
+| R | Thundergod's Wrath | No-target, **global** | **Global** (all enemy heroes) | 225 | 90s |
 
 ### 18. Lina (lina) — Int, Sentinel, Nuker
 
 - **Silhouette:** Female caster, flame hair, staff.
 - **Geometry:** Robe, flame hair (ConeGeometry × several), staff with flame, slim build. Colors: `#cc2200`, `#ff6622`, `#552200`.
 - **Stats:** hp 492, mp 351, move 8, range 12, dmg 44–50, armor 2, atkSpd 0.9. Int primary.
-- **Q — Dragon Slave:** Point-target line, fire damage. Mana 100, CD 9. Visual: fire line.
-- **W — Light Strike Array:** Point-target AoE delay stun + damage. Mana 90, CD 7. Visual: fire pillars.
-- **E — Fiery Soul:** Passive, attack speed per spell cast. Visual: flame stacks.
-- **R — Laguna Blade:** Unit-target pure nuke. Mana 280, CD 60. Visual: beam.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Dragon Slave | Point-target line | 1075 units | 100 | 9s |
+| W | Light Strike Array | Point-target AoE | 600 units | 90 | 7s |
+| E | Fiery Soul | Passive | N/A (passive) | — | — |
+| R | Laguna Blade | Unit-target | 600 units | 280 | 60s |
 
 ### 19. Lion (lion) — Int, Sentinel, Support/Disable
 
 - **Silhouette:** Robed figure, demon hand, staff.
 - **Geometry:** Robe, staff, large demon hand (claw), horns. Colors: `#663322`, `#aa6644`, `#330011`.
 - **Stats:** hp 492, mp 351, move 8, range 12, dmg 43–49, armor 2, atkSpd 0.9. Int primary.
-- **Q — Earth Spike:** Point-target line stun + damage. Mana 100, CD 12. Visual: spikes from ground.
-- **W — Hex:** Unit-target transform + slow. Mana 125, CD 30. Visual: hex effect.
-- **E — Mana Drain:** Unit-target channel, drain mana. Mana 10, CD 20. Visual: mana beam.
-- **R — Finger of Death:** Unit-target nuke, damage increases per kill. Mana 200, CD 160. Visual: red beam.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Earth Spike | Point-target line | 600 units | 100 | 12s |
+| W | Hex | Unit-target | 500 units | 125 | 30s |
+| E | Mana Drain | Unit-target (channel) | 550 units | 10 | 20s |
+| R | Finger of Death | Unit-target | 700 units | 200 | 160s |
 
 ### 20. Enigma (enigma) — Int, Scourge, Initiator
 
 - **Silhouette:** Floating cosmic figure, void/star theme.
 - **Geometry:** Central orb/core, orbiting fragments (small spheres), no legs, float. Colors: `#220022`, `#660066`, `#aa44aa`.
 - **Stats:** hp 511, mp 351, move 7, range 12, dmg 44–50, armor 2, atkSpd 0.9. Int primary.
-- **Q — Malefice:** Unit-target, repeated stun + damage. Mana 110, CD 15. Visual: pulse stuns.
-- **W — Demonic Conversion:** No-target, convert creep to eidolons. Mana 140, CD 35. Visual: convert effect.
-- **E — Midnight Pulse:** Point-target AoE, % max HP damage. Mana 95, CD 25. Visual: dark zone.
-- **R — Black Hole:** Point-target channel, pull + stun + damage. Mana 200, CD 160. Visual: black hole vortex.
+
+| Slot | Name | Type | Range | Mana | CD |
+|------|------|------|-------|------|-----|
+| Q | Malefice | Unit-target | 600 units | 110 | 15s |
+| W | Demonic Conversion | No-target (convert nearest creep) | 700 units (creep search) | 140 | 35s |
+| E | Midnight Pulse | Point-target AoE | 700 units | 95 | 25s |
+| R | Black Hole | Point-target (channel) | 400 units | 200 | 160s |
 
 ---
 
-*Next step: Implement the Hero Review Screen as `hero-viewer.html`, then integrate heroes into the game engine.*
+*Skill range taxonomy and per-hero specs are defined in [plan.md](plan.md) §6. Hero modules in `js/heroes/` should align `castRange`/`castRangeByLevel` with these values.*

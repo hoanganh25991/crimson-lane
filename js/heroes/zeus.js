@@ -21,6 +21,7 @@ export default {
   },
   skillCosts: { Q: [65, 65, 65, 65], W: [100, 100, 100, 100], E: [0, 0, 0, 0], R: [225, 225, 225, 225] },
   skillCDs: { Q: [2, 2, 2, 2], W: [7, 7, 7, 7], E: [0, 0, 0, 0], R: [90, 90, 90, 90] },
+  castRangeByLevel: { Q: [700, 700, 700, 700], W: [700, 700, 700, 700], R: [Infinity, Infinity, Infinity] },
   skillNames: { Q: 'ARC LIGHTNING', W: 'LIGHTNING BOLT', E: 'STATIC FIELD', R: "THUNDERGOD'S WRATH" },
   skillTypes: { E: 'passive' },
   aiBuild: ['boots_of_speed', 'magic_charm', 'void_staff', 'power_boots'],

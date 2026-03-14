@@ -107,6 +107,31 @@ RespawnTime = 5 + level * 2
 
 Each hero has Q, W, E, R. System supports: target skills, area skills, skillshots, passives, cooldowns, mana cost, cast time, projectiles, status effects, level scaling.
 
+### Skill cast range taxonomy
+
+Every skill must have a clear range definition. Categories:
+
+| Range type | Description | Example | `castRange` value |
+|------------|-------------|---------|-------------------|
+| **global** | No range limit; affects all valid targets (e.g. all enemy heroes) | Zeus R — Thundergod's Wrath | `Infinity` or `'global'` |
+| **self** | No target; effect centered on caster | Windrun, God's Strength | `0` |
+| **self-radius** | No target; AoE around caster | Ravage, Echo Slam | `0` + `effectRadius` |
+| **melee** | Unit-target, melee range (~150 units) | Dragon Tail, Dismember | `150` |
+| **short** | Point/unit target, ~400–600 units | Frost Nova, Crystal Nova | `400`–`600` |
+| **medium** | Point/unit target, ~700–1000 units | Chain Frost, Laguna Blade | `700`–`1000` |
+| **long** | Point/unit target, ~1200–1700 units | Powershot, Meat Hook | `1200`–`1700` |
+| **very-long** | Unit target, 2000+ units | Assassinate | `2000`/`2500`/`3000` by level |
+| **passive** | No cast; always-on or proc-based | Headshot, Dragon Blood | N/A |
+| **toggle** | No cast range; orb/buff | Frost Arrows, Rot | N/A |
+
+Special cases (Dota 1 liberties):
+
+- **Zeus R** — Global; damages all enemy heroes. No range check.
+- **Shadow Fiend Q** — Three fixed-range razes (200/450/700); no target selection.
+- **Shadow Fiend R** — Self-centered AoE (~1000 radius); no cast range.
+
+Hero modules should define `castRangeByLevel` (or `castRange` for fixed) for targetable skills. See [heroes.md](heroes.md) for per-hero skill specs.
+
 ### Status effects (MVP)
 
 Stun, slow, silence, knockback.

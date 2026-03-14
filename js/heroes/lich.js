@@ -20,6 +20,7 @@ export default {
   },
   skillCosts: { Q: [100, 115, 125, 140], W: [25, 25, 25, 25], E: [200, 290, 380, 380], R: [0, 0, 0, 0] },
   skillCDs: { Q: 6, W: 30, E: 145, R: 0 },
+  castRangeByLevel: { Q: [600, 600, 600, 600], W: [400, 400, 400, 400], E: [750, 750, 750, 750] },
   skillNames: { Q: 'FROST NOVA', W: 'DARK RITUAL', E: 'CHAIN FROST', R: 'FROST ARMOR' },
   skillTypes: { R: 'passive' },
   aiBuild: ['boots_of_speed', 'vitality_gem', 'magic_charm', 'power_boots', 'void_staff'],

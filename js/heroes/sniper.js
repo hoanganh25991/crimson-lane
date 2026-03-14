@@ -20,6 +20,7 @@ export default {
   },
   skillCosts: { Q: [120, 120, 120, 120], W: [0, 0, 0, 0], E: [0, 0, 0, 0], R: [200, 200, 200, 200] },
   skillCDs: { Q: 22, W: 0, E: 0, R: 20 },
+  castRangeByLevel: { Q: [900, 900, 900, 900], R: [2000, 2500, 3000] },
   skillNames: { Q: 'SHRAPNEL', W: 'HEADSHOT', E: 'AIM', R: 'ASSASSINATE' },
   skillTypes: { W: 'passive', E: 'passive' },
   aiBuild: ['boots_of_speed', 'blades_of_attack', 'ring_of_protection', 'lifesteal_blade'],

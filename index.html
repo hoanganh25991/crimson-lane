@@ -16,7 +16,7 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #main-menu .sub{color:#666688;font-size:0.9rem;letter-spacing:2px;margin-bottom:48px}
 .menu-btns{display:flex;flex-direction:column;gap:14px;align-items:center}
 .menu-btn{background:#1a1a2a;border:2px solid #3a3a5a;color:#e0d8c8;font-size:1.1rem;letter-spacing:3px;text-transform:uppercase;padding:16px 56px;cursor:pointer;border-radius:4px;transition:all 0.2s;min-width:220px}
-#main-menu .menu-btn{width:260px;min-width:260px}
+#main-menu .menu-btn{width:320px;min-width:320px}
 .menu-btn:hover{border-color:#ffcc44;color:#ffcc44;background:#1e1e32}
 .menu-btn:disabled{border-color:#2a2a3a;color:#555;cursor:not-allowed;opacity:0.7}
 
@@ -37,9 +37,9 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 /* SETTINGS */
 #settings-screen{position:fixed;inset:0;background:#07070f;display:none;flex-direction:column;z-index:130}
 #settings-screen.show{display:flex}
-#settings-screen .set-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#0d0d1a;border-bottom:1px solid #1e1e2e;flex-shrink:0}
-#settings-screen .set-header h2{font-size:1.2rem;color:#ffcc44;letter-spacing:2px}
-#settings-screen .set-tabs{display:flex;gap:4px;padding:8px 12px;background:#111118;border-bottom:1px solid #1e1e2e;flex-shrink:0;overflow-x:auto}
+#settings-screen .set-header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#0d0d1a;border-bottom:1px solid #1e1e2e;flex-shrink:0}
+#settings-screen .set-header h2{font-size:1.2rem;color:#ffcc44;letter-spacing:2px;flex-shrink:0}
+#settings-screen .set-tabs{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;justify-content:flex-start}
 #settings-screen .set-tab{background:transparent;border:1px solid #2a2a4a;color:#888;padding:8px 16px;font-size:0.9rem;cursor:pointer;border-radius:4px;transition:all 0.2s;flex-shrink:0}
 #settings-screen .set-tab:hover{color:#ccc;border-color:#3a3a5a}
 #settings-screen .set-tab.active{background:#1a1a2a;border-color:#ffcc44;color:#ffcc44}
@@ -48,9 +48,9 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #settings-screen .set-pane.active{display:flex}
 #settings-screen .set-pane.placeholder{padding:24px;color:#666;font-size:0.95rem}
 @media (max-height:520px) and (orientation:landscape){
-  #settings-screen .set-header{padding:5px 12px}
+  #settings-screen .set-header{padding:6px 12px;gap:8px}
   #settings-screen .set-header h2{font-size:0.95rem;letter-spacing:1px}
-  #settings-screen .set-tabs{padding:4px 8px;gap:3px}
+  #settings-screen .set-tabs{gap:3px}
   #settings-screen .set-tab{padding:5px 12px;font-size:0.8rem}
   #settings-screen .back-btn{padding:4px 12px;font-size:0.8rem}
 }
@@ -177,7 +177,7 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #endscreen .etitle{font-size:3rem;letter-spacing:6px;font-weight:bold}
 #endscreen .esub{color:#c8a84a;font-size:1rem;letter-spacing:2px}
 #endscreen button{background:#1a1a2a;border:2px solid #ffcc44;color:#ffcc44;padding:12px 36px;font-size:0.9rem;letter-spacing:2px;cursor:pointer;border-radius:3px;margin-top:12px}
-#settings-screen .back-btn{background:#1e1e2e;border:1px solid #3a3a5a;color:#aaa;padding:8px 20px;cursor:pointer;font-size:0.9rem;border-radius:3px}
+#settings-screen .back-btn{background:#1e1e2e;border:1px solid #3a3a5a;color:#aaa;padding:8px 20px;cursor:pointer;font-size:0.9rem;border-radius:3px;margin-left:auto;flex-shrink:0}
 #settings-screen .back-btn:hover{color:#ffcc44;border-color:#5555aa}
 
 /* General pane — language selector */
@@ -326,13 +326,13 @@ body.targeting-skill #targeting-hint{display:block}
 <div id="settings-screen">
   <div class="set-header">
     <h2 data-i18n="settings.title">Settings</h2>
+    <div class="set-tabs">
+      <button type="button" class="set-tab" data-tab="hero-viewer" data-i18n="settings.tab.hero_viewer">Hero Viewer</button>
+      <button type="button" class="set-tab" data-tab="general" data-i18n="settings.tab.general">General</button>
+      <button type="button" class="set-tab" data-tab="info" data-i18n="settings.tab.info">Info</button>
+      <button type="button" class="set-tab" data-tab="audio" data-i18n="settings.tab.audio">Audio</button>
+    </div>
     <button type="button" class="back-btn" id="settings-back-btn" data-i18n="settings.back">🔙</button>
-  </div>
-  <div class="set-tabs">
-    <button type="button" class="set-tab" data-tab="hero-viewer" data-i18n="settings.tab.hero_viewer">Hero Viewer</button>
-    <button type="button" class="set-tab" data-tab="general" data-i18n="settings.tab.general">General</button>
-    <button type="button" class="set-tab" data-tab="info" data-i18n="settings.tab.info">Info</button>
-    <button type="button" class="set-tab" data-tab="audio" data-i18n="settings.tab.audio">Audio</button>
   </div>
   <div class="set-content">
     <div class="set-pane" id="pane-general" data-pane="general" style="padding:24px;overflow-y:auto">
