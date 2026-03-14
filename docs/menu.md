@@ -71,7 +71,7 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 
 ## Main menu (`#main-menu`)
 
-- **Title:** “DOTA 1” with subtitle “DEFENSE OF THE ANCIENTS”.
+- **Title:** “CRIMSON LANE” with subtitle “MOBILE MOBA”.
 - **Buttons:**
   - **Play** — switches to play flow, step 1 (choose side).
   - **Multiplayer** — disabled, “Coming Soon”.

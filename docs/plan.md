@@ -2,7 +2,7 @@
 
 **Category:** Spec · **Tags:** #mvp #requirements #technical
 
-Game rules, systems, and technical contracts for the Dota 1–like mobile browser MOBA.
+Game rules, systems, and technical contracts for Crimson Lane (mobile browser MOBA).
 
 **Related docs:**
 [heroes.md](heroes.md) (hero content) ·

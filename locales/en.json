@@ -1,6 +1,6 @@
 {
-  "menu.title": "DOTA 1",
-  "menu.subtitle": "DEFENSE OF THE ANCIENTS",
+  "menu.title": "CRIMSON LANE",
+  "menu.subtitle": "MOBILE MOBA",
   "menu.play": "⚔️ Play",
   "menu.multiplayer": "🌐 Multiplayer",
   "menu.settings": "⚙️ Settings",
@@ -35,7 +35,7 @@
   "controls.zoom": "Zoom",
   "controls.shop": "Shop",
 
-  "lobby.title": "DOTA 1",
+  "lobby.title": "CRIMSON LANE",
   "lobby.single_player": "SINGLE PLAYER VS AI",
   "lobby.your_side": "Your side:",
   "lobby.difficulty": "DIFFICULTY",

@@ -19,7 +19,7 @@ import { joinRoom as trysteroJoin } from 'https://esm.sh/trystero/torrent';
 // ── Config ─────────────────────────────────────────────────────────────────────
 
 /** Unique namespace for this game — prevents cross-app peer discovery. */
-const APP_ID = 'dota-1-like-game-v1';
+const APP_ID = 'crimson-lane-v1';
 
 const STORAGE_KEY_PEER_ID = 'dota_peer_id';
 

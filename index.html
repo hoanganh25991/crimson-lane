@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>DOTA 1 — Single Player</title>
+<title>Crimson Lane — Single Player</title>
 <link rel="stylesheet" href="css/hero-viewer.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -86,7 +86,7 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 /* HUD */
 #hud{position:fixed;inset:0;pointer-events:none;z-index:10;display:none}
 
-/* Topbar — Dota 1 portrait strip */
+/* Topbar — Crimson Lane portrait strip */
 #topbar { position:absolute;top:0;left:0;right:0;height:48px;background:#0d0d1aee;border-bottom:1px solid #1e1e2e;display:flex;align-items:center;justify-content:space-between;padding:0 8px;pointer-events:auto; }
 #team-left,#team-right { display:flex;gap:4px;align-items:center;flex:1; }
 #team-right { justify-content:flex-end; }
@@ -284,8 +284,8 @@ body.targeting-skill #targeting-hint{display:block}
 
 <!-- LOADING SCREEN — visible immediately, dismissed once JS is ready -->
 <div id="loading-screen">
-  <div id="loading-title">DOTA 1</div>
-  <div id="loading-sub">DEFENSE OF THE ANCIENTS</div>
+  <div id="loading-title">CRIMSON LANE</div>
+  <div id="loading-sub">MOBILE MOBA</div>
   <div id="loading-msg">Loading engine…</div>
   <div id="loading-bar-wrap"><div id="loading-bar-fill"></div></div>
   <div id="loading-error"></div>
@@ -293,8 +293,8 @@ body.targeting-skill #targeting-hint{display:block}
 
 <!-- MAIN MENU -->
 <div id="main-menu">
-  <h1 data-i18n="menu.title">DOTA 1</h1>
-  <div class="sub" data-i18n="menu.subtitle">DEFENSE OF THE ANCIENTS</div>
+  <h1 data-i18n="menu.title">CRIMSON LANE</h1>
+  <div class="sub" data-i18n="menu.subtitle">MOBILE MOBA</div>
   <div class="menu-btns">
     <button class="menu-btn" id="btn-play" disabled data-i18n="menu.play">⚔️ Play</button>
     <button class="menu-btn" id="btn-multiplayer" disabled data-i18n="menu.multiplayer">🌐 Multiplayer</button>
@@ -340,8 +340,8 @@ body.targeting-skill #targeting-hint{display:block}
         <div class="gen-row">
           <label class="gen-label" for="lang-select" data-i18n="settings.language_label">Language</label>
           <select id="lang-select" class="gen-select">
-            <option value="en">English</option>
-            <option value="vi">Tiếng Việt</option>
+            <option value="en">🇺🇸 English</option>
+            <option value="vi">🇻🇳 Tiếng Việt</option>
           </select>
         </div>
         <div class="gen-row gen-reload-row" id="lang-reload-row" style="display:none">
@@ -457,7 +457,7 @@ body.targeting-skill #targeting-hint{display:block}
 <!-- LOBBY (hero pick; shown after Play → side → mode → Continue) -->
 <div id="lobby">
   <div id="lobby-header">
-    <h1 data-i18n="lobby.title">DOTA 1</h1>
+    <h1 data-i18n="lobby.title">CRIMSON LANE</h1>
     <div class="sub" id="lobby-sub" data-i18n="lobby.single_player">SINGLE PLAYER VS AI</div>
     <div class="sub" id="lobby-side" style="margin-bottom:8px;font-size:0.9rem"><span data-i18n="lobby.your_side">Your side:</span> <strong id="lobby-side-name">Scourge</strong></div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;justify-content:center">
@@ -488,7 +488,7 @@ body.targeting-skill #targeting-hint{display:block}
 
 <!-- HUD -->
 <div id="hud">
-  <!-- Topbar — Dota 1 portrait strip (populated dynamically by JS) -->
+  <!-- Topbar — Crimson Lane portrait strip (populated dynamically by JS) -->
   <div id="topbar">
     <div id="team-left"></div>
     <div id="topbar-center">

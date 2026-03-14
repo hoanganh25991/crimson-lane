@@ -1,6 +1,6 @@
 # Docs — SDLC Hub
 
-**Purpose:** Single entry point for the Dota 1–like mobile game. Scope, specs, progress, and backlog live here.
+**Purpose:** Single entry point for Crimson Lane. Scope, specs, progress, and backlog live here.
 
 **Stack:** Three.js · HTML/CSS/JS · Solo vs AI · WebRTC/Trystero multiplayer (host/join, room code, QR).
 
@@ -24,7 +24,7 @@
 | Doc | Tags | Description |
 |-----|------|-------------|
 | [plan.md](plan.md) | `#mvp` `#requirements` `#technical` | Game rules & systems spec: scope, match rules, map, stats, abilities, combat, lanes, structures, economy, items, controls, AI, architecture. **Primary source of truth.** |
-| [brief.md](brief.md) | `#vision` `#multiplayer` `#mobile` | Original brief: Dota 1 feel, WebRTC/QR join, mobile controls. |
+| [brief.md](brief.md) | `#vision` `#multiplayer` `#mobile` | Original brief: Dota 1–style feel, WebRTC/QR join, mobile controls. |
 
 ### Design — content & look
 

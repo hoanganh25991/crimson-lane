@@ -1,4 +1,4 @@
-# Game Theme — Dota 1 Mobile
+# Game Theme — Crimson Lane
 
 **Category:** Design · **Tags:** #art #ui #audio #ux
 
@@ -165,4 +165,4 @@ The reference point is the feeling of watching someone play Lich on a CRT monito
 
 ---
 
-*Theme authored for `dota-1-like-claude` · 2026 · personal project*
+*Theme authored for Crimson Lane · 2026 · personal project*
