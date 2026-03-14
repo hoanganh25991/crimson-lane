@@ -1,6 +1,7 @@
 // ─── HUD ────────────────────────────────────────────────────────────────────────
 import { G } from './state.js';
 import { camera } from './scene.js';
+import { HERO_REGISTRY } from './heroes/registry.js';
 
 export function showAnnouncer(text, color, dur=2500) {
   const el = document.getElementById('announcer');
@@ -98,14 +99,8 @@ export function updateHUD() {
 
 export function updateSkillUI() {
   const h = G.playerHero; if(!h) return;
-  const names = {
-    lich:{Q:'FROST NOVA',W:'DARK RITUAL',E:'CHAIN FROST',R:'FROST ARMOR'},
-    sniper:{Q:'SHRAPNEL',W:'HEADSHOT',E:'AIM',R:'ASSASSINATE'},
-    dragon_knight:{Q:'DRGN BLOOD',W:'DRGN TAIL',E:'BREATHE',R:'ELDER FORM'},
-    shadow_fiend:{Q:'SHADOWRAZE',W:'NECRO',E:'DARK PRES',R:'REQUIEM'},
-    windrunner:{Q:'SHACKLE',W:'POWERSHOT',E:'WINDRUN',R:'FOCUS FIRE'}
-  };
-  const ns = names[h.type] || names.lich;
+  const mod = HERO_REGISTRY[h.type];
+  const ns = (mod && mod.skillNames) ? mod.skillNames : { Q: 'Q', W: 'W', E: 'E', R: 'R' };
   for(const k of ['Q','W','E','R']) {
     const snEl = document.getElementById('sn'+k);
     if(snEl) snEl.textContent = ns[k];
@@ -190,81 +185,11 @@ export function drawPortrait(canvasId, heroType) {
   ctx.fillStyle='#0d0d1a';
   ctx.fillRect(0,0,W,H);
 
+  const mod = HERO_REGISTRY[heroType];
+  if (!mod || !mod.drawPortrait) return;
   const sx = W/136, sy = H/100;
   ctx.save();
   ctx.scale(sx, sy);
-  if(heroType==='lich') {
-    ctx.fillStyle='#8844cc'; ctx.fillRect(52,40,32,40);
-    ctx.fillStyle='#5522aa'; ctx.beginPath(); ctx.arc(68,32,16,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#6633cc'; ctx.lineWidth=3;
-    ctx.beginPath(); ctx.moveTo(90,20); ctx.lineTo(90,75); ctx.stroke();
-    ctx.fillStyle='#00ffcc'; ctx.beginPath(); ctx.arc(90,20,6,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#00ffcc';
-    ctx.beginPath(); ctx.arc(62,30,3,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(74,30,3,0,Math.PI*2); ctx.fill();
-  } else if(heroType==='sniper') {
-    ctx.fillStyle='#44aa44'; ctx.fillRect(52,40,32,40);
-    ctx.fillStyle='#d4a870'; ctx.beginPath(); ctx.arc(68,32,16,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#775533'; ctx.fillRect(52,18,36,16); ctx.fillRect(46,28,48,8);
-    ctx.strokeStyle='#554433'; ctx.lineWidth=4;
-    ctx.beginPath(); ctx.moveTo(84,40); ctx.lineTo(115,25); ctx.stroke();
-    ctx.fillStyle='#2244aa';
-    ctx.beginPath(); ctx.arc(62,30,2.5,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(74,30,2.5,0,Math.PI*2); ctx.fill();
-  } else if(heroType==='dragon_knight') {
-    // Armored body
-    ctx.fillStyle='#cc5511'; ctx.fillRect(48,38,40,44);
-    // Chest plate
-    ctx.fillStyle='#ee7722'; ctx.fillRect(52,42,32,30);
-    // Helm
-    ctx.fillStyle='#cc5511'; ctx.beginPath(); ctx.arc(68,28,18,0,Math.PI*2); ctx.fill();
-    ctx.fillStyle='#cc5511'; ctx.fillRect(52,28,32,14);
-    // Visor
-    ctx.fillStyle='#1a0800'; ctx.fillRect(54,30,28,8);
-    // Horns
-    ctx.fillStyle='#dd7700';
-    ctx.beginPath(); ctx.moveTo(52,22); ctx.lineTo(44,10); ctx.lineTo(54,22); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(84,22); ctx.lineTo(92,10); ctx.lineTo(82,22); ctx.fill();
-    // Sword
-    ctx.fillStyle='#ccccdd'; ctx.fillRect(94,22,8,52);
-    ctx.fillStyle='#dd9900'; ctx.fillRect(90,44,18,6);
-  } else if(heroType==='shadow_fiend') {
-    // Dark body
-    ctx.fillStyle='#220000'; ctx.fillRect(52,40,32,44);
-    // Wings
-    ctx.fillStyle='#550011';
-    ctx.beginPath(); ctx.moveTo(52,60); ctx.lineTo(20,40); ctx.lineTo(28,70); ctx.lineTo(50,74); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(84,60); ctx.lineTo(116,40); ctx.lineTo(108,70); ctx.lineTo(86,74); ctx.fill();
-    // Head
-    ctx.fillStyle='#330000'; ctx.beginPath(); ctx.arc(68,28,16,0,Math.PI*2); ctx.fill();
-    // Horns
-    ctx.fillStyle='#550000';
-    ctx.beginPath(); ctx.moveTo(58,20); ctx.lineTo(52,8); ctx.lineTo(62,18); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(78,20); ctx.lineTo(84,8); ctx.lineTo(74,18); ctx.fill();
-    // Glowing eyes
-    ctx.fillStyle='#ff0000';
-    ctx.beginPath(); ctx.arc(62,28,4,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(74,28,4,0,Math.PI*2); ctx.fill();
-  } else if(heroType==='windrunner') {
-    // Body with cape
-    ctx.fillStyle='#228844'; ctx.fillRect(52,40,32,44);
-    ctx.fillStyle='#115533';
-    ctx.beginPath(); ctx.moveTo(52,42); ctx.lineTo(36,90); ctx.lineTo(52,82); ctx.fill();
-    // Head
-    ctx.fillStyle='#d4a870'; ctx.beginPath(); ctx.arc(68,30,16,0,Math.PI*2); ctx.fill();
-    // Hair
-    ctx.fillStyle='#aa6600';
-    ctx.beginPath(); ctx.moveTo(52,24); ctx.lineTo(48,48); ctx.lineTo(56,32); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(84,24); ctx.lineTo(86,38); ctx.lineTo(80,30); ctx.fill();
-    // Bow
-    ctx.strokeStyle='#5a3a10'; ctx.lineWidth=3;
-    ctx.beginPath(); ctx.arc(96,54,22,Math.PI*0.7,Math.PI*1.3); ctx.stroke();
-    ctx.strokeStyle='#ddcc88'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(82,38); ctx.lineTo(82,70); ctx.stroke();
-    // Eyes
-    ctx.fillStyle='#226644';
-    ctx.beginPath(); ctx.arc(62,28,2.5,0,Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(74,28,2.5,0,Math.PI*2); ctx.fill();
-  }
+  mod.drawPortrait(ctx);
   ctx.restore();
 }

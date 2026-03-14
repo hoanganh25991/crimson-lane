@@ -5,18 +5,7 @@ export const CREEP_SPAWN_INTERVAL = 30;
 export const GOLD_TICK = 3;
 export const GOLD_PER_TICK = 3;
 
-export const HERO_DEFS = {
-  lich: {name:'LICH',color:0x8844cc,headColor:0x5522aa,team:'scourge',hp:454,mp:403,move:8,range:12,dmgMin:49,dmgMax:57,armor:1,atkSpd:0.9,
-    skills:['Frost Nova','Dark Ritual','Chain Frost','Frost Armor']},
-  sniper: {name:'SNIPER',color:0x44aa44,headColor:0xaacc88,team:'sentinel',hp:492,mp:195,move:8,range:14,dmgMin:35,dmgMax:45,armor:2,atkSpd:1.1,
-    skills:['Shrapnel','Headshot','Aim','Assassinate']},
-  dragon_knight: {name:'DRAGON KNIGHT',color:0xdd6622,headColor:0xcc4400,team:'sentinel',hp:625,mp:195,move:8,range:2.5,dmgMin:53,dmgMax:59,armor:3,atkSpd:0.75,
-    skills:['Dragon Blood','Dragon Tail','Breathe Fire','Elder Dragon Form']},
-  shadow_fiend: {name:'SHADOW FIEND',color:0xff2200,headColor:0x880000,team:'scourge',hp:530,mp:260,move:9,range:2.5,dmgMin:51,dmgMax:57,armor:2,atkSpd:1.1,
-    skills:['Shadowraze','Necromastery','Dark Presence','Requiem of Souls']},
-  windrunner: {name:'WINDRUNNER',color:0x44bb77,headColor:0x228855,team:'sentinel',hp:492,mp:234,move:9,range:13,dmgMin:36,dmgMax:46,armor:1,atkSpd:1.1,
-    skills:['Shackleshot','Powershot','Windrun','Focus Fire']}
-};
+// HERO_DEFS, SKILL_COSTS, SKILL_CDS moved to js/heroes/<id>.js and js/heroes/registry.js
 
 export const WAYPOINTS = {
   scourge:{
@@ -70,18 +59,3 @@ export const BARRACKS_DEFS = [
   {team:'sentinel', lane:'bot', x:87, z:12, hp:1000},
 ];
 
-export const SKILL_COSTS = {
-  lich:{Q:[100,115,125,140],W:[25,25,25,25],E:[200,290,380,380],R:[0,0,0,0]},
-  sniper:{Q:[120,120,120,120],W:[0,0,0,0],E:[0,0,0,0],R:[200,200,200,200]},
-  dragon_knight:{Q:[0,0,0,0],W:[100,100,100,100],E:[100,115,115,130],R:[0,0,0,0]},
-  shadow_fiend:{Q:[75,75,75,75],W:[0,0,0,0],E:[0,0,0,0],R:[150,175,200,200]},
-  windrunner:{Q:[90,100,110,120],W:[90,100,110,120],E:[100,100,100,100],R:[200,275,350,350]}
-};
-
-export const SKILL_CDS = {
-  lich:{Q:6,W:30,E:145,R:0},
-  sniper:{Q:22,W:0,E:0,R:20},
-  dragon_knight:{Q:0,W:9,E:15,R:100},
-  shadow_fiend:{Q:10,W:0,E:0,R:120},
-  windrunner:{Q:15,W:12,E:15,R:60}
-};

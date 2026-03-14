@@ -1,5 +1,6 @@
 // ─── MAIN ENTRY POINT ──────────────────────────────────────────────────────────
-import { HERO_DEFS, CREEP_SPAWN_INTERVAL, GOLD_TICK, GOLD_PER_TICK } from './constants.js';
+import { CREEP_SPAWN_INTERVAL, GOLD_TICK, GOLD_PER_TICK } from './constants.js';
+import { HERO_REGISTRY, ALL_HERO_IDS } from './heroes/registry.js';
 import { G } from './state.js';
 import { initThree, scene, camera, renderer, camTarget, updateCamera } from './scene.js';
 import { buildMap } from './map.js';
@@ -41,7 +42,7 @@ window._shrapnelTick = function(e) {
 // Clock
 const clock = {last:0};
 
-const ALL_HEROES = ['lich','sniper','dragon_knight','shadow_fiend','windrunner'];
+const ALL_HEROES = ALL_HERO_IDS;
 
 // ─── HERO SELECT ──────────────────────────────────────────────────────────────
 export function selectHero(type) {
@@ -130,7 +131,7 @@ export function startGame() {
   camTarget.set(G.playerHero.x + 18, 0, G.playerHero.z + 18);
 
   const heroNameEl = document.getElementById('hero-name');
-  if(heroNameEl) heroNameEl.textContent = HERO_DEFS[G.pickedHero].name;
+  if(heroNameEl && HERO_REGISTRY[G.pickedHero]) heroNameEl.textContent = HERO_REGISTRY[G.pickedHero].def.name;
   updateSkillUI();
 
   // Build topbar portraits dynamically

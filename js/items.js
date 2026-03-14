@@ -1,5 +1,6 @@
 // ─── ITEM SYSTEM ────────────────────────────────────────────────────────────────
 import { G } from './state.js';
+import { HERO_REGISTRY } from './heroes/registry.js';
 import { applyDamage, getEnemiesOf } from './combat.js';
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
@@ -131,15 +132,6 @@ export function updateItemCooldowns(hero, dt) {
   for(const k in hero.itemCDs) { if(hero.itemCDs[k]>0) hero.itemCDs[k]=Math.max(0,hero.itemCDs[k]-dt); }
 }
 
-// AI item build orders per hero type
-const AI_BUILD = {
-  lich:         ['boots_of_speed','vitality_gem','magic_charm','power_boots','void_staff'],
-  sniper:       ['boots_of_speed','blades_of_attack','ring_of_protection','lifesteal_blade'],
-  dragon_knight:['boots_of_speed','vitality_gem','ring_of_protection','aura_shield','power_boots'],
-  shadow_fiend: ['boots_of_speed','blades_of_attack','iron_branch','lifesteal_blade'],
-  windrunner:   ['boots_of_speed','magic_charm','blades_of_attack','arcane_boots','lifesteal_blade'],
-};
-
 export function updateAIItems(hero, dt) {
   if(!hero||!hero.alive) return;
   if(hero.aiGold===undefined) hero.aiGold=625;
@@ -147,7 +139,8 @@ export function updateAIItems(hero, dt) {
   hero.aiBuyTimer=(hero.aiBuyTimer||0)-dt;
   if(hero.aiBuyTimer>0) return;
   hero.aiBuyTimer=8;
-  const build=AI_BUILD[hero.type]||[];
+  const mod = HERO_REGISTRY[hero.type];
+  const build = (mod && mod.aiBuild) ? mod.aiBuild : [];
   for(const itemId of build) {
     if(hero.inventory.includes(itemId)) continue;
     if(hero.inventory.length>=6) break;

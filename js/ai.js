@@ -1,6 +1,7 @@
 // ─── AI ────────────────────────────────────────────────────────────────────────
 import { WAYPOINTS } from './constants.js';
 import { G } from './state.js';
+import { HERO_REGISTRY } from './heroes/registry.js';
 import { scene } from './scene.js';
 import { applyDamage, getEnemiesOf, getEnemyHeroesOf, spawnProjectile, spawnSpellProjectile, moveToward } from './combat.js';
 import { spawnParticles } from './particles.js';
@@ -118,51 +119,20 @@ export function updateAI(hero, dt) {
 }
 
 function castAISkill(aiHero, target) {
+  const mod = HERO_REGISTRY[aiHero.type];
+  if (!mod || !mod.castAISkill) return;
   const manaCost = 100;
-  if(aiHero.mp < manaCost) return;
+  if (aiHero.mp < manaCost) return;
   aiHero.mp -= manaCost;
   aiHero._castAnim = 'castQ';
   aiHero._castAnimTimer = 0.7;
-
-  if(aiHero.type==='sniper') {
-    const pos = {x:target.x+(Math.random()-0.5)*3, z:target.z+(Math.random()-0.5)*3};
-    const zone = new THREE.Mesh(
-      new THREE.CircleGeometry(7, 24),
-      new THREE.MeshBasicMaterial({color:0xccaa00, side:THREE.DoubleSide, transparent:true, opacity:0.2}));
-    zone.rotation.x = -Math.PI/2;
-    zone.position.set(pos.x, 0.03, pos.z);
-    scene.add(zone);
-    G.effects.push({mesh:zone, life:4, maxLife:4, type:'shrapnel', x:pos.x, z:pos.z, radius:7, dps:15, tickTimer:0.5, casterTeam:aiHero.team});
-    playSound('magic');
-  } else if(aiHero.type==='lich') {
-    applyDamage(target, 150, 'magic');
-    target.slowTimer = 3;
-    spawnParticles(target.x, target.z, 0x00ffcc, 6);
-    playSound('frost');
-  } else if(aiHero.type==='dragon_knight') {
-    applyDamage(target, 75, 'magic');
-    target.stunTimer = 2;
-    spawnParticles(target.x, target.z, 0xff6622, 5);
-    playSound('hit');
-  } else if(aiHero.type==='shadow_fiend') {
-    const fwdX = Math.sin(aiHero.group.rotation.y), fwdZ = Math.cos(aiHero.group.rotation.y);
-    for(const dist of [3,5.5,8]) {
-      const rx=aiHero.x+fwdX*dist, rz=aiHero.z+fwdZ*dist;
-      const dx=target.x-rx, dz=target.z-rz;
-      if(Math.sqrt(dx*dx+dz*dz)<=2.2) {
-        applyDamage(target, 150, 'magic');
-        spawnParticles(rx, rz, 0xff0000, 3);
-      }
-    }
-    playSound('magic');
-  } else if(aiHero.type==='windrunner') {
-    const dx=target.x-aiHero.x, dz=target.z-aiHero.z;
-    const d=Math.sqrt(dx*dx+dz*dz);
-    if(d>0) aiHero.group.rotation.y = Math.atan2(dx, dz);
-    spawnSpellProjectile(aiHero.x, aiHero.z, target, 0x88ff44, 25, (t)=>{
-      applyDamage(t, 340, 'magic');
-      spawnParticles(t.x, t.z, 0x88ff44, 5);
-    });
-    playSound('ranged_hit');
-  }
+  const ctx = {
+    scene,
+    G,
+    applyDamage,
+    spawnParticles,
+    playSound,
+    spawnSpellProjectile
+  };
+  mod.castAISkill(aiHero, target, ctx);
 }
