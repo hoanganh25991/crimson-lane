@@ -82,6 +82,10 @@
   "hud.shop": "🛒 CỬA HÀNG",
   "hud.tap_target": "NHẤN MỤC TIÊU",
   "hud.recenter_title": "Căn giữa camera về anh hùng",
+  "hud.skill_points": "Điểm kỹ năng: {n}",
+  "hud.learn_skill_title": "Nâng kỹ năng",
+  "hud.skill_type_passive_short": "BĐ",
+  "hud.skill_type_toggle_short": "BT",
 
   "announce.you_died": "💀 BẠN ĐÃ CHẾT",
   "announce.first_blood": "🩸 FIRST BLOOD!",
@@ -135,6 +139,9 @@
   "viewer.mana_cost": "Mana {n}",
   "viewer.passive": "Bị động",
   "viewer.cooldown": "CD {n}s",
+  "viewer.skill_type_active": "Chủ động",
+  "viewer.skill_type_passive": "Bị động",
+  "viewer.skill_type_toggle": "Bật/Tắt",
   "viewer.skill_desc": "Vào game để xem hiệu ứng đầy đủ.",
 
   "card.range": "Tầm: {n}",

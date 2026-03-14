@@ -119,17 +119,24 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 /* Skill bar */
 #skillbar{position:absolute;bottom:env(safe-area-inset-bottom);right:env(safe-area-inset-right);pointer-events:auto;padding:8px;opacity:0.85;transition:opacity 0.3s;}
 #skillbar:hover,#skillbar:active{opacity:1;}
+#skillbar-header{display:flex;justify-content:flex-end;margin-bottom:4px}
+#skill-points-label{font-size:0.62rem;color:#c8a84a;letter-spacing:1px;padding:2px 6px;border:1px solid #2a2a3a;border-radius:3px;background:#0d0d1acc}
+#skill-points-label.has-points{color:#ffdd66;border-color:#6a5a2a;box-shadow:0 0 6px #ffcc4455}
 .skill-grid{display:grid;grid-template-columns:54px 54px;grid-template-rows:54px 54px;gap:6px;position:relative}
 .skill-btn{width:54px;height:54px;background:#111118;border:2px solid #1e1e2e;border-radius:4px;color:#e0d8c8;font-size:1rem;font-weight:bold;cursor:pointer;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px;user-select:none;-webkit-tap-highlight-color:transparent}
 .skill-btn:active{transform:scale(0.93)}
 .skill-btn.ready{border-color:#3a3a5a}
 .skill-btn.active-target{border-color:#ffcc44;box-shadow:0 0 8px #ffcc4488}
 .skill-btn.no-mana{filter:saturate(0.2);animation:shake 0.3s}
-/* Passive skills — greyed, not interactive */
-.skill-btn.skill-passive{opacity:0.45;border-color:#252525!important;cursor:default;pointer-events:none}
+.skill-btn.skill-passive{opacity:0.55;border-color:#252525!important;cursor:default}
 .skill-btn.skill-passive:active{transform:none}
-.skill-btn.skill-passive .skill-key{color:#555}
-.skill-passive-badge{position:absolute;top:2px;right:3px;font-size:0.48rem;color:#555;font-weight:bold;pointer-events:none;letter-spacing:0}
+.skill-btn.skill-passive .skill-key{color:#666}
+.skill-btn.skill-unlearned .skill-name{color:#666}
+.skill-btn.locked{opacity:0.68;border-color:#2a2a2a}
+.skill-btn.learnable{border-color:#ffcc44;box-shadow:0 0 8px #ffcc4466}
+.skill-learn-btn{position:absolute;top:2px;left:2px;width:16px;height:16px;border:1px solid #7a5c1a;border-radius:50%;background:#1d1a0f;color:#ffcc44;font-size:0.72rem;font-weight:700;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;pointer-events:auto}
+.skill-learn-btn:active{transform:scale(0.92)}
+.skill-type-badge{position:absolute;top:2px;right:3px;font-size:0.48rem;font-weight:700;letter-spacing:0.3px;color:#999;background:#111a;border:1px solid #333;border-radius:2px;padding:0 2px;pointer-events:none}
 /* Toggle skills — light blue border when active */
 .skill-btn.skill-toggled-on{border-color:#44aaff;box-shadow:0 0 10px #44aaff55;background:#06121e}
 .skill-btn.skill-toggled-on .skill-key{color:#44aaff}
@@ -519,26 +526,33 @@ body.targeting-skill #targeting-hint{display:block}
 
   <!-- Skill bar -->
   <div id="skillbar">
+    <div id="skillbar-header">
+      <span id="skill-points-label" data-i18n="hud.skill_points">Skill Points: 0</span>
+    </div>
     <div class="skill-grid">
       <div class="skill-btn" id="sbQ" onclick="castSkill('Q')">
+        <button type="button" class="skill-learn-btn" id="learnQ" onclick="learnSkill('Q', event)" data-i18n-title="hud.learn_skill_title" title="Learn skill" style="display:none">+</button>
         <span class="skill-key">Q</span>
         <span class="skill-name" id="snQ"></span>
         <div class="skill-cd" id="cdQ" style="display:none"></div>
         <div class="skill-dots" id="dotsQ"></div>
       </div>
       <div class="skill-btn" id="sbW" onclick="castSkill('W')">
+        <button type="button" class="skill-learn-btn" id="learnW" onclick="learnSkill('W', event)" data-i18n-title="hud.learn_skill_title" title="Learn skill" style="display:none">+</button>
         <span class="skill-key">W</span>
         <span class="skill-name" id="snW"></span>
         <div class="skill-cd" id="cdW" style="display:none"></div>
         <div class="skill-dots" id="dotsW"></div>
       </div>
       <div class="skill-btn" id="sbE" onclick="castSkill('E')">
+        <button type="button" class="skill-learn-btn" id="learnE" onclick="learnSkill('E', event)" data-i18n-title="hud.learn_skill_title" title="Learn skill" style="display:none">+</button>
         <span class="skill-key">E</span>
         <span class="skill-name" id="snE"></span>
         <div class="skill-cd" id="cdE" style="display:none"></div>
         <div class="skill-dots" id="dotsE"></div>
       </div>
       <div class="skill-btn" id="sbR" onclick="castSkill('R')">
+        <button type="button" class="skill-learn-btn" id="learnR" onclick="learnSkill('R', event)" data-i18n-title="hud.learn_skill_title" title="Learn skill" style="display:none">+</button>
         <span class="skill-key">R</span>
         <span class="skill-name" id="snR"></span>
         <div class="skill-cd" id="cdR" style="display:none"></div>

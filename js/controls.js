@@ -1,7 +1,7 @@
 // ─── CONTROLS ──────────────────────────────────────────────────────────────────
 import { G } from './state.js';
 import { camera, groundPlane } from './scene.js';
-import { castSkill } from './skills.js';
+import { castSkill, learnSkill } from './skills.js';
 import { getEnemiesOf, floatDamage } from './combat.js';
 import { t } from './i18n.js';
 
@@ -188,10 +188,18 @@ export function initControls() {
     if(G.phase!=='game') return;
     const h = G.playerHero;
     switch(e.key) {
-      case 'q': case 'Q': castSkill('Q'); break;
-      case 'w': case 'W': castSkill('W'); break;
-      case 'e': case 'E': castSkill('E'); break;
-      case 'r': case 'R': castSkill('R'); break;
+      case 'q': case 'Q':
+        if (e.ctrlKey || e.metaKey || e.altKey) { learnSkill('Q'); e.preventDefault(); break; }
+        castSkill('Q'); break;
+      case 'w': case 'W':
+        if (e.ctrlKey || e.metaKey || e.altKey) { learnSkill('W'); e.preventDefault(); break; }
+        castSkill('W'); break;
+      case 'e': case 'E':
+        if (e.ctrlKey || e.metaKey || e.altKey) { learnSkill('E'); e.preventDefault(); break; }
+        castSkill('E'); break;
+      case 'r': case 'R':
+        if (e.ctrlKey || e.metaKey || e.altKey) { learnSkill('R'); e.preventDefault(); break; }
+        castSkill('R'); break;
       case 'Escape':
         if(G.targetingSkill){
           G.targetingSkill=null;
@@ -245,6 +253,14 @@ export function initControls() {
     const hits = dragRaycaster.intersectObject(groundPlane);
     return hits.length ? { x: hits[0].point.x, z: hits[0].point.z } : null;
   }
+
+  document.querySelectorAll('.skill-learn-btn').forEach(btn => {
+    ['touchstart', 'touchmove', 'touchend', 'click'].forEach(type => {
+      btn.addEventListener(type, ev => {
+        ev.stopPropagation();
+      }, { passive: false });
+    });
+  });
 
   document.querySelectorAll('.skill-btn').forEach(btn => {
     btn.addEventListener('touchstart', e => {

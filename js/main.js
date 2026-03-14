@@ -9,7 +9,7 @@ import { createHero } from './heroes.js';
 import { spawnWave, updateCreeps, initNeutralCamps, updateNeutralCamps } from './creeps.js';
 import { buildTowers, buildBarracks, updateTowers, updateBarracks } from './towers.js';
 import { updateProjectiles, moveToward, spawnProjectile, floatDamage, applyDamage } from './combat.js';
-import { updateSkillCDs, castSkill, processAssassinateEffect } from './skills.js';
+import { updateSkillCDs, castSkill, learnSkill, processAssassinateEffect } from './skills.js';
 import { updateAI, setDifficulty } from './ai.js';
 import { initControls, joystick, keys } from './controls.js';
 import { updateHUD, updateMinimap, updateSkillUI, showAnnouncer, drawPortrait } from './hud.js';
@@ -49,6 +49,11 @@ window._shrapnelTick = function(e) {
 const clock = {last:0};
 
 const ALL_HEROES = ALL_HERO_IDS;
+
+function initHeroSkillProgression(hero, isPlayer) {
+  hero.skillLevels = { Q: 0, W: 0, E: 0, R: 0 };
+  hero.skillPoints = isPlayer ? 1 : 0;
+}
 
 // ─── HERO SELECT ──────────────────────────────────────────────────────────────
 export function selectHero(type) {
@@ -109,6 +114,10 @@ export function startGame() {
   G.playerHero.x = playerBase.x;
   G.playerHero.z = playerBase.z;
   G.playerHero.group.position.set(playerBase.x, 0, playerBase.z);
+  initHeroSkillProgression(G.playerHero, true);
+  G.skillLevels = G.playerHero.skillLevels;
+  G.skillPoints = G.playerHero.skillPoints;
+  G.skillCDs = { Q: 0, W: 0, E: 0, R: 0 };
   G.heroList.push(G.playerHero);
 
   // Create ally bots (same team as player)
@@ -123,6 +132,7 @@ export function startGame() {
     bot.group.position.set(bot.x, 0, bot.z);
     bot.wpIndex = 0;
     bot.aiCastTimer = 5 + Math.random()*5;
+    initHeroSkillProgression(bot, false);
     G.allyBots.push(bot);
     G.heroList.push(bot);
   }
@@ -138,6 +148,7 @@ export function startGame() {
     bot.group.position.set(bot.x, 0, bot.z);
     bot.wpIndex = 0;
     bot.aiCastTimer = 5 + Math.random()*5;
+    initHeroSkillProgression(bot, false);
     G.enemyBots.push(bot);
     G.heroList.push(bot);
   }
@@ -267,6 +278,7 @@ function updateHeroes(dt) {
       h.respawnTimer -= dt;
       if(h.respawnTimer <= 0) respawnHero(h);
     } else {
+      const sl = h.skillLevels || G.skillLevels;
       if(h.slowTimer>0) h.slowTimer-=dt;
       if(h.stunTimer>0){
         h.stunTimer-=dt;
@@ -337,7 +349,7 @@ function updateHeroes(dt) {
           const dx=h.attackTarget.x-h.x, dz=h.attackTarget.z-h.z;
           const d=Math.sqrt(dx*dx+dz*dz);
           const range = h.def.range
-            + (h.type==='sniper' ? G.skillLevels['E']*3 : 0)
+            + (h.type==='sniper' ? (sl['E'] || 0) * 3 : 0)
             + (h.dragonFormActive ? 10 : 0);
           if(d > range) {
             if(!joystick.active && kx===0 && kz===0) moveToward(h, h.attackTarget.x, h.attackTarget.z, dt);
@@ -353,23 +365,25 @@ function updateHeroes(dt) {
               let dmg = (h.def.dmgMin+ib.dmgMin) + Math.random()*((h.def.dmgMax+ib.dmgMax)-(h.def.dmgMin+ib.dmgMin));
               const hasLifesteal = h.inventory.includes('lifesteal_blade');
               let onHitFn = null;
-              if(h.type==='sniper' && G.skillLevels['W']>0 && Math.random()<0.4) {
-                dmg += [30,55,80,115][G.skillLevels['W']-1]||30;
+              if(h.type==='sniper' && (sl['W'] || 0) > 0 && Math.random()<0.4) {
+                dmg += [30,55,80,115][(sl['W'] || 0)-1]||30;
                 onHitFn = (t,_d)=>{ if(t&&t.alive){ t.stunTimer=0.5; floatDamage(t.x,t.z,'HEADSHOT!','#ffcc44'); } };
               }
-              if(h.type==='shadow_fiend' && G.skillLevels['W']>0) dmg += h.soulStacks*2;
+              if(h.type==='shadow_fiend' && (sl['W'] || 0) > 0) dmg += h.soulStacks*2;
               if(hasLifesteal) {
                 const prev=onHitFn;
                 onHitFn=(t,actualDmg)=>{ if(prev)prev(t,actualDmg); if(actualDmg>0){h.hp=Math.min(h.maxHp,h.hp+Math.floor(actualDmg*0.2));} };
               }
               // Drow Ranger Frost Arrows orb: slows target on hit
               if(h.type==='drow_ranger' && h.frostArrowsActive) {
-                const lvl = G.skillLevels['Q'] || 1;
+                const lvl = sl['Q'] || 0;
+                if (lvl > 0) {
                 const slowDur = [1.5, 2, 2.5, 3][lvl - 1] || 1.5;
                 const frostBonusDmg = [15, 25, 35, 45][lvl - 1] || 15;
                 dmg += frostBonusDmg;
                 const prev=onHitFn;
                 onHitFn=(t,actualDmg)=>{ if(prev)prev(t,actualDmg); if(t&&t.alive){ t.slowTimer=Math.max(t.slowTimer||0,slowDur); } };
+                }
               }
               spawnProjectile(h, h.attackTarget, h.type==='drow_ranger'&&h.frostArrowsActive?0x88aacc:(h.team==='scourge'?0xcc88ff:0x88ccff), dmg, 'physical', onHitFn);
               playSound(h.def.range <= 3 ? 'hit' : 'ranged_hit');
@@ -389,8 +403,8 @@ function updateHeroes(dt) {
       }
 
       // Dragon Blood passive regen
-      if(h.type==='dragon_knight' && G.skillLevels['Q']>0) {
-        const regen = [1,2,3,4][G.skillLevels['Q']-1]||1;
+      if(h.type==='dragon_knight' && (sl['Q'] || 0) > 0) {
+        const regen = [1,2,3,4][(sl['Q'] || 0)-1]||1;
         h.hp = Math.min(h.maxHp, h.hp + regen*dt);
       }
 
@@ -611,6 +625,13 @@ function loop(ts) {
 window.selectHero = selectHero;
 window.startGame = startGame;
 window.castSkill = castSkill;
+window.learnSkill = (key, ev) => {
+  if (ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+  }
+  learnSkill(key);
+};
 
 // ─── MAIN MENU & PLAY FLOW & SETTINGS ──────────────────────────────────────────
 const mainMenu = document.getElementById('main-menu');

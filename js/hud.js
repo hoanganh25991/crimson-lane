@@ -4,6 +4,7 @@ import { camera } from './scene.js';
 import { HERO_REGISTRY } from './heroes/registry.js';
 import { t } from './i18n.js';
 import { getEnemiesOf } from './combat.js';
+import { canLearnSkill } from './skills.js';
 
 export function showAnnouncer(text, color, dur=2500) {
   const el = document.getElementById('announcer');
@@ -50,6 +51,12 @@ export function updateHUD() {
   if(goldEl) goldEl.textContent = t('hud.gold', { n: Math.floor(G.gold) });
   if(kdaEl) kdaEl.textContent = t('hud.kda', { k: G.kills, d: G.deaths, a: G.assists });
   if(levelEl) levelEl.textContent = t('hud.level', { n: h.level });
+  const skillPointsEl = document.getElementById('skill-points-label');
+  if (skillPointsEl) {
+    const pts = h.skillPoints || 0;
+    skillPointsEl.textContent = t('hud.skill_points', { n: pts });
+    skillPointsEl.classList.toggle('has-points', pts > 0);
+  }
 
   if(timeEl) {
     const sec = Math.floor(G.time); const m = Math.floor(sec/60); const s = sec%60;
@@ -146,17 +153,30 @@ export function updateHUD() {
 
 export function updateSkillUI() {
   const h = G.playerHero; if(!h) return;
+  if (!h.skillLevels) h.skillLevels = { Q: 0, W: 0, E: 0, R: 0 };
+  if (typeof h.skillPoints !== 'number') h.skillPoints = 0;
+  G.skillLevels = h.skillLevels;
+  G.skillPoints = h.skillPoints;
   const mod = HERO_REGISTRY[h.type];
   const ns = (mod && mod.skillNames) ? mod.skillNames : { Q: 'Q', W: 'W', E: 'E', R: 'R' };
   const skillTypes = (mod && mod.skillTypes) || {};
+  const getMaxLevel = (key) => {
+    const costs = mod?.skillCosts?.[key];
+    if (Array.isArray(costs) && costs.length) return costs.length;
+    const cds = mod?.skillCDs?.[key];
+    if (Array.isArray(cds) && cds.length) return cds.length;
+    return key === 'R' ? 3 : 4;
+  };
+
   for(const k of ['Q','W','E','R']) {
     const snEl = document.getElementById('sn'+k);
     if(snEl) snEl.textContent = ns[k];
     const dotsEl = document.getElementById('dots'+k);
     if(dotsEl) {
       dotsEl.innerHTML='';
-      const lvl = G.skillLevels[k];
-      for(let i=0;i<4;i++) {
+      const lvl = h.skillLevels[k] || 0;
+      const max = getMaxLevel(k);
+      for(let i=0;i<max;i++) {
         const d = document.createElement('div');
         d.className = 'skill-dot' + (i<lvl?' on':'');
         dotsEl.appendChild(d);
@@ -165,15 +185,25 @@ export function updateSkillUI() {
     // Apply passive / toggle styling
     const btn = document.getElementById('sb'+k);
     if(btn) {
-      const t = skillTypes[k] || 'active';
-      btn.classList.toggle('skill-passive', t === 'passive');
-      btn.classList.toggle('skill-toggle', t === 'toggle');
-      // Passive badge (P marker)
-      let badge = btn.querySelector('.skill-passive-badge');
-      if(t === 'passive') {
-        if(!badge) { badge = document.createElement('span'); badge.className='skill-passive-badge'; badge.textContent='P'; btn.appendChild(badge); }
-      } else {
+      const skillType = skillTypes[k] || 'active';
+      const lvl = h.skillLevels[k] || 0;
+      const max = getMaxLevel(k);
+      const learnable = canLearnSkill(h, k);
+      btn.classList.toggle('skill-passive', skillType === 'passive');
+      btn.classList.toggle('skill-toggle', skillType === 'toggle');
+      btn.classList.toggle('skill-unlearned', lvl <= 0);
+      btn.classList.toggle('learnable', learnable);
+      btn.classList.toggle('locked', !learnable && lvl < max);
+      let badge = btn.querySelector('.skill-type-badge');
+      if(skillType === 'passive' || skillType === 'toggle') {
+        if(!badge) { badge = document.createElement('span'); badge.className='skill-type-badge'; btn.appendChild(badge); }
+        badge.textContent = skillType === 'passive' ? t('hud.skill_type_passive_short') : t('hud.skill_type_toggle_short');
+      } else if(badge) {
         if(badge) badge.remove();
+      }
+      const learnBtn = document.getElementById('learn' + k);
+      if (learnBtn) {
+        learnBtn.style.display = learnable ? 'flex' : 'none';
       }
     }
   }

@@ -82,6 +82,10 @@
   "hud.shop": "🛒 SHOP",
   "hud.tap_target": "TAP TARGET",
   "hud.recenter_title": "Recenter camera on hero",
+  "hud.skill_points": "Skill Points: {n}",
+  "hud.learn_skill_title": "Learn skill",
+  "hud.skill_type_passive_short": "P",
+  "hud.skill_type_toggle_short": "T",
 
   "announce.you_died": "💀 YOU DIED",
   "announce.first_blood": "🩸 FIRST BLOOD!",
@@ -135,6 +139,9 @@
   "viewer.mana_cost": "Mana {n}",
   "viewer.passive": "Passive",
   "viewer.cooldown": "CD {n}s",
+  "viewer.skill_type_active": "Active",
+  "viewer.skill_type_passive": "Passive",
+  "viewer.skill_type_toggle": "Toggle",
   "viewer.skill_desc": "Use in game to see full effect.",
 
   "card.range": "Range: {n}",

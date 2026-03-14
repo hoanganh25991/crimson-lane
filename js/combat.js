@@ -6,6 +6,50 @@ import { spawnParticles, spawnRing } from './particles.js';
 import { playSound } from './audio.js';
 import { t } from './i18n.js';
 
+const SKILL_CAP = { Q: 4, W: 4, E: 4, R: 3 };
+const ULT_LEVEL_GATES = [6, 11, 16];
+
+function ensureSkillState(hero) {
+  if (!hero.skillLevels) hero.skillLevels = { Q: 0, W: 0, E: 0, R: 0 };
+  if (typeof hero.skillPoints !== 'number') hero.skillPoints = 0;
+}
+
+function canLearn(hero, key) {
+  ensureSkillState(hero);
+  const cur = hero.skillLevels[key] || 0;
+  if ((hero.skillPoints || 0) <= 0) return false;
+  if (cur >= (SKILL_CAP[key] || 4)) return false;
+  if (key === 'R') {
+    const req = ULT_LEVEL_GATES[cur] || 99;
+    if ((hero.level || 1) < req) return false;
+  }
+  return true;
+}
+
+function learnOne(hero, key) {
+  if (!canLearn(hero, key)) return false;
+  hero.skillLevels[key] += 1;
+  hero.skillPoints -= 1;
+  return true;
+}
+
+function autoLearnBotSkills(hero) {
+  ensureSkillState(hero);
+  while (hero.skillPoints > 0) {
+    if (learnOne(hero, 'R')) continue;
+    const qwe = ['Q', 'W', 'E'];
+    let picked = null;
+    let min = Infinity;
+    for (const k of qwe) {
+      if (!canLearn(hero, k)) continue;
+      const v = hero.skillLevels[k] || 0;
+      if (v < min) { min = v; picked = k; }
+    }
+    if (!picked) break;
+    learnOne(hero, picked);
+  }
+}
+
 // ─── Damage display ─────────────────────────────────────────────────────────────
 export function floatDamage(worldX, worldZ, amount, color) {
   const vec = new THREE.Vector3(worldX, 1.5, worldZ);
@@ -202,6 +246,7 @@ function onCreepDeath(creep) {
 
 export function addXP(amount) {
   const h = G.playerHero; if(!h) return;
+  ensureSkillState(h);
   h.xp += amount;
   G.xp += amount;
   while(h.xp >= h.xpNext && h.level < 25) {
@@ -210,6 +255,10 @@ export function addXP(amount) {
     h.xpNext = 50 * h.level * h.level;
     onLevelUp(h);
   }
+  G.level = h.level;
+  G.xpNext = h.xpNext;
+  G.skillLevels = h.skillLevels;
+  G.skillPoints = h.skillPoints;
 }
 
 export function addHeroXP(hero, amount) {
@@ -227,12 +276,12 @@ function onLevelUp(h) {
   playSound('levelup');
   h.maxHp += 40; h.hp = Math.min(h.hp+40, h.maxHp);
   h.maxMp += 20; h.mp = Math.min(h.mp+20, h.maxMp);
+  ensureSkillState(h);
+  h.skillPoints += 1;
+  G.skillLevels = h.skillLevels;
+  G.skillPoints = h.skillPoints;
   const { showAnnouncer, updateSkillUI } = window._hudFns || {};
   if(showAnnouncer) showAnnouncer(t('announce.level_up', { n: h.level }), '#ffcc44', 1500);
-  const keys = ['Q','W','E','R'];
-  const min = Math.min(...keys.map(k=>G.skillLevels[k]));
-  const toUp = keys.find(k=>G.skillLevels[k]===min && G.skillLevels[k]<4);
-  if(toUp) G.skillLevels[toUp] = Math.min(4, G.skillLevels[toUp]+1);
   if(updateSkillUI) updateSkillUI();
   spawnParticles(h.x, h.z, 0xffcc44, 8);
   spawnRing(h.x, h.z, '#ffdd44', 1.5);
@@ -243,6 +292,9 @@ function onBotLevelUp(hero) {
   hero.maxHp += 40; hero.hp = Math.min(hero.hp+40, hero.maxHp);
   hero.maxMp += 20; hero.mp = Math.min(hero.mp+20, hero.maxMp);
   hero.atkCd = Math.max(0.3, hero.atkCd * 0.97);
+  ensureSkillState(hero);
+  hero.skillPoints += 1;
+  autoLearnBotSkills(hero);
   spawnParticles(hero.x, hero.z, 0xffcc44, 5);
 }
 

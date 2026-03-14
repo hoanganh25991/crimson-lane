@@ -46,14 +46,17 @@ export function initHeroViewer() {
         const name = mod.skillNames?.[key] || def.skills?.[i] || key;
         const costs = mod.skillCosts?.[key];
         const cds = mod.skillCDs?.[key];
+        const skillType = mod.skillTypes?.[key] || 'active';
         const costStr = Array.isArray(costs) ? (costs[0] ?? costs) : (costs ?? 0);
         const cdVal = Array.isArray(cds) ? (cds[0] ?? cds) : (cds ?? 0);
-        const meta = costStr > 0 ? t('viewer.mana_cost', { n: costStr }) : t('viewer.passive');
-        const meta2 = cdVal > 0 ? t('viewer.cooldown', { n: cdVal }) : '';
+        const typeLabel = t(`viewer.skill_type_${skillType}`);
+        const costLabel = costStr > 0 ? t('viewer.mana_cost', { n: costStr }) : '';
+        const cdLabel = cdVal > 0 ? t('viewer.cooldown', { n: cdVal }) : '';
         return {
           key,
+          type: skillType,
           name: typeof name === 'string' ? name : (name && name.name) || key,
-          meta: [meta, meta2].filter(Boolean).join(' · '),
+          meta: [typeLabel, costLabel, cdLabel].filter(Boolean).join(' · '),
           desc: t('viewer.skill_desc'),
           anim: key === 'R' ? 'castR' : 'castQ',
         };
