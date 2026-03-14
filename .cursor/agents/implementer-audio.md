@@ -14,7 +14,7 @@ You are an **Audio/SFX Implementer** in an orchestrator workflow. You receive a 
 
 1. **Read the workstream** — Understand every task assigned to you.
 2. **Read existing code** — Read `audio.js` fully. Understand how sounds are loaded, played, and managed. Check what audio assets already exist in `sounds/`.
-3. **Check the theme** — Read `docs/game-theme.md` for audio identity and announcer specs.
+3. **Check the theme** — Read `docs/theme.md` for audio identity and announcer specs.
 4. **Implement each task** — Follow existing audio patterns for loading and playback.
 5. **Integration check** — Make sure audio triggers are wired to the correct game events. Audio calls should be fire-and-forget from the caller's perspective.
 6. **Self-check** — Re-read changes. Check for linter errors.

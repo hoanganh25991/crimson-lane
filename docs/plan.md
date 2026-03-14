@@ -5,9 +5,9 @@
 Game rules, systems, and technical contracts for the Dota 1–like mobile browser MOBA.
 
 **Related docs:**
-[dota1-heroes-detail.md](dota1-heroes-detail.md) (hero content) ·
-[game-theme.md](game-theme.md) (visual/audio theme) ·
-[main-menu.md](main-menu.md) (menu flow) ·
+[heroes.md](heroes.md) (hero content) ·
+[theme.md](theme.md) (visual/audio theme) ·
+[menu.md](menu.md) (menu flow) ·
 [index.md](index.md) (SDLC hub & progress)
 
 ---

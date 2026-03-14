@@ -10,9 +10,9 @@
 
 | Step | Action |
 |------|--------|
-| **Scope** | Read [plan.md](plan.md) for MVP rules; [input.md](input.md) for original vision. |
-| **Design** | [game-theme.md](game-theme.md) (look & feel), [dota1-heroes-detail.md](dota1-heroes-detail.md) (hero content). |
-| **Build** | [main-menu.md](main-menu.md) (UI flow). |
+| **Scope** | Read [plan.md](plan.md) for MVP rules; [brief.md](brief.md) for original vision. |
+| **Design** | [theme.md](theme.md) (look & feel), [heroes.md](heroes.md) (hero content). |
+| **Build** | [menu.md](menu.md) (UI flow). |
 | **Track** | Plan section below — Done / Requirements Plan / Backlog. |
 
 ---
@@ -24,20 +24,20 @@
 | Doc | Tags | Description |
 |-----|------|-------------|
 | [plan.md](plan.md) | `#mvp` `#requirements` `#technical` | Game rules & systems spec: scope, match rules, map, stats, abilities, combat, lanes, structures, economy, items, controls, AI, architecture. **Primary source of truth.** |
-| [input.md](input.md) | `#vision` `#multiplayer` `#mobile` | Original brief: Dota 1 feel, WebRTC/QR join, mobile controls. |
+| [brief.md](brief.md) | `#vision` `#multiplayer` `#mobile` | Original brief: Dota 1 feel, WebRTC/QR join, mobile controls. |
 
 ### Design — content & look
 
 | Doc | Tags | Description |
 |-----|------|-------------|
-| [dota1-heroes-detail.md](dota1-heroes-detail.md) | `#content` `#heroes` `#skills` `#art` | All 5 heroes: geometry, animations, stats, Q/W/E/R skills. |
-| [game-theme.md](game-theme.md) | `#art` `#ui` `#audio` `#ux` | Theme: colors, typography, 3D style, HUD, audio identity, announcer. |
+| [heroes.md](heroes.md) | `#content` `#heroes` `#skills` `#art` | All 5 heroes: geometry, animations, stats, Q/W/E/R skills. |
+| [theme.md](theme.md) | `#art` `#ui` `#audio` `#ux` | Theme: colors, typography, 3D style, HUD, audio identity, announcer. |
 
 ### Implementation — UI flow
 
 | Doc | Tags | Description |
 |-----|------|-------------|
-| [main-menu.md](main-menu.md) | `#ui` `#flow` `#implemented` | Main menu, Play flow (side + team size), Settings, Hero Viewer, Lobby. |
+| [menu.md](menu.md) | `#ui` `#flow` `#implemented` | Main menu, Play flow (side + team size), Settings, Hero Viewer, Lobby. |
 
 ---
 
@@ -86,7 +86,7 @@ Scoped and spec'd — ready to implement. Ordered by priority.
 | # | Item | Tags | Spec detail |
 |---|------|------|-------------|
 | 1 | **Minimap — fog of war & entity dots** | `#ui` `#ux` | Fog of war overlay; show dots for towers, barracks, creeps, heroes; recenter button. |
-| 2 | **Ability UX — drag-to-aim & double-tap** | `#ux` `#skills` | Drag-to-aim directional/area skills; double-tap for auto-target nearest; skill-specific VFX per [dota1-heroes-detail.md](dota1-heroes-detail.md). |
+| 2 | **Ability UX — drag-to-aim & double-tap** | `#ux` `#skills` | Drag-to-aim directional/area skills; double-tap for auto-target nearest; skill-specific VFX per [heroes.md](heroes.md). |
 | 3 | **TP Scroll — full spec** | `#items` `#ux` | Interrupt channel on stun/death; restrict target to allied structures only (not just base). Currently teleports to base with 3s channel. |
 | 4 | **Bot difficulty presets** | `#ai` | Easy / Normal / Hard with tunable aggression, cast accuracy, item buy priority, reaction time. |
 | 5 | **Tests & balance** | `#technical` | Unit/simulation tests for combat formulas; balance doc for hero stats, item costs, XP/gold curves. |

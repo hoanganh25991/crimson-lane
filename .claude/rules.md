@@ -9,7 +9,7 @@ Implementation in this repo is tracked with **docs** as the SDLC. Specs and prog
    - What’s **WIP / to finish** (with tags)
    - What’s **Backlog** (future)
 
-2. **Before implementing:** Read the relevant spec in docs (e.g. plan.md, dota1-heroes-detail.md) and docs/index.md Plan section. Implement only what is in scope or specified.
+2. **Before implementing:** Read the relevant spec in docs (e.g. plan.md, heroes.md) and docs/index.md Plan section. Implement only what is in scope or specified.
 
 3. **After implementing or changing scope:**
    - Update **docs/index.md**:
@@ -18,7 +18,7 @@ Implementation in this repo is tracked with **docs** as the SDLC. Specs and prog
      - Keep **Backlog** and **Backlog by category** in sync.
    - If code and spec diverge, update either the spec or the code and note the change.
 
-4. **Specs:** Requirements and design live in docs (plan.md, input.md, dota1-heroes-detail.md, game-theme.md, main-menu.md, dota1-mobile-game-plan.md). Implementation should reflect these; any deliberate deviation should be documented.
+4. **Specs:** Requirements and design live in docs (plan.md, brief.md, heroes.md, theme.md, menu.md). Implementation should reflect these; any deliberate deviation should be documented.
 
 ## Entry point
 
