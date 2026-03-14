@@ -1,0 +1,19 @@
+---
+alwaysApply: true
+---
+# SDLC — Docs as source of truth (project has docs hub)
+
+When the project has a **docs** folder used as SDLC (e.g. **docs/index.md** with a Plan / Done / WIP / Backlog section):
+
+1. **Use docs as the authority** for what is in scope, what is done, and what is next. Before implementing, check docs/index.md and the linked spec docs.
+
+2. **After implementing or changing scope**, update the docs hub (usually docs/index.md):
+   - Add or move completed work under Done / implemented.
+   - Add or move in-progress work under WIP with correct tags.
+   - Keep Backlog and any “backlog by category” in sync.
+
+3. **Keep specs and code aligned.** If code diverges from a spec in docs, either update the code to match the spec or update the spec and note the change.
+
+4. **Entry point:** The main doc (e.g. docs/index.md) is the single place to see current state and which spec to follow. Keep its Plan section and tags up to date when shipping or changing features.
+
+This rule applies when working in or with files under **docs/** so that implementation stays tracked and reflected in the project’s SDLC docs.

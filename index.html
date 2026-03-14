@@ -46,6 +46,10 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #settings-screen .set-pane{display:none;flex:1;flex-direction:column;overflow:hidden}
 #settings-screen .set-pane.active{display:flex}
 #settings-screen .set-pane.placeholder{padding:24px;color:#666;font-size:0.95rem}
+.info-pane{padding:24px;overflow:auto}
+.info-pane .info-title{font-size:1rem;color:#ffcc44;letter-spacing:2px;margin-bottom:16px;border-bottom:1px solid #2a2a4a;padding-bottom:8px}
+.info-pane .info-controls{list-style:none;font-size:0.9rem;color:#ccc;line-height:2}
+.info-pane .info-controls strong{color:#ffcc44;margin-right:8px;font-weight:600}
 
 /* LOBBY */
 #lobby{position:fixed;inset:0;background:#07070f;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100}
@@ -214,11 +218,26 @@ body.targeting-skill{cursor:crosshair}
   </div>
   <div class="set-tabs">
     <button type="button" class="set-tab" data-tab="general">General</button>
+    <button type="button" class="set-tab" data-tab="info">Info</button>
     <button type="button" class="set-tab" data-tab="audio">Audio</button>
     <button type="button" class="set-tab" data-tab="hero-viewer">Hero Viewer</button>
   </div>
   <div class="set-content">
     <div class="set-pane placeholder" id="pane-general" data-pane="general">General options (volume, graphics) — coming soon.</div>
+    <div class="set-pane" id="pane-info" data-pane="info">
+      <div class="info-pane">
+        <h3 class="info-title">Controls</h3>
+        <ul class="info-controls">
+          <li><strong>LEFT CLICK</strong> Move / Attack</li>
+          <li><strong>A</strong> Attack nearest</li>
+          <li><strong>Q W E R</strong> Skills</li>
+          <li><strong>SPACE</strong> Stop</li>
+          <li><strong>Arrows</strong> Move (desktop)</li>
+          <li><strong>SCROLL</strong> Zoom</li>
+          <li><strong>B</strong> Shop</li>
+        </ul>
+      </div>
+    </div>
     <div class="set-pane placeholder" id="pane-audio" data-pane="audio">Audio options — coming soon.</div>
     <div class="set-pane" id="pane-hero-viewer" data-pane="hero-viewer">
       <div id="hero-viewer-panel">
@@ -412,12 +431,8 @@ body.targeting-skill{cursor:crosshair}
     <div class="rtimer" id="respawn-timer">10</div>
   </div>
 
-  <!-- Desktop hints -->
-  <div id="desktop-info">
-    <span>LEFT CLICK: Move / Attack · A: Attack nearest</span>
-    <span>Q W E R: Skills · SPACE: Stop · Arrows: Move</span>
-    <span>SCROLL: Zoom · B: Shop</span>
-  </div>
+  <!-- Desktop hints removed; see Settings → Info -->
+  <div id="desktop-info" style="display:none"></div>
 
   <!-- Inventory bar -->
   <div id="inventory-bar">

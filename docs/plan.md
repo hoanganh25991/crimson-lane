@@ -56,7 +56,7 @@ Implement these in MVP:
   - Dragon Knight
   - Shadow Fiend
   - Windrunner
-- 12 items total
+- 13 items total (12 original + TP Scroll)
 - Item recipes including 2-part and 3-part combinations
 - Some item active skills
 - Solo mode with configurable:
@@ -807,7 +807,7 @@ TP Scroll MVP behavior:
 
 ### 16.2 MVP item count
 
-- exactly 12 starter items in MVP
+- 13 items in MVP (12 original + TP Scroll consumable)
 
 ### 16.3 Item requirements
 
