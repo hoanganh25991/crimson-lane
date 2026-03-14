@@ -681,9 +681,31 @@ window.lobbyBack = function() {
 // Start on main menu; lobby hidden until Play → Continue
 showScreen('menu');
 
-// Draw lobby portraits (used when lobby is shown)
-drawPortrait('lich-portrait','lich');
-drawPortrait('sniper-portrait','sniper');
-drawPortrait('dragon_knight-portrait','dragon_knight');
-drawPortrait('shadow_fiend-portrait','shadow_fiend');
-drawPortrait('windrunner-portrait','windrunner');
+// Build lobby hero cards from registry and draw portraits
+function buildLobbyHeroCards() {
+  const container = document.getElementById('hero-picks-container');
+  if (!container) return;
+  container.innerHTML = '';
+  for (const id of ALL_HERO_IDS) {
+    const mod = HERO_REGISTRY[id];
+    if (!mod || !mod.def) continue;
+    const d = mod.def;
+    const colorHex = '#' + (d.color != null ? Number(d.color).toString(16).padStart(6, '0') : '888888');
+    const teamColor = d.team === 'scourge' ? '#882222' : '#1a4a8a';
+    const rangeText = (d.range != null && d.range >= 4) ? ('Range: ' + d.range) : 'Melee';
+    const card = document.createElement('div');
+    card.className = 'hero-card';
+    card.id = 'pick-' + id;
+    card.onclick = () => selectHero(id);
+    card.innerHTML =
+      '<canvas width="120" height="88" id="' + id + '-portrait"></canvas>' +
+      '<div class="hname" style="color:' + colorHex + '">' + (d.name || id.toUpperCase()) + '</div>' +
+      '<div class="hteam" style="color:' + teamColor + '">' + (d.team || 'sentinel').toUpperCase() + '</div>' +
+      '<div class="hstats">HP: ' + (d.hp || 0) + ' · MP: ' + (d.mp || 0) + '<br>' + rangeText + ' · DMG: ' + (d.dmgMin || 0) + '-' + (d.dmgMax || 0) + '</div>';
+    container.appendChild(card);
+  }
+  for (const id of ALL_HERO_IDS) {
+    drawPortrait(id + '-portrait', id);
+  }
+}
+buildLobbyHeroCards();

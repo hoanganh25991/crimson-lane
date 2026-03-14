@@ -130,6 +130,11 @@ function castAISkill(aiHero, target) {
     scene,
     G,
     applyDamage,
+    getEnemiesOf,
+    getEnemyHeroesOf,
+    findEnemyNear,
+    killEntity,
+    floatDamage,
     spawnParticles,
     playSound,
     spawnSpellProjectile

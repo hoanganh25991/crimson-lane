@@ -2,7 +2,7 @@
 import { HERO_REGISTRY } from './heroes/registry.js';
 import { G } from './state.js';
 import { scene } from './scene.js';
-import { applyDamage, getEnemiesOf, findEnemyNear, killEntity, spawnSpellProjectile, floatDamage } from './combat.js';
+import { applyDamage, getEnemiesOf, getEnemyHeroesOf, findEnemyNear, killEntity, spawnSpellProjectile, floatDamage } from './combat.js';
 import { spawnParticles } from './particles.js';
 import { playSound } from './audio.js';
 
@@ -58,6 +58,7 @@ export function castSkill(key, targetPos, targetEntity) {
     G,
     applyDamage,
     getEnemiesOf,
+    getEnemyHeroesOf,
     findEnemyNear,
     killEntity,
     spawnSpellProjectile,

@@ -301,38 +301,7 @@ body.targeting-skill{cursor:crosshair}
   <h1>DOTA 1</h1>
   <div class="sub">SINGLE PLAYER VS AI</div>
   <div class="sub" id="lobby-side" style="margin-bottom:8px;font-size:0.9rem">Your side: <strong id="lobby-side-name">Scourge</strong></div>
-  <div class="hero-picks">
-    <div class="hero-card" id="pick-lich" onclick="selectHero('lich')">
-      <canvas width="120" height="88" id="lich-portrait"></canvas>
-      <div class="hname" style="color:#8844cc">LICH</div>
-      <div class="hteam" style="color:#882222">SCOURGE · INT</div>
-      <div class="hstats">HP: 454 · MP: 403<br>Range: 12 · DMG: 49-57</div>
-    </div>
-    <div class="hero-card" id="pick-sniper" onclick="selectHero('sniper')">
-      <canvas width="120" height="88" id="sniper-portrait"></canvas>
-      <div class="hname" style="color:#44aa44">SNIPER</div>
-      <div class="hteam" style="color:#1a4a8a">SENTINEL · AGI</div>
-      <div class="hstats">HP: 492 · MP: 195<br>Range: 14 · DMG: 35-45</div>
-    </div>
-    <div class="hero-card" id="pick-dragon_knight" onclick="selectHero('dragon_knight')">
-      <canvas width="120" height="88" id="dragon_knight-portrait"></canvas>
-      <div class="hname" style="color:#dd6622">DRAGON KNIGHT</div>
-      <div class="hteam" style="color:#1a4a8a">SENTINEL · STR</div>
-      <div class="hstats">HP: 625 · MP: 195<br>Melee · DMG: 53-59</div>
-    </div>
-    <div class="hero-card" id="pick-shadow_fiend" onclick="selectHero('shadow_fiend')">
-      <canvas width="120" height="88" id="shadow_fiend-portrait"></canvas>
-      <div class="hname" style="color:#ff2200">SHADOW FIEND</div>
-      <div class="hteam" style="color:#882222">SCOURGE · AGI</div>
-      <div class="hstats">HP: 530 · MP: 260<br>Melee · DMG: 51-57</div>
-    </div>
-    <div class="hero-card" id="pick-windrunner" onclick="selectHero('windrunner')">
-      <canvas width="120" height="88" id="windrunner-portrait"></canvas>
-      <div class="hname" style="color:#44bb77">WINDRUNNER</div>
-      <div class="hteam" style="color:#1a4a8a">SENTINEL · AGI</div>
-      <div class="hstats">HP: 492 · MP: 234<br>Range: 13 · DMG: 36-46</div>
-    </div>
-  </div>
+  <div class="hero-picks" id="hero-picks-container"></div>
   <div style="display:flex;gap:12px;align-items:center">
     <button type="button" onclick="lobbyBack()" style="background:#1e1e2e;border:1px solid #3a3a5a;color:#888;padding:12px 24px;font-size:0.9rem;cursor:pointer;border-radius:4px">← Back</button>
     <button id="startBtn" onclick="startGame()" disabled>SELECT A HERO</button>
