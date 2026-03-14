@@ -82,7 +82,7 @@ export default {
       hero.dragonFormTimer = 30;
       spawnParticles(hero.x, hero.z, 0xff8800, 12);
       floatDamage(hero.x, hero.z, 'DRAGON FORM!', '#ff8800');
-      if (showAnnouncer) showAnnouncer('ELDER DRAGON FORM!', '#ff8800', 2000);
+      if (showAnnouncer) showAnnouncer('🐉 ELDER DRAGON FORM!', '#ff8800', 2000);
     }
   },
 

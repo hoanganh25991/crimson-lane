@@ -248,9 +248,9 @@ export function endGame(playerWon) {
   el.style.flexDirection='column';
   el.style.alignItems='center';
   el.style.justifyContent='center';
-  document.getElementById('end-title').textContent = playerWon ? 'VICTORY' : 'DEFEAT';
+  document.getElementById('end-title').textContent = playerWon ? '🏆 VICTORY' : '💀 DEFEAT';
   document.getElementById('end-title').style.color = playerWon ? '#ffcc44' : '#ff2222';
-  document.getElementById('end-sub').textContent = playerWon ? 'The enemy Ancient has been destroyed.' : 'Your Ancient has fallen.';
+  document.getElementById('end-sub').textContent = playerWon ? '🏰 The enemy Ancient has been destroyed!' : '😔 Your Ancient has fallen.';
 }
 
 // ─── HERO UPDATE ───────────────────────────────────────────────────────────────
@@ -438,7 +438,7 @@ function respawnHero(hero) {
     hero.wpIndex = 0;
   }
   if(hero.isPlayer) {
-    showAnnouncer('— RESPAWNED —', '#88aaff', 1500);
+    showAnnouncer('✨ RESPAWNED', '#88aaff', 1500);
     playSound('respawn');
   }
   spawnParticles(hero.x, hero.z, hero.team==='scourge'?0xff2200:0x2244ff, 8);
@@ -639,8 +639,9 @@ document.getElementById('btn-settings').onclick = () => {
   showScreen('settings');
   settingsScreen.querySelectorAll('.set-tab').forEach(t => t.classList.remove('active'));
   settingsScreen.querySelectorAll('.set-pane').forEach(p => p.classList.remove('active'));
-  settingsScreen.querySelector('.set-tab[data-tab="general"]').classList.add('active');
-  settingsScreen.querySelector('.set-pane[data-pane="general"]').classList.add('active');
+  settingsScreen.querySelector('.set-tab[data-tab="hero-viewer"]').classList.add('active');
+  settingsScreen.querySelector('.set-pane[data-pane="hero-viewer"]').classList.add('active');
+  import('./hero-viewer.js').then(m => { m.initHeroViewer(); });
 };
 document.getElementById('btn-multiplayer').onclick = () => {
   showScreen('multiplayer');

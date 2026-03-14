@@ -132,7 +132,7 @@ export default {
       scene.add(ring);
       G.effects.push({ mesh: ring, life: 0.5, maxLife: 0.5, type: 'ring' });
       floatDamage(hero.x, hero.z, 'RAVAGE!', '#88ccaa');
-      if (showAnnouncer) showAnnouncer('RAVAGE!', '#88ccaa', 2000);
+      if (showAnnouncer) showAnnouncer('🌊 RAVAGE!', '#88ccaa', 2000);
     }
   },
 

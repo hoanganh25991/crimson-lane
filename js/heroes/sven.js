@@ -126,7 +126,7 @@ export default {
       hero.bonusDmgPercent = (hero.bonusDmgPercent || 0) + 100;
       spawnParticles(hero.x, hero.z, 0xffcc00, 12);
       floatDamage(hero.x, hero.z, "GOD'S STRENGTH!", '#ffcc00');
-      if (showAnnouncer) showAnnouncer("GOD'S STRENGTH!", '#ffcc00', 2000);
+      if (showAnnouncer) showAnnouncer("⚡ GOD'S STRENGTH!", '#ffcc00', 2000);
     }
   },
 

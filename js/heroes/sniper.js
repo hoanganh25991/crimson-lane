@@ -62,7 +62,7 @@ export default {
       cross.position.set(target.x, 0.1, target.z);
       scene.add(cross);
       G.effects.push({ mesh: cross, life: 1.7, maxLife: 1.7, type: 'crosshair', target, heroRef: hero });
-      if (showAnnouncer) showAnnouncer('CHANNELING...', '#ffff00', 1700);
+      if (showAnnouncer) showAnnouncer('🔭 CHANNELING...', '#ffff00', 1700);
       else {
         const el = document.getElementById('announcer');
         if (el) { el.textContent = 'CHANNELING...'; el.style.color = '#ffff00'; el.style.opacity = '1'; setTimeout(() => el.style.opacity = '0', 1300); }

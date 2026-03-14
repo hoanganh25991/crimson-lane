@@ -45,8 +45,8 @@ export function updateHUD() {
   if(mpFill) mpFill.style.width = Math.max(0,(h.mp/h.maxMp)*100)+'%';
   if(hpVal) hpVal.textContent = Math.ceil(h.hp)+'/'+h.maxHp;
   if(mpVal) mpVal.textContent = Math.ceil(h.mp)+'/'+h.maxMp;
-  if(goldEl) goldEl.textContent = '◆ '+Math.floor(G.gold);
-  if(kdaEl) kdaEl.textContent = G.kills+' / '+G.deaths+' / '+G.assists;
+  if(goldEl) goldEl.textContent = '🪙 '+Math.floor(G.gold);
+  if(kdaEl) kdaEl.textContent = '⚔️ '+G.kills+' / 💀 '+G.deaths+' / 🤝 '+G.assists;
   if(levelEl) levelEl.textContent = 'LVL '+h.level;
 
   if(timeEl) {

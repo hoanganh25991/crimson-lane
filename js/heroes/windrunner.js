@@ -91,7 +91,7 @@ export default {
       hero.attackTarget = target;
       spawnParticles(hero.x, hero.z, 0x88ff44, 6);
       floatDamage(hero.x, hero.z, 'FOCUS FIRE!', '#88ff44');
-      if (showAnnouncer) showAnnouncer('FOCUS FIRE!', '#88ff44', 2000);
+      if (showAnnouncer) showAnnouncer('🎯 FOCUS FIRE!', '#88ff44', 2000);
     }
   },
 

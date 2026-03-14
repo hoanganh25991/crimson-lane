@@ -38,14 +38,21 @@ body{background:#07070f;color:#e0d8c8;font-family:'Segoe UI',monospace;overflow:
 #settings-screen.show{display:flex}
 #settings-screen .set-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#0d0d1a;border-bottom:1px solid #1e1e2e;flex-shrink:0}
 #settings-screen .set-header h2{font-size:1.2rem;color:#ffcc44;letter-spacing:2px}
-#settings-screen .set-tabs{display:flex;gap:4px;padding:8px 12px;background:#111118;border-bottom:1px solid #1e1e2e;flex-shrink:0}
-#settings-screen .set-tab{background:transparent;border:1px solid #2a2a4a;color:#888;padding:8px 16px;font-size:0.9rem;cursor:pointer;border-radius:4px;transition:all 0.2s}
+#settings-screen .set-tabs{display:flex;gap:4px;padding:8px 12px;background:#111118;border-bottom:1px solid #1e1e2e;flex-shrink:0;overflow-x:auto}
+#settings-screen .set-tab{background:transparent;border:1px solid #2a2a4a;color:#888;padding:8px 16px;font-size:0.9rem;cursor:pointer;border-radius:4px;transition:all 0.2s;flex-shrink:0}
 #settings-screen .set-tab:hover{color:#ccc;border-color:#3a3a5a}
 #settings-screen .set-tab.active{background:#1a1a2a;border-color:#ffcc44;color:#ffcc44}
 #settings-screen .set-content{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0}
 #settings-screen .set-pane{display:none;flex:1;flex-direction:column;overflow:hidden}
 #settings-screen .set-pane.active{display:flex}
 #settings-screen .set-pane.placeholder{padding:24px;color:#666;font-size:0.95rem}
+@media (max-height:520px) and (orientation:landscape){
+  #settings-screen .set-header{padding:5px 12px}
+  #settings-screen .set-header h2{font-size:0.95rem;letter-spacing:1px}
+  #settings-screen .set-tabs{padding:4px 8px;gap:3px}
+  #settings-screen .set-tab{padding:5px 12px;font-size:0.8rem}
+  .back-btn{padding:4px 12px!important;font-size:0.8rem!important}
+}
 .info-pane{padding:24px;overflow:auto}
 .info-pane .info-title{font-size:1rem;color:#ffcc44;letter-spacing:2px;margin-bottom:16px;border-bottom:1px solid #2a2a4a;padding-bottom:8px}
 .info-pane .info-controls{list-style:none;font-size:0.9rem;color:#ccc;line-height:2}
@@ -237,9 +244,9 @@ body.targeting-skill #targeting-hint{display:block}
   <h1>DOTA 1</h1>
   <div class="sub">DEFENSE OF THE ANCIENTS</div>
   <div class="menu-btns">
-    <button class="menu-btn" id="btn-play">Play</button>
-    <button class="menu-btn" id="btn-multiplayer">Multiplayer</button>
-    <button class="menu-btn" id="btn-settings">Settings</button>
+    <button class="menu-btn" id="btn-play">⚔️ Play</button>
+    <button class="menu-btn" id="btn-multiplayer">🌐 Multiplayer</button>
+    <button class="menu-btn" id="btn-settings">⚙️ Settings</button>
   </div>
 </div>
 
@@ -248,13 +255,13 @@ body.targeting-skill #targeting-hint{display:block}
   <h2 id="play-flow-title">Choose your side</h2>
   <div class="step">
     <div class="options" id="play-side-options">
-      <button type="button" class="opt-btn" data-side="sentinel">Sentinel</button>
-      <button type="button" class="opt-btn" data-side="scourge">Scourge</button>
+      <button type="button" class="opt-btn" data-side="sentinel">🌟 Sentinel</button>
+      <button type="button" class="opt-btn" data-side="scourge">💀 Scourge</button>
     </div>
     <div class="options" id="play-mode-options" style="display:none">
-      <button type="button" class="opt-btn" data-mode="5">5 vs 5</button>
-      <button type="button" class="opt-btn" data-mode="3">3 vs 3</button>
-      <button type="button" class="opt-btn" data-mode="1">1 vs 1</button>
+      <button type="button" class="opt-btn" data-mode="5">⚔️ 5 vs 5</button>
+      <button type="button" class="opt-btn" data-mode="3">🗡️ 3 vs 3</button>
+      <button type="button" class="opt-btn" data-mode="1">🤺 1 vs 1</button>
     </div>
     <div class="flow-actions">
       <button type="button" id="play-back-btn" class="secondary">Back</button>
@@ -270,10 +277,10 @@ body.targeting-skill #targeting-hint{display:block}
     <button type="button" class="back-btn" id="settings-back-btn">← Back</button>
   </div>
   <div class="set-tabs">
+    <button type="button" class="set-tab" data-tab="hero-viewer">Hero Viewer</button>
     <button type="button" class="set-tab" data-tab="general">General</button>
     <button type="button" class="set-tab" data-tab="info">Info</button>
     <button type="button" class="set-tab" data-tab="audio">Audio</button>
-    <button type="button" class="set-tab" data-tab="hero-viewer">Hero Viewer</button>
   </div>
   <div class="set-content">
     <div class="set-pane placeholder" id="pane-general" data-pane="general">General options (volume, graphics) — coming soon.</div>
@@ -390,9 +397,9 @@ body.targeting-skill #targeting-hint{display:block}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;justify-content:center">
       <span style="color:#666688;font-size:0.8rem;letter-spacing:1px">DIFFICULTY</span>
       <div id="difficulty-btns" style="display:flex;gap:6px">
-        <button class="diff-btn" data-diff="easy" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">Easy</button>
-        <button class="diff-btn active" data-diff="normal" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">Normal</button>
-        <button class="diff-btn" data-diff="hard" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">Hard</button>
+        <button class="diff-btn" data-diff="easy" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">😊 Easy</button>
+        <button class="diff-btn active" data-diff="normal" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">⚔️ Normal</button>
+        <button class="diff-btn" data-diff="hard" style="background:#111118;border:2px solid #2a2a4a;color:#aaa;padding:6px 14px;font-size:0.8rem;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all 0.2s">💀 Hard</button>
       </div>
     </div>
     <div id="lobby-mp-info" style="display:none;margin-bottom:12px;padding:12px;background:#111118;border-radius:4px;font-size:0.85rem;color:#aaa">
@@ -406,7 +413,7 @@ body.targeting-skill #targeting-hint{display:block}
   </div>
   <div id="lobby-actions">
     <button type="button" onclick="lobbyBack()" style="background:#1e1e2e;border:1px solid #3a3a5a;color:#888;padding:12px 24px;font-size:0.9rem;cursor:pointer;border-radius:4px">← Back</button>
-    <button id="startBtn" onclick="startGame()" disabled>SELECT A HERO</button>
+    <button id="startBtn" onclick="startGame()" disabled>🗡️ SELECT A HERO</button>
   </div>
 </div>
 
@@ -420,7 +427,7 @@ body.targeting-skill #targeting-hint{display:block}
     <div id="team-left"></div>
     <div id="topbar-center">
       <div id="time-display" style="font-size:1.1rem;color:#ffcc44;font-weight:bold;letter-spacing:2px">00:00</div>
-      <div id="gold-display" style="font-size:0.7rem;color:#c8a84a">◆ 625</div>
+      <div id="gold-display" style="font-size:0.7rem;color:#c8a84a">🪙 625</div>
     </div>
     <div id="team-right"></div>
   </div>
@@ -435,21 +442,21 @@ body.targeting-skill #targeting-hint{display:block}
   <div id="hero-bars">
     <div id="hero-name">HERO</div>
     <div class="bar-row">
-      <span style="color:#22cc22;font-size:0.6rem;width:14px">HP</span>
+      <span style="font-size:0.75rem;width:16px">❤️</span>
       <div class="bar-wrap"><div id="hp-bar-fill" style="width:100%"></div></div>
       <span class="bar-val" id="hp-val">454/454</span>
     </div>
     <div class="bar-row">
-      <span style="color:#3366ff;font-size:0.6rem;width:14px">MP</span>
+      <span style="font-size:0.75rem;width:16px">💧</span>
       <div class="bar-wrap"><div id="mp-bar-fill" style="width:100%"></div></div>
       <span class="bar-val" id="mp-val">403/403</span>
     </div>
     <div class="bar-row">
-      <span style="color:#aa8800;font-size:0.6rem;width:14px">XP</span>
+      <span style="font-size:0.75rem;width:16px">⭐</span>
       <div class="bar-wrap"><div id="xp-bar-fill" style="width:0%;background:#aa8800"></div></div>
       <span class="bar-val" id="level-display">LVL 1</span>
     </div>
-    <div id="kda-display" style="font-size:0.62rem;color:#c8a84a;margin-top:2px">0 / 0 / 0</div>
+    <div id="kda-display" style="font-size:0.62rem;color:#c8a84a;margin-top:2px">⚔️ 0 / 💀 0 / 🤝 0</div>
   </div>
 
   <!-- Skill bar -->
@@ -499,7 +506,7 @@ body.targeting-skill #targeting-hint{display:block}
 
   <!-- Respawn -->
   <div id="respawn-overlay">
-    <div class="rdead">YOU DIED</div>
+    <div class="rdead">💀 YOU DIED</div>
     <div class="rtimer" id="respawn-timer">10</div>
   </div>
 
@@ -508,7 +515,7 @@ body.targeting-skill #targeting-hint{display:block}
 
   <!-- Inventory bar -->
   <div id="inventory-bar">
-    <button id="shop-btn" onclick="toggleShop()">SHOP<br><span style="font-size:0.6rem">[B]</span></button>
+    <button id="shop-btn" onclick="toggleShop()">🛒 SHOP<br><span style="font-size:0.6rem">[B]</span></button>
     <div class="inv-slot" id="inv0" onclick="useItemSlot(0)"><span class="inv-name" id="inv-name0"></span><div class="inv-cd" id="inv-cd0" style="display:none"></div></div>
     <div class="inv-slot" id="inv1" onclick="useItemSlot(1)"><span class="inv-name" id="inv-name1"></span><div class="inv-cd" id="inv-cd1" style="display:none"></div></div>
     <div class="inv-slot" id="inv2" onclick="useItemSlot(2)"><span class="inv-name" id="inv-name2"></span><div class="inv-cd" id="inv-cd2" style="display:none"></div></div>
@@ -523,8 +530,8 @@ body.targeting-skill #targeting-hint{display:block}
   <!-- Shop overlay -->
   <div id="shop" style="display:none">
     <div class="shop-hdr">
-      <span style="color:#ffcc44;font-size:0.9rem;letter-spacing:2px">SHOP</span>
-      <span style="font-size:0.7rem;color:#888">Gold: <span id="shop-gold">0</span></span>
+      <span style="color:#ffcc44;font-size:0.9rem;letter-spacing:2px">🛒 SHOP</span>
+      <span style="font-size:0.7rem;color:#888">🪙 <span id="shop-gold">0</span></span>
       <button onclick="toggleShop()" style="background:transparent;border:none;color:#888;font-size:1rem;cursor:pointer">✕</button>
     </div>
     <div id="shop-items"></div>
@@ -541,7 +548,7 @@ body.targeting-skill #targeting-hint{display:block}
 <div id="endscreen">
   <div class="etitle" id="end-title">VICTORY</div>
   <div class="esub" id="end-sub">The enemy Ancient has been destroyed.</div>
-  <button onclick="location.reload()">PLAY AGAIN</button>
+  <button onclick="location.reload()">🔄 PLAY AGAIN</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

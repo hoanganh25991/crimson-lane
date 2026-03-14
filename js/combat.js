@@ -88,7 +88,7 @@ function onHeroDeath(hero) {
 
   if(hero.isPlayer) {
     G.deaths++;
-    if(showAnnouncer) showAnnouncer('YOU DIED', '#ff4444', 2000);
+    if(showAnnouncer) showAnnouncer('💀 YOU DIED', '#ff4444', 2000);
   } else if(hero.team !== G.playerHero.team) {
     // Enemy hero killed — reward player team
     const goldGain = 200 + 50*(hero.level||1);
@@ -97,17 +97,17 @@ function onHeroDeath(hero) {
     G.killStreak++;
     if(!G.firstBlood) {
       G.firstBlood = true;
-      if(showAnnouncer) showAnnouncer('FIRST BLOOD!', '#ff4444');
+      if(showAnnouncer) showAnnouncer('🩸 FIRST BLOOD!', '#ff4444');
       playSound('gold');
     } else if(G.killStreak >= 2) {
-      if(showAnnouncer) showAnnouncer('KILL STREAK!', '#ff8800');
+      if(showAnnouncer) showAnnouncer('🔥 KILL STREAK!', '#ff8800');
     }
-    floatDamage(hero.x, hero.z, '+'+goldGain+'g', '#ffcc44');
+    floatDamage(hero.x, hero.z, '🪙+'+goldGain, '#ffcc44');
     if(G.playerHero) addXP(100 + 20*G.playerHero.level);
     playSound('gold');
   } else if(hero.isAllyBot) {
     // Ally bot died
-    if(showAnnouncer) showAnnouncer('ALLY KILLED', '#ff8844', 1500);
+    if(showAnnouncer) showAnnouncer('😢 ALLY KILLED', '#ff8844', 1500);
   }
 
   // Give gold to nearby enemy bot heroes (for their item buys)
@@ -123,7 +123,7 @@ function onHeroDeath(hero) {
 function onTowerDeath(tower) {
   tower.group.visible = false;
   const { showAnnouncer } = window._hudFns || {};
-  if(showAnnouncer) showAnnouncer('TOWER DESTROYED', '#ffcc44');
+  if(showAnnouncer) showAnnouncer('🏚️ TOWER DESTROYED', '#ffcc44');
   playSound('tower_death');
 
   if(tower.lane === 'ancient' && G.playerHero) {
@@ -134,7 +134,7 @@ function onTowerDeath(tower) {
   if(G.playerHero && tower.team !== G.playerHero.team) {
     const g = tower.tier === 4 ? 200 : 80+tower.tier*30;
     G.gold += g;
-    floatDamage(G.playerHero.x, G.playerHero.z, '+'+g+'g', '#ffcc44');
+    floatDamage(G.playerHero.x, G.playerHero.z, '🪙+'+g, '#ffcc44');
   }
 }
 
@@ -143,13 +143,13 @@ function onBarracksDeath(barracks) {
   const { showAnnouncer } = window._hudFns || {};
   const lane = barracks.lane.toUpperCase();
   const side = barracks.team === 'scourge' ? 'SCOURGE' : 'SENTINEL';
-  if(showAnnouncer) showAnnouncer(side+' '+lane+' BARRACKS FALLEN!', '#ffaa00', 3000);
+  if(showAnnouncer) showAnnouncer('🏚️ '+side+' '+lane+' BARRACKS FALLEN!', '#ffaa00', 3000);
   // Opposing team gets mega creeps on that lane
   const enemy = barracks.team === 'scourge' ? 'sentinel' : 'scourge';
   G.megaLanes[enemy][barracks.lane] = true;
   if(G.playerHero && barracks.team !== G.playerHero.team) {
     G.gold += 250;
-    floatDamage(G.playerHero.x, G.playerHero.z, '+250g BARRACKS', '#ffcc44');
+    floatDamage(G.playerHero.x, G.playerHero.z, '🪙+250 BARRACKS', '#ffcc44');
     addXP(200);
   }
   playSound('tower_death');
@@ -168,7 +168,7 @@ function onCreepDeath(creep) {
 
     if(creep.lastHitter === G.playerHero) {
       G.gold += gold;
-      floatDamage(creep.x, creep.z, '+'+gold+'g', '#ffcc44');
+      floatDamage(creep.x, creep.z, '🪙+'+gold, '#ffcc44');
       playSound('gold');
     } else if(creep.lastHitter.aiGold !== undefined) {
       creep.lastHitter.aiGold += gold;
@@ -226,7 +226,7 @@ function onLevelUp(h) {
   h.maxHp += 40; h.hp = Math.min(h.hp+40, h.maxHp);
   h.maxMp += 20; h.mp = Math.min(h.mp+20, h.maxMp);
   const { showAnnouncer, updateSkillUI } = window._hudFns || {};
-  if(showAnnouncer) showAnnouncer('LEVEL UP! '+h.level, '#ffcc44', 1500);
+  if(showAnnouncer) showAnnouncer('⬆️ LEVEL UP! '+h.level, '#ffcc44', 1500);
   const keys = ['Q','W','E','R'];
   const min = Math.min(...keys.map(k=>G.skillLevels[k]));
   const toUp = keys.find(k=>G.skillLevels[k]===min && G.skillLevels[k]<4);

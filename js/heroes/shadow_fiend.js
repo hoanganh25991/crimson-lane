@@ -78,7 +78,7 @@ export default {
         }
       }
       spawnParticles(hero.x, hero.z, 0xff0000, 12);
-      if (showAnnouncer) showAnnouncer('REQUIEM OF SOULS!', '#ff2200', 2000);
+      if (showAnnouncer) showAnnouncer('💀 REQUIEM OF SOULS!', '#ff2200', 2000);
     }
   },
 

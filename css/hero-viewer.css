@@ -350,6 +350,131 @@
   margin-bottom: 4px;
 }
 
+/* ─── Mobile landscape compaction ─────────────────────────────────────────── */
+/*
+ * Mobile landscape: short screens (≤520px tall). Squeeze all vertical chrome
+ * so the 3D viewport and stats get the maximum useful space.
+ */
+@media (max-height: 520px) and (orientation: landscape) {
+  /* Topbar: tighter padding, smaller title */
+  #hero-viewer-panel #hv-topbar {
+    padding: 4px 8px;
+  }
+  #hero-viewer-panel #hv-topbar h1 {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  #hero-viewer-panel .hv-nav-btn {
+    padding: 3px 10px;
+    font-size: 11px;
+  }
+
+  /* Portrait strip: smaller portraits, less gap/padding */
+  #hero-viewer-panel #hv-portrait-strip {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  #hero-viewer-panel .hv-portrait {
+    width: 42px;
+    height: 42px;
+    font-size: 8px;
+  }
+  #hero-viewer-panel .hv-portrait .port-icon {
+    font-size: 17px;
+  }
+
+  /* Main area: viewport takes 60%, stats panel scrollable on right */
+  #hero-viewer-panel #hv-viewport-wrap {
+    width: 60%;
+  }
+
+  /* Stats panel: tighter spacing */
+  #hero-viewer-panel #hv-stats-panel {
+    padding: 6px;
+    gap: 5px;
+  }
+  #hero-viewer-panel .hv-panel-section {
+    padding: 6px 8px;
+  }
+  #hero-viewer-panel .hv-panel-section h3 {
+    font-size: 9px;
+    margin-bottom: 4px;
+  }
+  #hero-viewer-panel #hv-hero-title {
+    font-size: 13px;
+  }
+  #hero-viewer-panel #hv-hero-sub {
+    font-size: 9px;
+  }
+
+  /* Vitals bars: slimmer */
+  #hero-viewer-panel .hv-bar-row {
+    margin-bottom: 3px;
+  }
+  #hero-viewer-panel .hv-bar-track {
+    height: 7px;
+  }
+  #hero-viewer-panel .hv-bar-label,
+  #hero-viewer-panel .hv-bar-val {
+    font-size: 9px;
+  }
+
+  /* Attributes: tighter */
+  #hero-viewer-panel .hv-attr-box {
+    padding: 3px 4px;
+  }
+  #hero-viewer-panel .hv-attr-box .attr-icon {
+    font-size: 13px;
+  }
+  #hero-viewer-panel .hv-attr-box .attr-val {
+    font-size: 11px;
+  }
+
+  /* Stats grid: denser */
+  #hero-viewer-panel .hv-stat-item {
+    font-size: 9px;
+    padding: 1px 3px;
+  }
+
+  /* Sliders: compact */
+  #hero-viewer-panel .hv-slider-row {
+    margin-bottom: 3px;
+  }
+  #hero-viewer-panel .hv-slider-label,
+  #hero-viewer-panel .hv-slider-val {
+    font-size: 9px;
+  }
+
+  /* Skills: smaller cards */
+  #hero-viewer-panel .hv-skill-grid {
+    gap: 4px;
+  }
+  #hero-viewer-panel .hv-skill-btn {
+    padding: 4px 6px;
+  }
+  #hero-viewer-panel .hv-skill-btn .skill-key {
+    font-size: 9px;
+  }
+  #hero-viewer-panel .hv-skill-btn .skill-name {
+    font-size: 10px;
+  }
+  #hero-viewer-panel .hv-skill-btn .skill-meta {
+    font-size: 8px;
+  }
+
+  /* Animation buttons overlay: smaller */
+  #hero-viewer-panel .hv-anim-btn {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  /* Announcer: smaller */
+  #hero-viewer-panel #hv-announcer {
+    font-size: 16px;
+    top: 10px;
+  }
+}
+
 /* Damage number animation (scoped name to avoid global clash) */
 @keyframes hv-floatUp {
   0% {

@@ -118,7 +118,7 @@ export default {
         }
       }
       floatDamage(hero.x, hero.z, "THUNDERGOD'S WRATH", '#ffff88');
-      if (showAnnouncer) showAnnouncer("THUNDERGOD'S WRATH!", '#ffff88', 2000);
+      if (showAnnouncer) showAnnouncer("⚡ THUNDERGOD'S WRATH!", '#ffff88', 2000);
     }
   },
 
