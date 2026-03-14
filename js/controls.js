@@ -38,8 +38,8 @@ export function initControls() {
     joystickInner.style.top = (60+ny*clampLen-22)+'px';
     joystick.dx = nx; joystick.dz = ny;
     // With camera at (cx-30,35,cz-30): apply camera-relative world direction
-    joystick.wx = joystick.dx * 0.707 - joystick.dz * 0.707;
-    joystick.wz = -joystick.dx * 0.707 - joystick.dz * 0.707;
+    joystick.wx = -(joystick.dx + joystick.dz) * 0.707;
+    joystick.wz = (joystick.dx - joystick.dz) * 0.707;
   },{passive:false});
 
   joystickArea.addEventListener('touchend', e=>{
@@ -74,29 +74,25 @@ export function initControls() {
       return;
     }
 
-    const allEntities = [...G.creeps, ...G.towers, G.aiHero].filter(e=>e&&e.alive);
-    let hitEnemy = null;
+    // Attack targets: enemies + neutral creeps + deniable allied creeps (<50% HP)
+    const allEntities = [...G.creeps, ...G.towers, ...G.barracks, G.aiHero].filter(e=>e&&e.alive);
+    let hitTarget = null;
     for(const ent of allEntities) {
-      if(ent.team === h.team) continue;
-      const pos = new THREE.Vector3(ent.x||ent.def?.x||0, 1, ent.z||ent.def?.z||0);
+      const ex = ent.x||(ent.def?.x)||0, ez = ent.z||(ent.def?.z)||0;
+      const pos = new THREE.Vector3(ex, 1, ez);
       const screen = pos.clone().project(camera);
       const sx=(screen.x*0.5+0.5)*window.innerWidth;
       const sy=(-screen.y*0.5+0.5)*window.innerHeight;
       const dx=e.clientX-sx, dy=e.clientY-sy;
-      if(Math.sqrt(dx*dx+dy*dy)<25){hitEnemy=ent;break;}
-    }
-
-    if(hitEnemy && hitEnemy.team!==h.team) {
-      h.attackTarget = hitEnemy;
-      h.moveTarget = null;
-    } else {
-      const hits = raycaster.intersectObject(groundPlane);
-      if(hits.length) {
-        const p = hits[0].point;
-        h.moveTarget = {x:p.x, z:p.z};
-        h.attackTarget = null;
+      if(Math.sqrt(dx*dx+dy*dy)<25) {
+        const isEnemy = ent.team !== h.team && ent.team !== 'neutral';
+        const isNeutral = ent.team === 'neutral';
+        const isDeniable = ent.team === h.team && !ent.def && !ent.isBarracks && ent.isPlayer===undefined && (ent.hp/ent.maxHp) < 0.5;
+        if(isEnemy || isNeutral || isDeniable) { hitTarget = ent; break; }
       }
     }
+    if(hitTarget) { h.attackTarget = hitTarget; h.moveTarget = null; }
+    // No click-to-move: movement is joystick or keyboard only
   });
 
   // Keyboard

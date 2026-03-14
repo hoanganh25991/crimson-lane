@@ -22,8 +22,10 @@ export function buildMap() {
     mesh.receiveShadow = true;
     scene.add(mesh);
   }
-  addLane(50, 85, 100, 5, 0); // top
-  addLane(50, 15, 100, 5, 0); // bot
+  addLane(50, 85, 76, 5, 0); // top horizontal (x=12 to x=88)
+  addLane(50, 15, 76, 5, 0); // bot horizontal
+  addLane(10, 47, 5, 75, 0); // left vertical connector (scourge base → top lane, z=10 to z=85)
+  addLane(90, 53, 5, 75, 0); // right vertical connector (bot lane → sentinel base, z=15 to z=90)
   // Mid diagonal
   const midGeo = new THREE.PlaneGeometry(6, 140);
   const midMat = new THREE.MeshStandardMaterial({color:0x1a1208, roughness:1});
