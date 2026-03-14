@@ -2,7 +2,7 @@
 
 **Purpose:** Single entry point for the Dota 1–like mobile game. Scope, specs, progress, and backlog live here.
 
-**Stack:** Three.js · HTML/CSS/JS · Solo vs AI (future: WebRTC/PeerJS multiplayer).
+**Stack:** Three.js · HTML/CSS/JS · Solo vs AI · WebRTC/PeerJS multiplayer (host/join, room code, QR).
 
 ---
 
@@ -30,7 +30,7 @@
 
 | Doc | Tags | Description |
 |-----|------|-------------|
-| [heroes.md](heroes.md) | `#content` `#heroes` `#skills` `#art` | All 5 heroes: geometry, animations, stats, Q/W/E/R skills. |
+| [heroes.md](heroes.md) | `#content` `#heroes` `#skills` `#art` | 20 heroes: geometry, animations, stats, Q/W/E/R skills; per-hero modules in `js/heroes/`. |
 | [theme.md](theme.md) | `#art` `#ui` `#audio` `#ux` | Theme: colors, typography, 3D style, HUD, audio identity, announcer. |
 
 ### Implementation — UI flow
@@ -67,7 +67,7 @@ Verified against code — these features are shipped and working.
 |------|-----------|
 | **Engine** | Three.js scene, 100x100 map (terrain, 3 lanes, river, base pads), camera, game loop. |
 | **Menu** | Main menu, Play (side + team size), Settings, Hero Viewer (3D preview, animations, stats, level slider), Lobby, hero pick → start. |
-| **Heroes** | 5 heroes with 3D models, stats, Q/W/E/R skills: Lich, Sniper, Dragon Knight, Shadow Fiend, Windrunner. |
+| **Heroes** | 20 heroes with 3D models, stats, Q/W/E/R skills. Per-hero modules in `js/heroes/` (registry, _template). Lich, Sniper, Dragon Knight, Shadow Fiend, Windrunner, Axe, Pudge, Sven, Tidehunter, Earthshaker, Phantom Assassin, Juggernaut, Drow Ranger, Bounty Hunter, Vengeful Spirit, Crystal Maiden, Zeus, Lina, Lion, Enigma. |
 | **Combat** | Melee/ranged attacks, projectiles, physical/magic/pure damage, armor, lifesteal, death, respawn timer. |
 | **Creeps** | Lane creeps (melee + ranged), waypoints, last hit, deny, XP, gold. |
 | **Neutral camps** | 6 camps, tiered units, leash radius, respawn timer, gold/XP rewards. |
@@ -75,6 +75,7 @@ Verified against code — these features are shipped and working.
 | **Items** | 13 items (6 basic, 6 upgrade, TP Scroll), recipes, passives, actives (Blink, Teleport, Mana Restore, Void Burst), shop, 6-slot inventory. |
 | **HUD** | Top bar (portraits, HP, time, gold), hero bars (HP/MP/XP/level/KDA), skill bar (Q/W/E/R, cooldowns, mana), attack button, inventory, shop button, minimap (click-to-pan), announcer (First Blood, Kill Streak, Barracks Fallen, etc.). |
 | **Match end** | Victory / Defeat screen on Ancient destruction. |
+| **Multiplayer** | PeerJS networking (`js/net/`: peer, protocol, host, client, lobby). Create/Join game, room code, QR code, hero pick, host starts; host broadcasts state snapshots. |
 | **Controls** | Desktop (arrow keys, click move/attack, Q/W/E/R, Space stop, scroll zoom, B shop). Mobile (joystick, attack button, skill buttons). |
 | **AI** | Hero bots (lane march, fight, retreat, fountain regen, skill casting, item buying). Creep AI (lane pathing, target priority). |
 | **Audio** | 18 SFX (hit, ranged, magic, death, levelup, gold, spawn, respawn, tower hit/death, frost, shrapnel, chain frost, assassinate channel/fire, fire, windrun, buy). Procedural main theme. |
@@ -95,8 +96,7 @@ Scoped and spec'd — ready to implement. Ordered by priority.
 
 | Item | Tags | Notes |
 |------|------|-------|
-| Multiplayer (PeerJS, host authority, sync) | `#multiplayer` `#technical` | Post-MVP. Requires network architecture design. |
-| Lobby: Host/Join, QR code, room ID, connection state | `#lobby` `#qr` `#multiplayer` | Depends on multiplayer. |
+| Client sync from host snapshots | `#multiplayer` `#technical` | Host broadcasts state; client can be extended to render from snapshots only. |
 | Draft/ban phase | `#multiplayer` `#content` | Out of MVP. |
 | Replay system | `#technical` | Out of MVP. |
 | Matchmaking & login | `#technical` `#multiplayer` | Out of MVP. |
@@ -108,10 +108,12 @@ Scoped and spec'd — ready to implement. Ordered by priority.
 - **Run:** Open `index.html` in browser (no build step).
 - **Entry:** `js/main.js` (game loop, menu flow, lobby).
 - **Core:** `js/state.js`, `js/scene.js`, `js/constants.js`.
-- **Gameplay:** `js/heroes.js`, `js/hero-models.js`, `js/skills.js`, `js/combat.js`, `js/creeps.js`, `js/towers.js`, `js/items.js`, `js/ai.js`.
+- **Heroes:** `js/heroes/` (registry.js, _template.js, one module per hero); `js/heroes.js`, `js/hero-models.js`, `js/skills.js`, `js/combat.js`, `js/items.js`, `js/ai.js`.
+- **Gameplay:** `js/creeps.js`, `js/towers.js`, `js/particles.js`, `js/animations.js`.
+- **Net:** `js/net/` (peer.js, protocol.js, host.js, client.js, lobby.js).
 - **Player:** `js/controls.js`, `js/hud.js`, `js/map.js`, `js/audio.js`, `js/particles.js`, `js/animations.js`.
 - **UI:** `js/hero-viewer.js`, `css/hero-viewer.css`.
-- **Content:** Heroes/skills in `js/constants.js` + `js/hero-models.js` + `js/skills.js`; items in `js/items.js`; map/towers/barracks in `js/constants.js`.
+- **Content:** Heroes in `js/heroes/` (per-hero defs, skills, models); items in `js/items.js`; map/towers/barracks in `js/constants.js`.
 - **Audio:** 18 WAV files in `sounds/`; generation script in `scripts/generate-dota-sfx.js`.
 
 ---

@@ -1,8 +1,8 @@
-# 🧙 Dota 1 — 5 Hero Design Document
+# 🧙 Dota 1 — 20 Hero Design Document
 
 **Category:** Design · **Tags:** #content #heroes #skills #art
 
-> All heroes are drawn using **Three.js geometry only** (no external assets).  
+> **Roster:** 20 heroes (5 original + 15 new). All heroes are drawn using **Three.js geometry only** (no external assets).  
 > Each hero has a **unique silhouette** recognizable from Dota 1.  
 > Attack animation speed scales directly with attack speed stat.  
 > A **Hero Review Screen** lets you preview each hero + test each skill live.

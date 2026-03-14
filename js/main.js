@@ -16,6 +16,7 @@ import { playSound, playMainTheme, stopMainTheme } from './audio.js';
 import { spawnParticles, updateParticles, updateEffects } from './particles.js';
 import { updateHeroAnim } from './animations.js';
 import { buyItem, useItem, updateItemCooldowns, updateAIItems, ITEM_DEFS } from './items.js';
+import * as mpLobby from './net/lobby.js';
 
 // ─── Expose HUD functions for combat.js bridge ──────────────────────────────────
 window._hudFns = { showAnnouncer, updateSkillUI };
@@ -58,8 +59,14 @@ export function selectHero(type) {
 // ─── GAME START ────────────────────────────────────────────────────────────────
 export function startGame() {
   if(!G.pickedHero) return;
+  if (G.isMultiplayer && G.isHost) {
+    mpLobby.broadcastStart({ hero: G.pickedHero, playerSide: G.playerSide, teamSize: G.teamSize });
+  }
   G.phase = 'game';
   document.getElementById('lobby').style.display='none';
+  document.getElementById('lobby').classList.remove('show');
+  const mpSetup = document.getElementById('multiplayer-setup');
+  if (mpSetup) mpSetup.style.display = 'none';
   document.getElementById('hud').style.display='block';
 
   initThree();
@@ -136,6 +143,14 @@ export function startGame() {
 
   // Build topbar portraits dynamically
   buildTopbarPortraits();
+
+  // Multiplayer host: broadcast state snapshots for clients
+  if (G.isMultiplayer && G.isHost) {
+    import('./net/host.js').then((host) => {
+      host.setStateGetter(() => G);
+      host.startSnapshotBroadcast(50);
+    });
+  }
 
   // Wire minimap click
   const minimapEl = document.getElementById('minimap');
@@ -600,6 +615,42 @@ document.getElementById('btn-settings').onclick = () => {
   settingsScreen.querySelector('.set-tab[data-tab="general"]').classList.add('active');
   settingsScreen.querySelector('.set-pane[data-pane="general"]').classList.add('active');
 };
+document.getElementById('btn-multiplayer').onclick = () => mpLobby.showMultiplayerSetup();
+
+document.getElementById('mp-create-btn').onclick = () => {
+  mpLobby.createGame().catch(() => {});
+};
+document.getElementById('mp-join-btn').onclick = () => {
+  document.getElementById('mp-choose').style.display = 'none';
+  document.getElementById('mp-join-panel').style.display = 'block';
+};
+document.getElementById('mp-connect-btn').onclick = () => {
+  const code = document.getElementById('mp-room-code-in').value.trim();
+  if (!code) return;
+  mpLobby.joinGame(code).catch(() => {});
+};
+document.getElementById('mp-join-back').onclick = () => {
+  document.getElementById('mp-join-panel').style.display = 'none';
+  document.getElementById('mp-choose').style.display = 'flex';
+};
+document.getElementById('mp-to-lobby-btn').onclick = () => {
+  mpLobby.hostGoToLobby();
+  G.isMultiplayer = true;
+  G.isHost = true;
+  showScreen('lobby');
+  const sub = document.getElementById('lobby-sub');
+  if (sub) sub.textContent = 'MULTIPLAYER — Pick your hero';
+  const info = document.getElementById('lobby-mp-info');
+  if (info) { info.style.display = 'block'; }
+  const roomEl = document.getElementById('lobby-mp-room');
+  if (roomEl) roomEl.textContent = 'Room: ' + (mpLobby.getRoomCode() || '');
+  const playersEl = document.getElementById('lobby-mp-players');
+  if (playersEl) playersEl.textContent = 'Players: ' + mpLobby.getConnectionCount();
+};
+document.getElementById('mp-setup-back').onclick = () => {
+  mpLobby.hideMultiplayerSetup();
+  showScreen('menu');
+};
 
 playSideOptions.querySelectorAll('.opt-btn').forEach(btn => {
   btn.onclick = () => {
@@ -668,6 +719,17 @@ settingsScreen.querySelectorAll('.set-tab').forEach(tab => {
 });
 
 window.lobbyBack = function() {
+  if (G.isMultiplayer) {
+    G.isMultiplayer = false;
+    G.isHost = false;
+    const info = document.getElementById('lobby-mp-info');
+    if (info) info.style.display = 'none';
+    const sub = document.getElementById('lobby-sub');
+    if (sub) sub.textContent = 'SINGLE PLAYER VS AI';
+    mpLobby.hideMultiplayerSetup();
+    showScreen('menu');
+    return;
+  }
   showScreen('play');
   playFlowStep = 1;
   playFlowTitle.textContent = 'Choose team size';
@@ -709,3 +771,14 @@ function buildLobbyHeroCards() {
   }
 }
 buildLobbyHeroCards();
+
+// Client: when host starts, receive hero/side and start game
+mpLobby.onStartSignal((data) => {
+  G.pickedHero = data.hero || G.pickedHero;
+  G.playerSide = data.playerSide || G.playerSide;
+  G.teamSize = data.teamSize || 3;
+  G.isMultiplayer = true;
+  G.isHost = false;
+  mpLobby.hideMultiplayerSetup();
+  startGame();
+});

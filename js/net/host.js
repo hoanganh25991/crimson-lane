@@ -21,7 +21,12 @@ export function startHost(roomCode, getState, onCommand) {
   });
 }
 
-/** Start broadcasting snapshots at ~20 Hz */
+/** Set state getter (call when game starts and peer room already exists from lobby). */
+export function setStateGetter(getState) {
+  _getState = getState;
+}
+
+/** Start broadcasting snapshots at ~20 Hz. Call setStateGetter first if not using startHost. */
 export function startSnapshotBroadcast(intervalMs = 50) {
   stopSnapshotBroadcast();
   _snapshotInterval = setInterval(() => {
