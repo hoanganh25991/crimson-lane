@@ -99,9 +99,18 @@ export function initControls() {
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
+  // Track touch events on canvas so click events fired by touch are ignored
+  let lastCanvasTouchTime = 0;
+  document.getElementById('canvas').addEventListener('touchstart', () => {
+    lastCanvasTouchTime = Date.now();
+  }, { passive: true });
+
   document.getElementById('canvas').addEventListener('click', e=>{
     if(G.phase!=='game') return;
     const h = G.playerHero; if(!h||!h.alive) return;
+
+    // Detect whether this click originated from a touch event
+    const fromTouch = Date.now() - lastCanvasTouchTime < 500;
 
     mouse.x = (e.clientX/window.innerWidth)*2-1;
     mouse.y = -(e.clientY/window.innerHeight)*2+1;
@@ -144,6 +153,10 @@ export function initControls() {
       }
       return;
     }
+
+    // Attack via canvas click: desktop-only.
+    // On mobile, attacks are initiated exclusively by the attack button.
+    if(fromTouch) return;
 
     // Attack targets: enemies + neutral creeps + deniable allied creeps (<50% HP)
     const enemyHeroes = G.heroList.filter(eh=>eh&&eh.alive&&eh.team!==h.team);
@@ -312,21 +325,31 @@ export function initControls() {
     }, { passive: false });
   });
 
-  // Attack button — find nearest enemy, set target, fire immediately
+  // Attack button — find nearest enemy, do ONE swing, then stop.
+  // Sets attackSingle=true so main loop clears attackTarget after the hit fires.
   function doAttackNearest() {
     const h = G.playerHero; if(!h||!h.alive) return;
     // Always play attack animation regardless of cooldown or enemy presence
     h._atkAnimTimer = Math.min(h.atkCd * 0.8, 0.55);
-    // Lock on to nearest enemy if any
-    const range = h.def.range;
+    // Lock on to nearest attackable entity (enemies + neutrals + deniable creeps)
+    const range = h.def.range + 4; // slightly extended so button always feels responsive
     const enemies = getEnemiesOf(h.team).filter(en=>en.alive);
+    const neutrals = (G.neutralCreeps||[]).flatMap(c=>c.units||[]).filter(u=>u&&u.alive);
+    const candidates = [...enemies, ...neutrals];
     let best=null, bestD=Infinity;
-    for(const en of enemies){
+    for(const en of candidates){
       const dx=en.x-h.x, dz=en.z-h.z;
       const d=Math.sqrt(dx*dx+dz*dz);
       if(d<=range && d<bestD){bestD=d;best=en;}
     }
-    if(best){ h.attackTarget=best; h.moveTarget=null; }
+    if(best){
+      h.attackTarget = best;
+      h.moveTarget = null;
+      h.attackSingle = true; // cleared by main loop after one hit fires
+    } else {
+      // Nothing in range — swing animation only, no target
+      h.attackSingle = false;
+    }
   }
   const atkBtn = document.getElementById('attack-btn');
   atkBtn.addEventListener('touchstart', e=>{ e.preventDefault(); doAttackNearest(); },{passive:false});

@@ -1,4 +1,8 @@
 // ─── MAIN ENTRY POINT ──────────────────────────────────────────────────────────
+import { initI18n, t, applyDOM, getLang, setLang } from './i18n.js';
+await initI18n();
+applyDOM();
+
 import { CREEP_SPAWN_INTERVAL, GOLD_TICK, GOLD_PER_TICK } from './constants.js';
 import { HERO_REGISTRY, ALL_HERO_IDS } from './heroes/registry.js';
 import { G } from './state.js';
@@ -55,10 +59,10 @@ export function selectHero(type) {
   const startBtn = document.getElementById('startBtn');
   if (G.isMultiplayer && !G.isHost) {
     startBtn.disabled = true;
-    startBtn.textContent = 'HERO SELECTED — WAITING FOR HOST';
+    startBtn.textContent = t('mp.hero_selected_waiting');
   } else {
     startBtn.disabled = false;
-    startBtn.textContent = 'START GAME';
+    startBtn.textContent = t('mp.start_game');
   }
 }
 
@@ -248,7 +252,7 @@ export function endGame(playerWon) {
   el.style.flexDirection='column';
   el.style.alignItems='center';
   el.style.justifyContent='center';
-  document.getElementById('end-title').textContent = playerWon ? '🏆 VICTORY' : '💀 DEFEAT';
+  document.getElementById('end-title').textContent = playerWon ? t('end.victory') : t('end.defeat');
   document.getElementById('end-title').style.color = playerWon ? '#ffcc44' : '#ff2222';
   document.getElementById('end-sub').textContent = playerWon ? '🏰 The enemy Ancient has been destroyed!' : '😔 Your Ancient has fallen.';
 }
@@ -308,6 +312,8 @@ function updateHeroes(dt) {
             h.group.rotation.y = Math.atan2(joystick.wx, joystick.wz);
           }
           h.moveTarget = null;
+          // Moving with joystick cancels a single-attack lock-on
+          if(h.attackSingle) { h.attackTarget = null; h.attackSingle = false; }
         }
 
         if(h.moveTarget && !joystick.active && kx===0 && kz===0) {
@@ -357,6 +363,8 @@ function updateHeroes(dt) {
               }
               spawnProjectile(h, h.attackTarget, h.team==='scourge'?0xcc88ff:0x88ccff, dmg, 'physical', onHitFn);
               playSound(h.def.range <= 3 ? 'hit' : 'ranged_hit');
+              // Single-swing mode (attack button on mobile): clear target after one hit
+              if(h.attackSingle) { h.attackTarget = null; h.attackSingle = false; }
             }
           }
         }
@@ -428,7 +436,7 @@ function respawnHero(hero) {
   hero.x = spawn.x; hero.z = spawn.z;
   hero.group.position.set(spawn.x, 0, spawn.z);
   hero.hp = hero.maxHp; hero.mp = hero.maxMp;
-  hero.attackTarget = null; hero.moveTarget = null;
+  hero.attackTarget = null; hero.moveTarget = null; hero.attackSingle = false;
   hero.channeling = 0;
   hero.group.rotation.x = 0;
   hero.atkTimer = 0; hero._atkAnimTimer = 0; hero._castAnimTimer = 0; hero._prevAnim = null;

@@ -82,6 +82,7 @@ function onHeroDeath(hero) {
 
   hero.moveTarget = null;
   hero.attackTarget = null;
+  hero.attackSingle = false;
   hero.channeling = 0;
 
   const { showAnnouncer } = window._hudFns || {};

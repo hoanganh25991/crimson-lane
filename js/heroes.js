@@ -45,7 +45,7 @@ export function createHero(type, isPlayer) {
     def, team: 'scourge',
     hp: def.hp, maxHp: def.hp, mp: def.mp, maxMp: def.mp,
     alive: true, isPlayer,
-    moveTarget: null, attackTarget: null,
+    moveTarget: null, attackTarget: null, attackSingle: false,
     atkTimer: 0, atkCd: 1 / def.atkSpd,
     x: 0, z: 0,
     vx: 0, vz: 0,

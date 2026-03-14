@@ -12,7 +12,7 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 
 - **Play** — choose side (Sentinel / Scourge), then team size (5v5, 3v3, 1v1), then go to the hero-pick lobby and start a game (others are bots).
 - **Multiplayer** — placeholder; currently disabled (“Coming Soon”).
-- **Settings** — open a tabbed settings screen; one tab is **Hero Viewer**, which loads and shows the hero viewer when first opened.
+- **Settings** — open a tabbed settings screen; **Hero Viewer is the first and default tab**, auto-loading the 3D hero viewer immediately on open.
 
 ---
 
@@ -99,9 +99,9 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 
 - **Header:** “Settings” + **← Back** (returns to Main Menu).
 - **Tabs:** `data-tab` / `data-pane` link each tab to its pane:
+  - **Hero Viewer** *(first tab, auto-selected on Settings open)* — shows `#hero-viewer-panel`; the app runs `import('./hero-viewer.js')` and then `initHeroViewer()` immediately when Settings is opened.
   - **General** — placeholder text.
   - **Audio** — placeholder text.
-  - **Hero Viewer** — shows `#hero-viewer-panel`; on first open, the app runs `import('./hero-viewer.js')` and then `initHeroViewer()`.
 
 ---
 
