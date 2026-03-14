@@ -1,4 +1,5 @@
-import { stdMat, glowMat, metalMat, transMat, buildLich, buildSniper, buildDragonKnight, buildShadowFiend, buildWindrunner } from './hero-models.js';
+import { stdMat, glowMat, metalMat, transMat } from './hero-models.js';
+import { HERO_REGISTRY, ALL_HERO_IDS } from './heroes/registry.js';
 
 let heroViewerInited = false;
 export function initHeroViewer() {
@@ -7,66 +8,83 @@ export function initHeroViewer() {
   if (!canvas) return;
   heroViewerInited = true;
 
-  // ─── HERO DATA ───────────────────────────────────────────────────────────────
-const HEROES = [
-  { name:'Lich', sub:'Intelligence · Scourge · Undead', primary:'int', color:0x00ffcc,
-    baseHP:454, hpLvl:19, baseMana:403, manaLvl:26,
-    armor:1.1, range:600, ms:295, dmg:'49–55',
-    str:15, strG:1.75, agi:15, agiG:1.5, int:22, intG:3.0,
-    skills:[
-      {key:'Q',name:'Frost Nova',meta:'Mana 120–160 · CD 7–4s · AoE',desc:'Deals 75/150/225/300 magic dmg in 400 AoE. Slows 20–50% for 4s.',anim:'castQ'},
-      {key:'W',name:'Dark Ritual',meta:'Mana 25 · CD 55–25s · Unit-target',desc:'Sacrifice allied creep → restore mana equal to 100–200% of its HP.',anim:'castQ'},
-      {key:'E',name:'Chain Frost',meta:'Mana 150–200 · CD 8s · Unit-target',desc:'Bouncing ice orb. 280/370/460 magic per bounce, up to 10 bounces. Slows 30%.',anim:'castR'},
-      {key:'R',name:'Frost Armor',meta:'Passive aura · 900 radius',desc:'Adds 3/4/5/6 armor to nearby allies. Enemies who attack get slowed 40% for 3s.',anim:'idle'},
-    ]
-  },
-  { name:'Sniper', sub:'Agility · Sentinel · Keen', primary:'agi', color:0xffcc00,
-    baseHP:492, hpLvl:19, baseMana:195, manaLvl:13,
-    armor:2.08, range:550, ms:290, dmg:'38–44',
-    str:15, strG:1.7, agi:21, agiG:2.9, int:16, intG:1.5,
-    skills:[
-      {key:'Q',name:'Shrapnel',meta:'Mana 120 · CD 22s · 2 charges · AoE zone',desc:'350 radius shrapnel zone for 9s. 15/30/45/60 DPS + 30% slow inside.',anim:'castQ'},
-      {key:'W',name:'Headshot',meta:'Passive · 40% proc chance',desc:'40% chance: 30/55/80/115 bonus phys dmg + 0.5s mini-stun.',anim:'attack'},
-      {key:'E',name:'Aim',meta:'Passive · Attack range bonus',desc:'+75/150/225/300 attack range. At lvl4 Sniper has 850 range.',anim:'idle'},
-      {key:'R',name:'Assassinate',meta:'Mana 175–275 · CD 20s · Channel 1.7s',desc:'Channel → fire devastating shot. 355/505/655 magic dmg. Range 2000–3000.',anim:'castR'},
-    ]
-  },
-  { name:'Dragon Knight', sub:'Strength · Sentinel · Human', primary:'str', color:0xffcc00,
-    baseHP:625, hpLvl:25, baseMana:195, manaLvl:13,
-    armor:3.9, range:128, ms:290, dmg:'53–59',
-    str:21, strG:2.9, agi:21, agiG:1.5, int:14, intG:1.5,
-    skills:[
-      {key:'Q',name:'Dragon Blood',meta:'Passive',desc:'+3/6/9/12 HP regen/sec and +3/4/5/6 armor. Red corona pulses.',anim:'idle'},
-      {key:'W',name:'Dragon Tail',meta:'Mana 100 · CD 9s · Melee 150',desc:'Shield bash: 2–2.5s stun + 25/50/75/100 magic dmg.',anim:'castQ'},
-      {key:'E',name:'Breathe Fire',meta:'Mana 100–130 · CD 15–6s · Cone 600',desc:'Fire cone: 75/150/225/300 magic dmg. Reduces enemy attack dmg 35% for 5s.',anim:'castQ'},
-      {key:'R',name:'Elder Dragon Form',meta:'CD 100s · Duration 60s · Transform',desc:'Become a dragon! Green/Red/Blue levels. +500 range, +15 armor, +50 ms.',anim:'castR'},
-    ]
-  },
-  { name:'Shadow Fiend', sub:'Agility · Scourge · Undead', primary:'agi', color:0xff2200,
-    baseHP:530, hpLvl:19, baseMana:260, manaLvl:14,
-    armor:3.08, range:128, ms:305, dmg:'51–57 (+2/soul)',
-    str:15, strG:2.0, agi:20, agiG:2.9, int:18, intG:1.8,
-    skills:[
-      {key:'Q',name:'Shadowraze ×3',meta:'Mana 75 · CD 10s each · No-target',desc:'3 fixed razes at 200/450/700 range. 75/150/225/300 magic each.',anim:'castQ'},
-      {key:'W',name:'Necromastery',meta:'Passive · Soul collect',desc:'Kill → gain 1 soul (max 12/16/20/24). Each = +2 dmg. Drop 50% on death.',anim:'idle'},
-      {key:'E',name:'Dark Presence',meta:'Passive aura · 900 radius',desc:'Reduce nearby enemy armor by 3/4/5/6. Dark mist radiates from feet.',anim:'idle'},
-      {key:'R',name:'Requiem of Souls',meta:'Mana 150–200 · CD 120–100s · Global',desc:'Wings OPEN. Soul lines explode outward then retract. (souls÷2)×80/120/160 dmg.',anim:'castR'},
-    ]
-  },
-  { name:'Windrunner', sub:'Agility · Sentinel · Night Elf', primary:'agi', color:0x88ffcc,
-    baseHP:492, hpLvl:19, baseMana:234, manaLvl:26,
-    armor:1.1, range:600, ms:295, dmg:'36–46',
-    str:15, strG:1.5, agi:21, agiG:2.9, int:18, intG:2.0,
-    skills:[
-      {key:'Q',name:'Shackleshot',meta:'Mana 90–120 · CD 15s · Unit-target',desc:'Arrow stuns target + nearby tree/unit for 0.75/1.5/2.25/3.0s.',anim:'castQ'},
-      {key:'W',name:'Powershot',meta:'Mana 90–120 · CD 12s · Channel 1s',desc:'Charge up huge arrow. 340/480/620/760 magic, pierces all units in line.',anim:'castQ'},
-      {key:'E',name:'Windrun',meta:'Mana 100 · CD 15–6s · 3s duration',desc:'+50% evasion, +50% ms for 3s. All projectiles miss.',anim:'castQ'},
-      {key:'R',name:'Focus Fire',meta:'Mana 200–350 · CD 60s · 20s duration',desc:'Max attack speed (400/600/800) on target. Arrow blur at 800 speed.',anim:'castR'},
-    ]
-  },
-];
+  // ─── VIEWER STATS (primary attr + str/agi/int for display; from docs/heroes.md) ─
+  const VIEWER_STATS = {
+    lich: { primary: 'int', str: 15, strG: 1.75, agi: 15, agiG: 1.5, int: 22, intG: 3.0, hpLvl: 19, manaLvl: 26 },
+    sniper: { primary: 'agi', str: 15, strG: 1.7, agi: 21, agiG: 2.9, int: 16, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    dragonKnight: { primary: 'str', str: 21, strG: 2.9, agi: 21, agiG: 1.5, int: 14, intG: 1.5, hpLvl: 25, manaLvl: 13 },
+    shadowFiend: { primary: 'agi', str: 15, strG: 2.0, agi: 20, agiG: 2.9, int: 18, intG: 1.8, hpLvl: 19, manaLvl: 14 },
+    windrunner: { primary: 'agi', str: 15, strG: 1.5, agi: 21, agiG: 2.9, int: 18, intG: 2.0, hpLvl: 19, manaLvl: 26 },
+    axe: { primary: 'str', str: 22, strG: 2.5, agi: 18, agiG: 1.5, int: 16, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    pudge: { primary: 'str', str: 23, strG: 2.7, agi: 16, agiG: 1.4, int: 18, intG: 1.6, hpLvl: 25, manaLvl: 14 },
+    sven: { primary: 'str', str: 21, strG: 2.4, agi: 18, agiG: 1.6, int: 15, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    tidehunter: { primary: 'str', str: 21, strG: 2.3, agi: 17, agiG: 1.5, int: 17, intG: 1.5, hpLvl: 19, manaLvl: 14 },
+    earthshaker: { primary: 'str', str: 20, strG: 2.3, agi: 17, agiG: 1.5, int: 19, intG: 1.8, hpLvl: 19, manaLvl: 14 },
+    phantomAssassin: { primary: 'agi', str: 17, strG: 1.7, agi: 22, agiG: 2.9, int: 15, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    juggernaut: { primary: 'agi', str: 18, strG: 1.9, agi: 21, agiG: 2.6, int: 16, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    drowRanger: { primary: 'agi', str: 15, strG: 1.6, agi: 22, agiG: 2.8, int: 16, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    bountyHunter: { primary: 'agi', str: 16, strG: 1.6, agi: 21, agiG: 2.6, int: 17, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    vengefulSpirit: { primary: 'agi', str: 17, strG: 1.8, agi: 20, agiG: 2.6, int: 17, intG: 1.5, hpLvl: 19, manaLvl: 13 },
+    crystalMaiden: { primary: 'int', str: 15, strG: 1.75, agi: 15, agiG: 1.5, int: 22, intG: 2.9, hpLvl: 19, manaLvl: 26 },
+    zeus: { primary: 'int', str: 17, strG: 1.8, agi: 16, agiG: 1.5, int: 22, intG: 2.7, hpLvl: 19, manaLvl: 14 },
+    lina: { primary: 'int', str: 15, strG: 1.5, agi: 18, agiG: 2.0, int: 22, intG: 2.8, hpLvl: 19, manaLvl: 14 },
+    lion: { primary: 'int', str: 15, strG: 1.5, agi: 18, agiG: 2.0, int: 22, intG: 2.8, hpLvl: 19, manaLvl: 14 },
+    enigma: { primary: 'int', str: 17, strG: 1.8, agi: 16, agiG: 1.5, int: 22, intG: 2.7, hpLvl: 19, manaLvl: 14 },
+  };
 
-const PORTRAIT_ICONS = ['❄️','🎯','🐉','👻','🏹'];
+  function buildViewerHeroes() {
+    const keys = ['Q', 'W', 'E', 'R'];
+    return ALL_HERO_IDS.map((id) => {
+      const mod = HERO_REGISTRY[id];
+      const def = mod.def;
+      const extra = VIEWER_STATS[id] || { primary: 'str', str: 20, strG: 2, agi: 20, agiG: 2, int: 20, intG: 2, hpLvl: 19, manaLvl: 13 };
+      const team = (def.team || 'scourge').toLowerCase();
+      const teamLabel = team === 'sentinel' ? 'Sentinel' : 'Scourge';
+      const primaryLabel = extra.primary === 'str' ? 'Strength' : extra.primary === 'agi' ? 'Agility' : 'Intelligence';
+      const skills = keys.map((key, i) => {
+        const name = mod.skillNames?.[key] || def.skills?.[i] || key;
+        const costs = mod.skillCosts?.[key];
+        const cds = mod.skillCDs?.[key];
+        const costStr = Array.isArray(costs) ? (costs[0] ?? costs) : (costs ?? 0);
+        const cdVal = Array.isArray(cds) ? (cds[0] ?? cds) : (cds ?? 0);
+        const meta = costStr > 0 ? `Mana ${costStr}` : 'Passive';
+        const meta2 = cdVal > 0 ? `CD ${cdVal}s` : '';
+        return {
+          key,
+          name: typeof name === 'string' ? name : (name && name.name) || key,
+          meta: [meta, meta2].filter(Boolean).join(' · '),
+          desc: 'Use in game to see full effect.',
+          anim: key === 'R' ? 'castR' : 'castQ',
+        };
+      });
+      return {
+        id,
+        name: def.name?.replace(/_/g, ' ') || id,
+        sub: `${primaryLabel} · ${teamLabel}`,
+        primary: extra.primary,
+        color: def.color ?? 0x888888,
+        baseHP: def.hp,
+        hpLvl: extra.hpLvl ?? 19,
+        baseMana: def.mp,
+        manaLvl: extra.manaLvl ?? 13,
+        armor: def.armor ?? 0,
+        range: def.range ?? 128,
+        ms: (def.move ?? 8) * 36,
+        dmg: `${def.dmgMin ?? 0}–${def.dmgMax ?? 0}`,
+        str: extra.str ?? 20,
+        strG: extra.strG ?? 2,
+        agi: extra.agi ?? 20,
+        agiG: extra.agiG ?? 2,
+        int: extra.int ?? 20,
+        intG: extra.intG ?? 2,
+        skills,
+      };
+    });
+  }
+
+  const HEROES = buildViewerHeroes();
+
+  const PORTRAIT_ICONS = ['❄️','🎯','🐉','👻','🏹','🪓','🔪','⚔️','🐚','⛏️','🗡️','🌀','🏹','🥷','👻','❄️','⚡','🔥','🦁','🌑'];
 
 // ─── THREE.JS SETUP ───────────────────────────────────────────────────────────
 
@@ -137,7 +155,6 @@ heroLight.position.set(0,1.5,0.5);
 scene.add(heroLight);
 
 // ─── HERO MANAGEMENT ─────────────────────────────────────────────────────────
-const BUILDERS = [buildLich, buildSniper, buildDragonKnight, buildShadowFiend, buildWindrunner];
 let heroObjects = [];
 let currentHero = 0;
 let currentAnim = 'idle';
@@ -145,11 +162,13 @@ let animTime = 0;
 let attackSpeedMult = 1.0;
 
 function buildAllHeroes() {
-  heroObjects.forEach(h => { if(h) scene.remove(h.group); });
-  heroObjects = BUILDERS.map(b => b());
-  heroObjects.forEach((h,i) => {
-    h.group.visible = (i === currentHero);
-    scene.add(h.group);
+  heroObjects.forEach(h => { if (h && h.group) scene.remove(h.group); });
+  heroObjects = ALL_HERO_IDS.map((id) => HERO_REGISTRY[id].buildModel());
+  heroObjects.forEach((h, i) => {
+    if (h && h.group) {
+      h.group.visible = (i === currentHero);
+      scene.add(h.group);
+    }
   });
 }
 
@@ -182,7 +201,7 @@ function setAnim(name) {
 function animateHero(dt) {
   const h = heroObjects[currentHero];
   if(!h) return;
-  const p = h.parts;
+  const p = h.parts || {};
   animTime += dt * attackSpeedMult;
   const t = animTime;
   const sin = Math.sin, cos = Math.cos;
@@ -521,32 +540,53 @@ function spawnArrow() {
   });
 }
 
+function castGenericSpell(skillName, colorHex) {
+  const color = '#' + (colorHex || 0x888888).toString(16).padStart(6, '0');
+  announce((skillName || 'SKILL').toUpperCase().replace(/\s+/g, ' '), color);
+  const g = new THREE.Group();
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.04, 8, 24), glowMat(colorHex || 0x888888, 2));
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 0.6;
+  g.add(ring);
+  addEffect(g, 0.6, (frac) => {
+    ring.scale.setScalar(1 + frac * 0.8);
+    ring.material.emissiveIntensity = (1 - frac) * 2;
+  });
+  spawnHitSparks();
+}
+
 function castHeroSpell(key) {
   const hero = HEROES[currentHero];
   const skill = hero.skills.find(s=>s.key===key);
   if(skill){ setAnim(skill.anim||'castQ'); }
-  // Hero-specific effects
-  if(currentHero===0){
+  const id = hero.id;
+  if(id==='lich'){
     if(key==='Q') castFrostNova();
     else if(key==='E') castChainFrost();
-  } else if(currentHero===1){
+    else { castGenericSpell(skill?.name, hero.color); }
+  } else if(id==='sniper'){
     if(key==='Q') castShrapnel();
     else if(key==='R') castAssassinate();
     else if(key==='W'||key==='E') { showDamage(80,'#ffcc44'); announce('HEADSHOT!','#ffcc44'); }
-  } else if(currentHero===2){
+    else { castGenericSpell(skill?.name, hero.color); }
+  } else if(id==='dragonKnight'){
     if(key==='Q') { announce('DRAGON BLOOD','#ff4400'); }
     else if(key==='W') castDragonTail();
     else if(key==='E') castBreatheFire();
     else if(key==='R') castElderDragon();
-  } else if(currentHero===3){
+    else { castGenericSpell(skill?.name, hero.color); }
+  } else if(id==='shadowFiend'){
     if(key==='Q') castShadowraze();
     else if(key==='R') castRequiem();
     else if(key==='W'||key==='E') { announce('DARK PRESENCE','#660033'); }
-  } else if(currentHero===4){
+    else { castGenericSpell(skill?.name, hero.color); }
+  } else if(id==='windrunner'){
     if(key==='Q'||key==='W'||key==='E') castWindrun();
     else if(key==='R') castFocusFire();
+    else { castGenericSpell(skill?.name, hero.color); }
+  } else {
+    castGenericSpell(skill?.name, hero.color);
   }
-  // Hit sparks on dummy
   spawnHitSparks();
 }
 
@@ -705,8 +745,6 @@ document.getElementById('hv-atkSlider').addEventListener('input', function(){ do
 
 // ─── MAIN LOOP ────────────────────────────────────────────────────────────────
 let lastTime = 0;
-const ringColors = [0x4444ff,0xff4400,0x00ffcc,0xffcc00,0x88ffcc];
-let ringColorT = 0;
 
 function animate(time) {
   requestAnimationFrame(animate);
@@ -719,9 +757,6 @@ function animate(time) {
     updateCamera();
   }
 
-  // Ring color pulse
-  ringColorT += dt*0.5;
-  const rc = ringColors[currentHero];
   const pulse = 1.2+Math.sin(time*0.002)*0.4;
   ringMesh.material.emissiveIntensity = pulse;
   heroLight.intensity = 0.8+Math.sin(time*0.003)*0.3;

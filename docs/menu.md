@@ -110,7 +110,8 @@ On load, the game shows the **Main Menu** instead of the lobby. From there the u
 - **Markup:** All viewer UI is in `index.html` inside `#hero-viewer-panel` (no separate HTML file).
 - **IDs:** All viewer elements use an `hv-` prefix (e.g. `#hv-hero-canvas`, `#hv-stats-panel`) to avoid clashes with the main game.
 - **Load on demand:** The Hero Viewer script and 3D scene are only initialized when the user opens **Settings → Hero Viewer**; `js/hero-viewer.js` exports `initHeroViewer()` and is loaded via dynamic `import()`.
-- **Behaviour:** Same as the original standalone viewer: hero strip, 3D viewport, stats, level/attack-speed sliders, skills, animation buttons (Idle, Walk, Attack, Cast Q/R, Die), prev/next hero, and keyboard (Q/W/E/R, arrows, etc.).
+- **All heroes:** The viewer lists all 20 heroes from the game registry (`HERO_REGISTRY` / `ALL_HERO_IDS`). Each hero’s 3D model is built via the hero module’s `buildModel()`; stats and Q/W/E/R skills are derived from the same registry so you can review both the model and skills easily.
+- **Behaviour:** Hero strip (portrait per hero), 3D viewport, stats, level/attack-speed sliders, skill grid with keys and meta (mana/CD), animation buttons (Idle, Walk, Attack, Cast Q/R, Die), prev/next hero, and keyboard (Q/W/E/R, arrows, etc.). The first five heroes (Lich, Sniper, Dragon Knight, Shadow Fiend, Windrunner) have custom spell VFX in the viewer; the rest use a generic cast effect.
 
 ---
 

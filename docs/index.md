@@ -66,7 +66,7 @@ Verified against code — these features are shipped and working.
 | Area | What's in |
 |------|-----------|
 | **Engine** | Three.js scene, 100x100 map (terrain, 3 lanes, river, base pads), camera, game loop. |
-| **Menu** | Main menu, Play (side + team size), Settings, Hero Viewer (3D preview, animations, stats, level slider), Lobby, hero pick → start. |
+| **Menu** | Main menu, Play (side + team size), Settings, Hero Viewer (all 20 heroes: 3D preview, animations, stats, skills, level slider), Lobby, hero pick → start. |
 | **Heroes** | 20 heroes with 3D models, stats, Q/W/E/R skills. Per-hero modules in `js/heroes/` (registry, _template). Lich, Sniper, Dragon Knight, Shadow Fiend, Windrunner, Axe, Pudge, Sven, Tidehunter, Earthshaker, Phantom Assassin, Juggernaut, Drow Ranger, Bounty Hunter, Vengeful Spirit, Crystal Maiden, Zeus, Lina, Lion, Enigma. |
 | **Combat** | Melee/ranged attacks, projectiles, physical/magic/pure damage, armor, lifesteal, death, respawn timer. |
 | **Creeps** | Lane creeps (melee + ranged), waypoints, last hit, deny, XP, gold. |
