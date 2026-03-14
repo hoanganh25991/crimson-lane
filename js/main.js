@@ -141,8 +141,8 @@ export function startGame() {
   if(minimapEl) {
     minimapEl.addEventListener('click', function(e) {
       const rect = this.getBoundingClientRect();
-      const fx = (e.clientX - rect.left) / rect.width;
-      const fz = 1 - (e.clientY - rect.top) / rect.height;
+      const fz = (e.clientX - rect.left) / rect.width;
+      const fx = 1 - (e.clientY - rect.top) / rect.height;
       camTarget.set(fx*100, 0, fz*100);
     });
   }

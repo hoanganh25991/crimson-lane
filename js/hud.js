@@ -130,49 +130,54 @@ export function updateMinimap() {
   ctx.fillStyle='#0a1a0a';
   ctx.fillRect(0,0,W,H);
 
-  // Lanes
+  // Camera looks from west: screen right = +Z, screen up = +X
+  // Minimap must match: canvas horizontal = world Z, canvas vertical (up) = world X
+
+  // Lanes (L-shaped side lanes + diagonal mid)
   ctx.fillStyle='#1a1208';
-  ctx.fillRect(0,13,100,4);    // bot lane
-  ctx.fillRect(0,1,100,4);     // top lane
-  ctx.save(); ctx.translate(50,50); ctx.rotate(Math.PI/4); ctx.fillRect(-2,-60,4,120); ctx.restore();
+  ctx.fillRect(0, H-15, W, 4);   // lane along x≈10 (bottom of minimap)
+  ctx.fillRect(83, 0, 4, H);     // lane along z≈85 (right of minimap)
+  ctx.fillRect(13, 0, 4, H);     // lane along z≈15 (left of minimap)
+  ctx.fillRect(0, 8, W, 4);      // lane along x≈90 (top of minimap)
+  ctx.save(); ctx.translate(50,50); ctx.rotate(-Math.PI/4); ctx.fillRect(-2,-60,4,120); ctx.restore();
 
   // River
   ctx.fillStyle='#0a1a3a';
-  ctx.save(); ctx.translate(50,50); ctx.rotate(-Math.PI/4); ctx.fillRect(-1,-60,2,120); ctx.restore();
+  ctx.save(); ctx.translate(50,50); ctx.rotate(Math.PI/4); ctx.fillRect(-1,-60,2,120); ctx.restore();
 
-  // Towers
+  // Towers — swap x↔z so minimap matches game view
   for(const t of G.towers) {
     if(!t.alive) continue;
     ctx.fillStyle = t.team==='scourge' ? '#cc4444' : '#4488cc';
-    const mx = (t.x/100)*W, mz = (t.z/100)*H;
-    ctx.fillRect(mx-1.5, H-mz-1.5, 3, 3);
+    const mx = (t.z/100)*W, my = H-(t.x/100)*H;
+    ctx.fillRect(mx-1.5, my-1.5, 3, 3);
   }
 
   // Creeps
   for(const c of G.creeps) {
     if(!c.alive) continue;
     ctx.fillStyle = c.team==='scourge' ? '#ff8844' : '#88aaff';
-    const mx=(c.x/100)*W, mz=(c.z/100)*H;
-    ctx.fillRect(mx-1,H-mz-1,2,2);
+    const mx=(c.z/100)*W, my=H-(c.x/100)*H;
+    ctx.fillRect(mx-1,my-1,2,2);
   }
 
   // All heroes on minimap
   const playerTeam = G.playerHero ? G.playerHero.team : 'scourge';
   for(const hero of G.heroList) {
     if(!hero || !hero.alive) continue;
-    const mx=(hero.x/100)*W, mz=(hero.z/100)*H;
+    const mx=(hero.z/100)*W, my=H-(hero.x/100)*H;
     if(hero.isPlayer) {
       ctx.fillStyle='#ffff00';
-      ctx.beginPath(); ctx.arc(mx,H-mz,3,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(mx,my,3,0,Math.PI*2); ctx.fill();
       ctx.strokeStyle='#ffff00';
       ctx.lineWidth=1;
-      ctx.beginPath(); ctx.arc(mx,H-mz,4,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(mx,my,4,0,Math.PI*2); ctx.stroke();
     } else if(hero.team === playerTeam) {
       ctx.fillStyle='#44ff44';
-      ctx.beginPath(); ctx.arc(mx,H-mz,2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(mx,my,2.5,0,Math.PI*2); ctx.fill();
     } else {
       ctx.fillStyle='#ff4444';
-      ctx.beginPath(); ctx.arc(mx,H-mz,2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(mx,my,2.5,0,Math.PI*2); ctx.fill();
     }
   }
 }

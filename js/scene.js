@@ -64,14 +64,20 @@ const CAM_LOOK_OFFSET = 18;
 
 export function updateCamera(_dt, playerHero) {
   if (playerHero && playerHero.alive) {
-    // Look at a point toward enemy base (top-right) so hero stays in bottom-left of view
     const lookX = playerHero.x + CAM_LOOK_OFFSET;
     const lookZ = playerHero.z + CAM_LOOK_OFFSET;
     camTarget.x += (lookX - camTarget.x) * 0.08;
     camTarget.z += (lookZ - camTarget.z) * 0.08;
   }
-  camTarget.x = Math.max(0, Math.min(100, camTarget.x));
-  camTarget.z = Math.max(0, Math.min(100, camTarget.z));
+
+  // Clamp so the camera frustum stays within the map (no off-map padding)
+  const zoom = camera.top;
+  const aspect = camera.right / zoom;
+  const minX = zoom, maxX = 100 - zoom;
+  const minZ = zoom * aspect, maxZ = 100 - zoom * aspect;
+  camTarget.x = minX < maxX ? Math.max(minX, Math.min(maxX, camTarget.x)) : 50;
+  camTarget.z = minZ < maxZ ? Math.max(minZ, Math.min(maxZ, camTarget.z)) : 50;
+
   // Camera from the west: screen right = +Z, screen up ≈ +X → lane diagonal
   camera.position.set(camTarget.x - 30, 35, camTarget.z);
   camera.lookAt(camTarget.x, 0, camTarget.z);
