@@ -1,0 +1,49 @@
+---
+alwaysApply: true
+---
+# Agent Observability — Workflow Tracing
+
+When `$CURSOR_TRACE` is set, emit trace events at key workflow points.
+
+```bash
+python3 ~/.cursor-observability/bin/trace_event.py \
+  --agent "<role>" --event "<event>" [--task-id "<id>"] [--data '<json>']
+```
+
+## Instrumented workflow steps
+
+Emit events at these moments during the SDLC workflow:
+
+| Moment | agent | event | extras |
+|--------|-------|-------|--------|
+| Starting any task | your role | `started` | `--task-id "<short-slug>"` |
+| Reading docs/specs | your role | `skill_called` | `--data '{"skill":"read-spec","file":"<path>"}'` |
+| Implementing code | `coder` | `skill_called` | `--data '{"skill":"implement","files":["<paths>"]}'` |
+| Updating docs/index.md | `coder` | `skill_called` | `--data '{"skill":"update-sdlc"}'` |
+| Delegating to subagent | your role | `task_assigned` | `--data '{"target":"<subagent-type>"}'` |
+| Task completed | your role | `completed` | `--task-id "<short-slug>"` |
+| Task failed | your role | `failed` | `--task-id "<short-slug>" --data '{"error":"<msg>"}'` |
+
+## Task ID conventions
+
+Use short kebab-case slugs derived from the task, e.g.:
+- `fog-of-war`, `drag-to-aim`, `tp-scroll-fix`, `bot-difficulty`
+- `fix-combat-bug`, `add-hero-luna`, `balance-items`
+
+## Agent roles
+
+| Role | When |
+|------|------|
+| `planner` | Scoping, breaking down tasks, updating plan |
+| `coder` | Writing or editing game code |
+| `researcher` | Exploring codebase, reading specs |
+| `reviewer` | Reviewing changes, checking correctness |
+| `debugger` | Fixing bugs, investigating issues |
+| `tester` | Running or writing tests |
+
+## Rules
+
+- Only emit if `$CURSOR_TRACE` is set — check once at session start
+- Fire-and-forget — never block on trace failures
+- Emit at most at start/end of significant steps — don't over-trace
+- Keep `--agent` and `--event` lowercase, hyphen-separated

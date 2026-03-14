@@ -482,4 +482,160 @@ Attack damage: 36–46 (ranged physical)
 
 ---
 
+## New 15 Heroes — Specs for Implementation
+
+Each hero is implemented as `js/heroes/<id>.js` following the contract in `js/heroes/_template.js`. Use `stdMat`, `glowMat`, `metalMat`, `transMat` from `../hero-models.js`. No new builders in hero-models.js required — implement `buildModel()` inside each hero file (THREE.Group + parts with `parts.type = this.id`, `parts.glowColor`). Stats use in-game scale: `range` in world units (melee ~2.5–3, ranged 10–14), `move` ~7–9, `hp`/`mp` in hundreds.
+
+### 6. Axe (axe) — Str, Scourge, Initiator/Tank
+
+- **Silhouette:** Large armored orc, single broad axe, horned helmet, red/dark armor.
+- **Geometry:** Box torso, shoulder pads, helmet with horns, one large axe (BoxGeometry blade + Cylinder handle), legs, boots. Colors: `#8B0000`, `#2a1510`, `#cc4422`.
+- **Stats:** hp 650, mp 220, move 8, range 2.5 (melee), dmg 52–58, armor 4, atkSpd 0.9. Str primary.
+- **Q — Berserker's Call:** No-target, taunt enemies in radius ~6 for 2s, +30 armor self. Mana 80, CD 14. Visual: red ring, enemies pull toward Axe.
+- **W — Battle Hunger:** Unit-target DoT, slow, damage over time. Mana 75, CD 20. Visual: red debuff on target.
+- **E — Counter Helix:** Passive, chance on hit to spin (AoE physical damage). Visual: spin effect on proc.
+- **R — Culling Blade:** Unit-target execute (high damage if target low HP). Mana 120, CD 75. Visual: axe chop, execute flash.
+
+### 7. Pudge (pudge) — Str, Scourge, Ganker
+
+- **Silhouette:** Fat butcher, meat hook in hand, belly, chains, dark green/grey.
+- **Geometry:** Large rounded torso (sphere/cylinder), belly, head, meat hook (chain + hook geometry), legs. Colors: `#3d4a3d`, `#1a2a1a`, `#88aa88`.
+- **Stats:** hp 700, mp 280, move 7.5, range 2.5 (melee), dmg 45–51, armor 2, atkSpd 0.85. Str primary.
+- **Q — Meat Hook:** Vector/point, hook flies out, pulls first enemy hit to Pudge, damage. Mana 110, CD 14. Visual: chain line, pull.
+- **W — Rot:** Toggle AoE around Pudge, DoT to self and enemies. Visual: green gas cloud.
+- **E — Flesh Heap:** Passive, bonus str per kill; active block. Visual: stack indicator.
+- **R — Dismember:** Unit-target channel, stun + DoT. Mana 100, CD 30. Visual: channel beam.
+
+### 8. Sven (sven) — Str, Sentinel, Carry/Stun
+
+- **Silhouette:** Knight in blue/silver armor, huge sword, cape.
+- **Geometry:** Armored torso, pauldrons, helmet, greatsword (long BoxGeometry), cape, legs, boots. Colors: `#2244aa`, `#aaccff`, `#6688cc`.
+- **Stats:** hp 620, mp 195, move 8, range 2.5 (melee), dmg 54–56, armor 3, atkSpd 0.9. Str primary.
+- **Q — Storm Hammer:** Unit-target stun + damage, small AoE. Mana 140, CD 15. Visual: hammer throw, stun ring.
+- **W — Great Cleave:** Passive, melee attacks cleave in cone. Visual: cleave arc.
+- **E — Warcry:** No-target, armor + move speed for allies in radius. Mana 25, CD 36. Visual: yellow aura.
+- **R — God's Strength:** No-target, +damage for duration. Mana 100, CD 80. Visual: golden glow, larger sword.
+
+### 9. Tidehunter (tidehunter) — Str, Scourge, Initiator
+
+- **Silhouette:** Large fish/beast, anchor weapon, shell, teal/green.
+- **Geometry:** Rounded body, shell back, head with mouth, anchor (Cylinder + Box), webbed feet. Colors: `#2d5a4a`, `#1a3a2e`, `#88ccaa`.
+- **Stats:** hp 660, mp 234, move 7.5, range 2.5 (melee), dmg 50–56, armor 3, atkSpd 0.9. Str primary.
+- **Q — Gush:** Unit-target nuke + slow. Mana 120, CD 12. Visual: water blast.
+- **W — Kraken Shell:** Passive, block + dispel. Visual: shell shine on hit.
+- **E — Anchor Smash:** Passive, attack reduces damage of hit enemies. Visual: splash on hit.
+- **R — Ravage:** No-target, huge AoE stun + damage. Mana 150, CD 150. Visual: tentacles from ground, wave.
+
+### 10. Earthshaker (earthshaker) — Str, Sentinel, Initiator
+
+- **Silhouette:** Tall totem-carrying shaman, horned, earth tones, giant totem.
+- **Geometry:** Tall torso, totem (tall Cylinder/Box), horns, tribal armor, legs. Colors: `#4a3728`, `#8B6914`, `#2a1810`.
+- **Stats:** hp 610, mp 291, move 7.5, range 2.5 (melee), dmg 50–56, armor 3, atkSpd 0.9. Str primary.
+- **Q — Fissure:** Point-target line, creates impassable wall, stun + damage. Mana 125, CD 15. Visual: earth crack line.
+- **W — Enchant Totem:** No-target, next attack bonus damage + range. Mana 20, CD 6. Visual: totem glow.
+- **E — Aftershock:** Passive, stun/slow on cast. Visual: small quake on spell cast.
+- **R — Echo Slam:** No-target, AoE damage (more for each unit in range). Mana 145, CD 150. Visual: concentric rings, slam.
+
+### 11. Phantom Assassin (phantom_assassin) — Agi, Scourge, Carry/Assassin
+
+- **Silhouette:** Hooded figure, twin blades, red/black.
+- **Geometry:** Slim torso, hood, two curved blades, legs. Colors: `#2a0010`, `#aa2244`, `#440011`.
+- **Stats:** hp 530, mp 195, move 8.5, range 2.5 (melee), dmg 51–53, armor 2, atkSpd 1.0. Agi primary.
+- **Q — Stifling Dagger:** Unit-target, damage + slow. Mana 30, CD 8. Visual: dagger projectile.
+- **W — Phantom Strike:** Unit-target blink, attack speed. Mana 50, CD 20. Visual: blink in, slash.
+- **E — Blur:** Passive, evasion. Visual: blur effect when evading.
+- **R — Coup de Grâce:** Passive, crit. Visual: crit slash, big number.
+
+### 12. Juggernaut (juggernaut) — Agi, Sentinel, Carry/Fighter
+
+- **Silhouette:** Samurai with blade, mask, armor.
+- **Geometry:** Armored torso, mask, single long blade, bandana, legs. Colors: `#cc4422`, `#2a1510`, `#ff8844`.
+- **Stats:** hp 560, mp 195, move 8, range 2.5 (melee), dmg 46–50, armor 3, atkSpd 0.95. Agi primary.
+- **Q — Blade Fury:** No-target, spin, magic immune + AoE damage. Mana 120, CD 42. Visual: spinning blades.
+- **W — Healing Ward:** No-target, place ward that heals in AoE. Mana 140, CD 60. Visual: ward model, heal particles.
+- **E — Blade Dance:** Passive, crit. Visual: crit flash.
+- **R — Omnislash:** Unit-target, slash bounces between enemies. Mana 200, CD 130. Visual: multiple slashes, bounce.
+
+### 13. Drow Ranger (drow_ranger) — Agi, Sentinel, Carry/Range
+
+- **Silhouette:** Archer, longbow, cloak, ice theme.
+- **Geometry:** Slim torso, bow (TorusGeometry half), quiver, cloak, legs, hood. Colors: `#4466aa`, `#88aacc`, `#2a3355`.
+- **Stats:** hp 530, mp 195, move 8, range 12, dmg 44–51, armor 2, atkSpd 1.0. Agi primary.
+- **Q — Frost Arrows:** Toggle/orb, slow + bonus damage. Visual: ice arrow.
+- **W — Gust:** Point-target cone, silence + knockback. Mana 90, CD 13. Visual: wind cone.
+- **E — Precision Aura:** Passive, bonus agility / damage to self (and allies if desired). Visual: aura ring.
+- **R — Marksmanship:** Passive, bonus damage; pierce evasion. Visual: crosshair glow.
+
+### 14. Bounty Hunter (bounty_hunter) — Agi, Scourge, Ganker/Roam
+
+- **Silhouette:** Stealthy figure, dual blades, hood.
+- **Geometry:** Lean torso, hood, two short blades, scarf, legs. Colors: `#1a2a1a`, `#558855`, `#88cc88`.
+- **Stats:** hp 550, mp 195, move 8.5, range 2.5 (melee), dmg 48–54, armor 3, atkSpd 0.95. Agi primary.
+- **Q — Shuriken Toss:** Unit-target, damage + ministun. Mana 90, CD 10. Visual: shuriken projectile.
+- **W — Jinada:** Passive, slow + bonus gold on hit. Visual: gold burst on proc.
+- **E — Shadow Walk:** No-target, invis + bonus damage on break. Mana 50, CD 15. Visual: fade, strike.
+- **R — Track:** Unit-target, vision + move speed vs target, gold on kill. Mana 50, CD 5. Visual: eye icon over target.
+
+### 15. Vengeful Spirit (vengeful_spirit) — Agi, Scourge, Support/Stun
+
+- **Silhouette:** Winged archer, glowing, dark purple.
+- **Geometry:** Slim torso, wings (BoxGeometry), bow, crown/hair, legs. Colors: `#4a2a5a`, `#aa88cc`, `#2a1a3a`.
+- **Stats:** hp 530, mp 234, move 8, range 12, dmg 42–48, armor 2, atkSpd 0.95. Agi primary.
+- **Q — Magic Missile:** Unit-target stun + damage. Mana 110, CD 13. Visual: magic bolt.
+- **W — Wave of Terror:** Point-target cone, minus armor + damage. Mana 40, CD 15. Visual: wave cone.
+- **E — Vengeance Aura:** Passive, bonus damage for allies. Visual: aura.
+- **R — Nether Swap:** Unit-target, swap positions. Mana 100, CD 45. Visual: swap beam.
+
+### 16. Crystal Maiden (crystal_maiden) — Int, Sentinel, Support
+
+- **Silhouette:** Robed caster, staff with crystal, ice theme.
+- **Geometry:** Robe (Cylinder/Lathe), staff, crystal orb, hood, hair. Colors: `#4488aa`, `#aaddff`, `#2266aa`.
+- **Stats:** hp 454, mp 403, move 7, range 12, dmg 43–49, armor 1, atkSpd 0.85. Int primary.
+- **Q — Crystal Nova:** Point-target AoE, damage + slow. Mana 130, CD 12. Visual: ice burst.
+- **W — Frostbite:** Unit-target root + DoT. Mana 115, CD 10. Visual: ice bind.
+- **E — Arcane Aura:** Passive, mana regen (self + global). Visual: blue aura.
+- **R — Freezing Field:** No-target channel, random ice explosions in AoE. Mana 200, CD 90. Visual: ice explosions.
+
+### 17. Zeus (zeus) — Int, Sentinel, Nuker
+
+- **Silhouette:** Robed elder, lightning, beard, crown.
+- **Geometry:** Robe, beard (BoxGeometry), crown, lightning orb in hand. Colors: `#ffcc00`, `#886622`, `#fff0aa`.
+- **Stats:** hp 511, mp 351, move 7.5, range 12, dmg 41–49, armor 2, atkSpd 0.9. Int primary.
+- **Q — Arc Lightning:** Unit-target bounces to nearby enemies. Mana 65, CD 2. Visual: lightning bolt.
+- **W — Lightning Bolt:** Unit-target nuke + ministun, true sight. Mana 100, CD 7. Visual: single bolt.
+- **E — Static Field:** Passive, % current HP damage in range on cast. Visual: static on spell.
+- **R — Thundergod's Wrath:** No-target, damage all enemy heroes globally. Mana 225, CD 90. Visual: lightning from sky.
+
+### 18. Lina (lina) — Int, Sentinel, Nuker
+
+- **Silhouette:** Female caster, flame hair, staff.
+- **Geometry:** Robe, flame hair (ConeGeometry × several), staff with flame, slim build. Colors: `#cc2200`, `#ff6622`, `#552200`.
+- **Stats:** hp 492, mp 351, move 8, range 12, dmg 44–50, armor 2, atkSpd 0.9. Int primary.
+- **Q — Dragon Slave:** Point-target line, fire damage. Mana 100, CD 9. Visual: fire line.
+- **W — Light Strike Array:** Point-target AoE delay stun + damage. Mana 90, CD 7. Visual: fire pillars.
+- **E — Fiery Soul:** Passive, attack speed per spell cast. Visual: flame stacks.
+- **R — Laguna Blade:** Unit-target pure nuke. Mana 280, CD 60. Visual: beam.
+
+### 19. Lion (lion) — Int, Sentinel, Support/Disable
+
+- **Silhouette:** Robed figure, demon hand, staff.
+- **Geometry:** Robe, staff, large demon hand (claw), horns. Colors: `#663322`, `#aa6644`, `#330011`.
+- **Stats:** hp 492, mp 351, move 8, range 12, dmg 43–49, armor 2, atkSpd 0.9. Int primary.
+- **Q — Earth Spike:** Point-target line stun + damage. Mana 100, CD 12. Visual: spikes from ground.
+- **W — Hex:** Unit-target transform + slow. Mana 125, CD 30. Visual: hex effect.
+- **E — Mana Drain:** Unit-target channel, drain mana. Mana 10, CD 20. Visual: mana beam.
+- **R — Finger of Death:** Unit-target nuke, damage increases per kill. Mana 200, CD 160. Visual: red beam.
+
+### 20. Enigma (enigma) — Int, Scourge, Initiator
+
+- **Silhouette:** Floating cosmic figure, void/star theme.
+- **Geometry:** Central orb/core, orbiting fragments (small spheres), no legs, float. Colors: `#220022`, `#660066`, `#aa44aa`.
+- **Stats:** hp 511, mp 351, move 7, range 12, dmg 44–50, armor 2, atkSpd 0.9. Int primary.
+- **Q — Malefice:** Unit-target, repeated stun + damage. Mana 110, CD 15. Visual: pulse stuns.
+- **W — Demonic Conversion:** No-target, convert creep to eidolons. Mana 140, CD 35. Visual: convert effect.
+- **E — Midnight Pulse:** Point-target AoE, % max HP damage. Mana 95, CD 25. Visual: dark zone.
+- **R — Black Hole:** Point-target channel, pull + stun + damage. Mana 200, CD 160. Visual: black hole vortex.
+
+---
+
 *Next step: Implement the Hero Review Screen as `hero-viewer.html`, then integrate heroes into the game engine.*
