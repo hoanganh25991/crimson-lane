@@ -1,9 +1,11 @@
-# 🎮 DOTA 1 Mobile Browser Game — Full Implementation Plan
+# DOTA 1 Mobile Browser Game — Original Implementation Plan
 
 **Category:** Plan · **Tags:** #phases #multiplayer #lobby #qr
 
-> **Stack:** Three.js · Vanilla JS · HTML/CSS · PeerJS (WebRTC) · Web Audio API  
-> **Target:** Mobile-first multiplayer, Garena-style virtual controls  
+> **Status:** Historical reference. The actual build went solo-first (AI bots) rather than multiplayer-first. Map is 100x100 (not 128x128), all 5 heroes are implemented (not 2), code lives in `js/` modules (not flat root files). See [index.md](index.md) for current state.
+
+> **Stack:** Three.js · Vanilla JS · HTML/CSS · PeerJS (WebRTC) · Web Audio API
+> **Target:** Mobile-first multiplayer, Garena-style virtual controls
 > **Goal:** Faithful Dota 1 experience playable in mobile browser, 2 players via QR code join
 
 ---

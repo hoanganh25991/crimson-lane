@@ -11,8 +11,10 @@ export function initThree() {
   const aspect = window.innerWidth / window.innerHeight;
   camera = new THREE.OrthographicCamera(-ZOOM*aspect, ZOOM*aspect, ZOOM, -ZOOM, -500, 500);
   camTarget = new THREE.Vector3(50, 0, 50);
-  // View matches minimap: base (0,0)–(10,10) at bottom-left, lanes toward top-right
-  camera.position.set(camTarget.x - 30, 35, camTarget.z - 30);
+  // Dota-style: diagonal view so lane (1,1) in XZ runs bottom-left → top-right on screen
+  camera.up.set(1, 1, 0).normalize();
+  const CAM_DIST = 30 * Math.SQRT2;
+  camera.position.set(camTarget.x, 35, camTarget.z - CAM_DIST);
   camera.lookAt(camTarget.x, 0, camTarget.z);
 
   renderer = new THREE.WebGLRenderer({canvas:document.getElementById('canvas'), antialias:true});
@@ -72,8 +74,8 @@ export function updateCamera(_dt, playerHero) {
   }
   camTarget.x = Math.max(0, Math.min(100, camTarget.x));
   camTarget.z = Math.max(0, Math.min(100, camTarget.z));
-  // Same orientation as minimap: (0,0) bottom-left, (100,100) top-right
-  camera.position.x = camTarget.x - 30;
-  camera.position.z = camTarget.z - 30;
+  // Camera south of target: world +X = screen right, world +Z = screen up → lane = bottom-left to top-right
+  const CAM_DIST = 30 * Math.SQRT2;
+  camera.position.set(camTarget.x, 35, camTarget.z - CAM_DIST);
   camera.lookAt(camTarget.x, 0, camTarget.z);
 }
